@@ -61,3 +61,14 @@ flowchart TD
     P -->|metadatos del experimento| GDOCS
     GDOCS -->|enlace a la bitácora creada| P
 ```
+
+# **Stakeholders y roles
+## 2. Stakeholders y roles
+
+| Rol | Tipo | Interacción con el sistema | Permisos |
+|---|---|---|---|
+| Investigador/a o becario/a | Usuario directo | Carga experimentos de docking, consulta el catálogo antes de correr un ensayo nuevo, visualiza poses 3D, agrega notas | Alta de experimentos propios; edición/borrado solo de los experimentos que él/ella cargó; consulta y búsqueda sobre todo el catálogo (necesario para detectar duplicados) |
+| Director/a del grupo | Usuario directo | Consulta el historial completo del grupo, filtra y busca sin necesidad de pedir el dato a cada integrante | Consulta total del catálogo; edición/borrado de cualquier experimento del grupo (responsabilidad última sobre la integridad de los datos) |
+| Cátedra/docente | Interesado, no usuario | Evalúa el proyecto en las instancias de presentación; no interactúa con el sistema en producción | No aplica — no opera el sistema |
+
+**Nota sobre el diseño de permisos**: la distinción de roles entre investigador/a y director/a evita que la carga de un integrante sea modificada o eliminada por otro sin autorización, preservando la trazabilidad histórica que es el valor central del sistema. Ver bloque "Valor" en la sección 1.
