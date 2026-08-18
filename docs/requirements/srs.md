@@ -35,3 +35,29 @@ El más probable en nuestro caso es el cambio de requerimientos. Si el modelo de
 
 ### **Datos Sensibles**
 Los metadatos de experimentos no son datos clínicos ni biológicos de una persona — son datos de investigación (moléculas, parámetros, resultados). El único dato mínimamente personal es el nombre del autor de cada experimento (miembro del propio grupo), que no cae dentro de las categorías que exige proteger el Código de Ética IEEE/ACM (no es dato de salud, no es identificable de un tercero ajeno al proyecto).
+
+
+# **DFD nivel 0**
+
+```mermaid
+flowchart TD
+    %% Sistema Central
+    P((0<br/>Gestionar Catálogo<br/>de Experimentos))
+    
+    %% Entidades Externas
+    INV[Investigador / Becario]
+    DIR[Director del Grupo]
+    GDOCS[Google Docs]
+
+    %% Interacciones del Investigador
+    INV -->|parámetros de docking y archivo PDB| P
+    P -->|vista 3D y confirmación de carga| INV
+    
+    %% Interacciones del Director
+    DIR -->|criterios de filtro y búsqueda| P
+    P -->|historial de experimentos| DIR
+    
+    %% Interacción con el sistema externo
+    P -->|metadatos del experimento| GDOCS
+    GDOCS -->|enlace a la bitácora creada| P
+```
