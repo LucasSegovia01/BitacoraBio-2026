@@ -62,7 +62,7 @@ flowchart TD
     GDOCS -->|enlace a la bitácora creada| P
 ```
 
-# **Stakeholders y roles
+# **Stakeholders y roles**
 ## 2. Stakeholders y roles
 
 | Rol | Tipo | Interacción con el sistema | Permisos |
