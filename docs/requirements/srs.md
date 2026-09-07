@@ -83,9 +83,15 @@ flowchart TD
     P6((6<br/>Gestionar<br/>Proyecto))
     P7((7<br/>Modificar Estado<br/>de Experimento))
     P8((8<br/>Eliminar<br/>Experimento))
+    P9((9<br/>Registrar<br/>Usuario))
 
     D1[(D1 · Experimentos)]
     D2[(D2 · Proyectos)]
+    D3[(D3 · Usuarios)]
+
+    DIR -->|alta de usuario y rol| P9
+    P9 -->|guarda| D3
+    P9 -->|confirmación de alta| DIR
 
     INV -->|parámetros de docking y archivo PDB| P1
     P1 -->|consulta posible coincidencia| P3
@@ -121,6 +127,8 @@ flowchart TD
     P8 -->|elimina| D1
     P8 -->|confirmación de eliminación| DIR
 ```
+
+Los 16 flujos externos del Nivel 0 están todos presentes acá, repartidos entre los nueve procesos — regla de balanceo.
 
 Los 14 flujos externos del Nivel 0 están todos presentes acá, repartidos entre los ocho procesos — regla de balanceo.
 
