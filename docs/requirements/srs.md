@@ -46,6 +46,9 @@ flowchart TD
     DIR[Director del Grupo]
     GDOCS[Google Docs]
 
+    DIR -->|alta de usuario y asignación de rol| P
+    P -->|confirmación de alta de usuario| DIR
+
     INV -->|alta de experimento, parámetros y archivo PDB| P
     P -->|confirmación de carga y vista 3D| INV
     INV -->|modificación de estado de validez/análisis| P
