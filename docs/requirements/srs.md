@@ -64,7 +64,7 @@ flowchart TD
 
 # **Modelo de Dominio Conceptual**
 
-\```mermaid
+```mermaid
 classDiagram
     class Usuario {
         <<Investigador o Director>>
@@ -84,23 +84,35 @@ classDiagram
     Experimento "1" --> "*" ParametroExperimento : tiene
     Experimento "1" --> "0..1" ArchivoResultado : produce
     Experimento "1" --> "0..1" DocumentoNotas : enlaza
-\```
+```
 
 
 # **Requerimientos funcionales**
 ## Requerimientos funcionales
 RF-01: El sistema debe permitir dar de alta un usuario con un rol asociado (Investigador/a o Director/a).
+
 RF-02: El sistema debe permitir a un usuario con rol Director/a crear un proyecto.
+
 RF-03: El sistema debe permitir a un usuario con rol Director/a eliminar un proyecto.
+
 RF-04: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis y estado.
+
 RF-05: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
+
 RF-06: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido".
+
 RF-07: El sistema debe alertar al usuario si detecta una posible coincidencia, mostrando el experimento existente, y permitirle decidir si continúa o cancela el registro.
+
 RF-08: El sistema debe crear y asociar automáticamente un documento de Google Docs de notas al confirmarse el registro de un experimento.
+
 RF-09: El sistema debe permitir consultar el detalle completo de un experimento (todos sus campos, parámetros, resultado principal, estado de validez, estado de análisis y enlace a Google Docs).
+
 RF-10: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y proyecto.
+
 RF-11: El sistema debe permitir a cualquier usuario con rol Investigador/a modificar el estado de validez de un experimento (`invalido`/`finalizado`/`en_curso`), independientemente de quién lo haya cargado.
+
 RF-12: El sistema debe permitir a un usuario con rol Investigador/a modificar el estado de análisis de un experimento (`pendiente`/`en_analisis`/`analizado`).
+
 RF-13: El sistema debe permitir a un usuario con rol Director/a eliminar cualquier experimento del catálogo.
 
 # **Stakeholders y roles**
@@ -108,8 +120,9 @@ RF-13: El sistema debe permitir a un usuario con rol Director/a eliminar cualqui
 
 | Rol | Tipo | Interacción con el sistema | Permisos |
 |---|---|---|---|
-| Investigador/a o becario/a | Usuario directo | Carga experimentos de docking, consulta el catálogo antes de correr un ensayo nuevo, visualiza poses 3D, agrega notas | Alta de experimentos propios; edición/borrado solo de los experimentos que él/ella cargó; consulta y búsqueda sobre todo el catálogo (necesario para detectar duplicados) |
-| Director/a del grupo | Usuario directo | Consulta el historial completo del grupo, filtra y busca sin necesidad de pedir el dato a cada integrante | Consulta total del catálogo; edición/borrado de cualquier experimento del grupo (responsabilidad última sobre la integridad de los datos) |
+| Investigador/a o becario/a | Usuario directo | Carga experimentos de docking, consulta el catálogo antes de correr un ensayo nuevo, visualiza poses 3D, agrega notas |Registra experimentos dentro de un proyecto existente; edita los campos de los experimentos que él/ella cargó; puede modificar el estado de validez (`invalido`/`finalizado`) de **cualquier** experimento del catálogo, no solo el propio; consulta y filtra sobre todo el catálogo. No puede crear ni eliminar proyectos ni experimentos.|
+| Director/a del grupo | Usuario directo | Consulta el historial completo del grupo, filtra y busca sin necesidad de pedir el dato a cada integrante | Todo lo anterior, más: crea y elimina proyectos; elimina cualquier experimento del catálogo. |
 | Cátedra/docente | Interesado, no usuario | Evalúa el proyecto en las instancias de presentación; no interactúa con el sistema en producción | No aplica — no opera el sistema |
 
 **Nota sobre el diseño de permisos**: la distinción de roles entre investigador/a y director/a evita que la carga de un integrante sea modificada o eliminada por otro sin autorización, preservando la trazabilidad histórica que es el valor central del sistema. Ver bloque "Valor" en la sección 1.
+
