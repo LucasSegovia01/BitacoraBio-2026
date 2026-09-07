@@ -130,7 +130,6 @@ flowchart TD
 
 Los 16 flujos externos del Nivel 0 están todos presentes acá, repartidos entre los nueve procesos — regla de balanceo.
 
-Los 14 flujos externos del Nivel 0 están todos presentes acá, repartidos entre los ocho procesos — regla de balanceo.
 
 # **Modelo de Dominio Conceptual**
 
@@ -170,31 +169,21 @@ Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con 
 
 # **Requerimientos funcionales**
 ## Requerimientos funcionales
-RF-01: El sistema debe permitir dar de alta un usuario con un rol asociado (Investigador/a o Director/a).
 
-RF-02: El sistema debe permitir a un usuario con rol Director/a crear un proyecto.
+RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, notas (vacías por defecto) y estado.
 
-RF-03: El sistema debe permitir a un usuario con rol Director/a eliminar un proyecto.
+RF-02: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
 
-RF-04: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis y estado.
+RF-03: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido".
 
-RF-05: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
+RF-04: El sistema debe alertar al usuario si detecta una posible coincidencia, mostrando el experimento existente, y permitirle decidir si continúa o cancela el registro.
 
-RF-06: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido".
+RF-05: El sistema debe crear y asociar automáticamente un documento de Google Docs de notas al confirmarse el registro de un experimento.
 
-RF-07: El sistema debe alertar al usuario si detecta una posible coincidencia, mostrando el experimento existente, y permitirle decidir si continúa o cancela el registro.
+RF-06: El sistema debe permitir consultar el detalle completo de un experimento (todos sus campos, parámetros, resultado principal, estado de validez, estado de análisis).
 
-RF-08: El sistema debe crear y asociar automáticamente un documento de Google Docs de notas al confirmarse el registro de un experimento.
+RF-07: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y proyecto.
 
-RF-09: El sistema debe permitir consultar el detalle completo de un experimento (todos sus campos, parámetros, resultado principal, estado de validez, estado de análisis y enlace a Google Docs).
-
-RF-10: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y proyecto.
-
-RF-11: El sistema debe permitir a cualquier usuario con rol Investigador/a modificar el estado de validez de un experimento (`invalido`/`finalizado`/`en_curso`), independientemente de quién lo haya cargado.
-
-RF-12: El sistema debe permitir a un usuario con rol Investigador/a modificar el estado de análisis de un experimento (`pendiente`/`en_analisis`/`analizado`).
-
-RF-13: El sistema debe permitir a un usuario con rol Director/a eliminar cualquier experimento del catálogo.
 
 # **Stakeholders y roles**
 ## 2. Stakeholders y roles
@@ -207,3 +196,35 @@ RF-13: El sistema debe permitir a un usuario con rol Director/a eliminar cualqui
 
 **Nota sobre el diseño de permisos**: la distinción de roles entre investigador/a y director/a evita que la carga de un integrante sea modificada o eliminada por otro sin autorización, preservando la trazabilidad histórica que es el valor central del sistema. Ver bloque "Valor" en la sección 1.
 
+
+# **CU-01 * Cargar archivo de experimento (Proceso 1)**
+Actor principal: Investigador/a
+Realiza: RF-01, RF-02, RF-03
+
+Interesados e intereses:
+  - Investigador/a: cargar sus datos rápido y saber si están en condiciones de analizarse.
+  - Administrador/a del sistema: que no se acepten datos que comprometan el repositorio.
+
+Precondición: el/la investigador/a está autenticado/a y tiene un archivo en su equipo.
+Disparador: el/la investigador/a decide cargar un nuevo conjunto de datos.
+Garantía de éxito: el archivo queda almacenado, validado, disponible para análisis,
+  y el investigador/a tiene un resumen de lo cargado.
+Garantía mínima: el sistema nunca deja datos parcialmente almacenados ni corrompe
+  el repositorio.
+
+Flujo principal:
+  1. El/la investigador/a selecciona el archivo a cargar.
+  2. El sistema valida que el formato sea uno de los soportados (CSV, JSON).
+  3. El sistema valida que los datos cumplan los rangos y tipos del esquema.
+  4. El sistema almacena el archivo validado en el repositorio.
+  5. El sistema calcula un resumen estadístico del conjunto de datos.
+  6. El sistema confirma la carga exitosa y muestra el resumen.
+
+Flujos alternativos (nombrados):
+  - A1: el archivo tiene formato inválido (diverge en el paso 2).
+  - A2: el archivo está vacío o sin registros (diverge en el paso 2).
+  - A3: el investigador/a cancela antes de confirmar (diverge en el paso 1).
+
+Flujos de excepción (nombrados):
+  - E1: se interrumpe la conexión durante la carga (pasos 1-4).
+  - E2: el repositorio no tiene espacio disponible (paso 4).
