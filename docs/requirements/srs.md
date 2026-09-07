@@ -64,6 +64,63 @@ flowchart TD
     GDOCS -->|enlace a la bitácora creada| P
 ```
 
+# **Descompisición funcional (DFD nivel 1)**
+
+```mermaid
+flowchart TD
+    INV[Investigador / Becario]
+    DIR[Director del Grupo]
+    GDOCS[Google Docs]
+
+    P1((1<br/>Registrar<br/>Experimento))
+    P2((2<br/>Consultar y<br/>Filtrar Experimentos))
+    P3((3<br/>Detectar<br/>Duplicado))
+    P4((4<br/>Visualizar<br/>Pose 3D))
+    P5((5<br/>Vincular<br/>Documento de Notas))
+    P6((6<br/>Gestionar<br/>Proyecto))
+    P7((7<br/>Modificar Estado<br/>de Experimento))
+    P8((8<br/>Eliminar<br/>Experimento))
+
+    D1[(D1 · Experimentos)]
+    D2[(D2 · Proyectos)]
+
+    INV -->|parámetros de docking y archivo PDB| P1
+    P1 -->|consulta posible coincidencia| P3
+    P3 -->|resultado de la verificación| P1
+    P3 -->|lee| D1
+    P1 -->|verifica proyecto existente| D2
+    P1 -->|guarda| D1
+    P1 -->|confirmación de carga| INV
+    P1 -->|solicita creación de documento| P5
+    P5 -->|metadatos del experimento| GDOCS
+    GDOCS -->|enlace a la bitácora creada| P5
+    P5 -->|link asociado| P1
+
+    DIR -->|criterios de filtro y búsqueda| P2
+    INV -->|criterios de filtro y búsqueda| P2
+    P2 -->|lee| D1
+    P2 -->|historial de experimentos| DIR
+    P2 -->|resultado de búsqueda| INV
+
+    INV -->|solicita ver pose| P4
+    P4 -->|lee archivo de resultado| D1
+    P4 -->|render 3D| INV
+
+    DIR -->|alta o baja de proyecto| P6
+    P6 -->|guarda / elimina| D2
+    P6 -->|confirmación de gestión| DIR
+
+    INV -->|nuevo estado de validez/análisis| P7
+    P7 -->|actualiza| D1
+    P7 -->|confirmación de actualización| INV
+
+    DIR -->|eliminación de experimento| P8
+    P8 -->|elimina| D1
+    P8 -->|confirmación de eliminación| DIR
+```
+
+Los 14 flujos externos del Nivel 0 están todos presentes acá, repartidos entre los ocho procesos — regla de balanceo.
+
 # **Modelo de Dominio Conceptual**
 
 ```mermaid
