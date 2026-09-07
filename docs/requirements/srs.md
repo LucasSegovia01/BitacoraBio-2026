@@ -63,7 +63,6 @@ flowchart TD
 ```
 
 # **Modelo de Dominio Conceptual**
-## Modelo de dominio conceptual
 
 \```mermaid
 classDiagram
@@ -86,6 +85,23 @@ classDiagram
     Experimento "1" --> "0..1" ArchivoResultado : produce
     Experimento "1" --> "0..1" DocumentoNotas : enlaza
 \```
+
+
+# **Requerimientos funcionales**
+## Requerimientos funcionales
+RF-01: El sistema debe permitir dar de alta un usuario con un rol asociado (Investigador/a o Director/a).
+RF-02: El sistema debe permitir a un usuario con rol Director/a crear un proyecto.
+RF-03: El sistema debe permitir a un usuario con rol Director/a eliminar un proyecto.
+RF-04: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis y estado.
+RF-05: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
+RF-06: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido".
+RF-07: El sistema debe alertar al usuario si detecta una posible coincidencia, mostrando el experimento existente, y permitirle decidir si continúa o cancela el registro.
+RF-08: El sistema debe crear y asociar automáticamente un documento de Google Docs de notas al confirmarse el registro de un experimento.
+RF-09: El sistema debe permitir consultar el detalle completo de un experimento (todos sus campos, parámetros, resultado principal, estado de validez, estado de análisis y enlace a Google Docs).
+RF-10: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y proyecto.
+RF-11: El sistema debe permitir a cualquier usuario con rol Investigador/a modificar el estado de validez de un experimento (`invalido`/`finalizado`/`en_curso`), independientemente de quién lo haya cargado.
+RF-12: El sistema debe permitir a un usuario con rol Investigador/a modificar el estado de análisis de un experimento (`pendiente`/`en_analisis`/`analizado`).
+RF-13: El sistema debe permitir a un usuario con rol Director/a eliminar cualquier experimento del catálogo.
 
 # **Stakeholders y roles**
 ## 2. Stakeholders y roles
