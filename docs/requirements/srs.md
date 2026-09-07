@@ -41,23 +41,25 @@ Los metadatos de experimentos no son datos clínicos ni biológicos de una perso
 
 ```mermaid
 flowchart TD
-    %% Sistema Central
     P((0<br/>Gestionar Catálogo<br/>de Experimentos))
-    
-    %% Entidades Externas
     INV[Investigador / Becario]
     DIR[Director del Grupo]
     GDOCS[Google Docs]
 
-    %% Interacciones del Investigador
-    INV -->|parámetros de docking y archivo PDB| P
-    P -->|vista 3D y confirmación de carga| INV
-    
-    %% Interacciones del Director
-    DIR -->|criterios de filtro y búsqueda| P
+    INV -->|alta de experimento, parámetros y archivo PDB| P
+    P -->|confirmación de carga y vista 3D| INV
+    INV -->|modificación de estado de validez/análisis| P
+    P -->|confirmación de actualización de estado| INV
+    INV -->|consulta y filtro de experimentos| P
+    P -->|resultado de búsqueda| INV
+
+    DIR -->|alta y baja de proyecto| P
+    P -->|confirmación de gestión de proyecto| DIR
+    DIR -->|eliminación de experimento| P
+    P -->|confirmación de eliminación| DIR
+    DIR -->|consulta y filtro de experimentos| P
     P -->|historial de experimentos| DIR
-    
-    %% Interacción con el sistema externo
+
     P -->|metadatos del experimento| GDOCS
     GDOCS -->|enlace a la bitácora creada| P
 ```
