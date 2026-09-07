@@ -145,6 +145,16 @@ classDiagram
     Experimento "1" --> "0..1" DocumentoNotas : enlaza
 ```
 
+# **Selección de proceso(s) a desarrollar en profundidad**
+
+Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con el Proceso 3 · Detectar Duplicado). Tambien el **Proceso 2. Consulta y Filtro de experimentos**. Consideramos que estos procesos son la base para la visualización mínima de lo que el sistema busca hacer, mostrando el uso básico para el usuario investigador / becario, que será el tipo de usuario mas frecuente.
+
+**Quedan fuera de profundización esta entrega:**
+- Proceso 4 (Visualizar Pose 3D): la complejidad la resuelve una librería externa (3Dmol.js).
+- Proceso 5 (Vincular Documento de Notas): acoplado al Proceso 1, se documenta como dependencia de su especificación.
+- Proceso 6 (Gestionar Proyecto): CRUD simple sin reglas de negocio adicionales — se documenta a nivel de alcance (DFD + modelo de dominio), sin CU propio este cuatrimestre.
+- Proceso 7 (Modificar Estado de Experimento): cambio de estado simple; queda como extensión natural de CU-01 a desarrollar en una iteración futura si el tiempo lo permite.
+- Proceso 8 (Eliminar Experimento): operación de baja sin lógica compleja, análoga a Proceso 6.
 
 # **Requerimientos funcionales**
 ## Requerimientos funcionales
