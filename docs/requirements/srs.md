@@ -166,6 +166,7 @@ Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con 
 - Proceso 6 (Gestionar Proyecto): CRUD simple sin reglas de negocio adicionales — se documenta a nivel de alcance (DFD + modelo de dominio), sin CU propio este cuatrimestre.
 - Proceso 7 (Modificar Estado de Experimento): cambio de estado simple; queda como extensión natural de CU-01 a desarrollar en una iteración futura si el tiempo lo permite.
 - Proceso 8 (Eliminar Experimento): operación de baja sin lógica compleja, análoga a Proceso 6.
+- Proceso 9 (Registrar Usuario): alta simple con asignación de rol, sin reglas de negocio propias más allá de la validación de datos básicos — se documenta a nivel de alcance, sin CU propio este cuatrimestre.
 
 # **Requerimientos funcionales**
 ## Requerimientos funcionales
