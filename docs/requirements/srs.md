@@ -62,6 +62,31 @@ flowchart TD
     GDOCS -->|enlace a la bitácora creada| P
 ```
 
+# **Modelo de Dominio Conceptual**
+## Modelo de dominio conceptual
+
+\```mermaid
+classDiagram
+    class Usuario {
+        <<Investigador o Director>>
+    }
+    class Proyecto
+    class Experimento {
+        <<estado_validez: invalido | finalizado | en_curso>>
+        <<estado_analisis: pendiente | en_analisis | analizado>>
+    }
+    class ParametroExperimento
+    class ArchivoResultado
+    class DocumentoNotas
+
+    Usuario "1" --> "*" Proyecto : crea (solo Director)
+    Proyecto "1" --> "*" Experimento : agrupa
+    Usuario "1" --> "*" Experimento : registra
+    Experimento "1" --> "*" ParametroExperimento : tiene
+    Experimento "1" --> "0..1" ArchivoResultado : produce
+    Experimento "1" --> "0..1" DocumentoNotas : enlaza
+\```
+
 # **Stakeholders y roles**
 ## 2. Stakeholders y roles
 
