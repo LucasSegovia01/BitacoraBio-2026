@@ -196,6 +196,20 @@ RF-07: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y
 
 **Nota sobre el diseño de permisos**: la distinción de roles entre investigador/a y director/a evita que la carga de un integrante sea modificada o eliminada por otro sin autorización, preservando la trazabilidad histórica que es el valor central del sistema. Ver bloque "Valor" en la sección 1.
 
+# **CU-00 · Detectar Duplicado (incluido por CU-01)**
+```
+Actor principal: ninguno — CU de sistema, invocado internamente por CU-01
+Realiza: RF-03
+Precondición: se recibió el tipo de experimento y la combinación molécula/ligando a verificar.
+
+Flujo:
+  1. El sistema busca en el catálogo (D1) experimentos del mismo tipo y la misma combinación molécula/ligando.
+  2. El sistema excluye de la búsqueda los experimentos con estado_validez = "inválido".
+  3. El sistema retorna el resultado al llamador: "sin coincidencias" o "coincidencia encontrada" junto con el/los experimento(s) hallado(s).
+
+Postcondición: el llamador (CU-01) recibe el resultado de la verificación;
+  CU-00 no modifica ningún dato del catálogo.
+```
 
 # **CU-01 * Registrar Experimento de Docking (Proceso 1)**
 ```
@@ -224,18 +238,39 @@ Flujo principal:
   7. El sistema confirma el registro y muestra el resumen del experimento cargado, incluyendo el enlace a su documento de notas.
 
 Flujos alternativos (nombrados):
-  - A1: se detecta posible coincidencia y el/la investigador/a decide
-    continuar el registro de todos modos (diverge en el paso 2, retoma en el paso 4).
-  - A2: se detecta posible coincidencia y el/la investigador/a decide
-    cancelar el registro (diverge en el paso 2, sin guardar nada).
-  - A3: el proyecto seleccionado ya no existe al momento de confirmar
-    (diverge en el paso 1).
-  - A4: el/la investigador/a deja un campo obligatorio vacío (diverge en
-    el paso 1).
+  - A1: se detecta posible coincidencia y el/la investigador/a decide continuar el registro de todos modos (diverge en el paso 3, retoma en el paso 4).
+  - A2: se detecta posible coincidencia y el/la investigador/a decide cancelar el registro (diverge en el paso 3, sin guardar nada).
+  - A3: el proyecto seleccionado ya no existe al momento de confirmar (diverge en el paso 1).
+  - A4: el/la investigador/a deja un campo obligatorio vacío (diverge en el paso 1).
 
 Flujos de excepción (nombrados):
-  - E1: falla la creación del documento de Google Docs, el servicio no
-    responde (diverge en el paso 6; el experimento queda guardado sin bitácora asociada).
-  - E2: se interrumpe la conexión durante el guardado del experimento
-    (pasos 1-5).
+  - E1: falla la creación del documento de Google Docs, el servicio no responde (diverge en el paso 6; el experimento queda guardado sin bitácora asociada).
+  - E2: se interrumpe la conexión durante el guardado del experimento (pasos 4-6).
 ```
+
+## **Slices**
+```
+CU-01
+  Slice B1 (básico) — pasos 1-7: completa datos, verifica duplicado (CU-00), registra autor/fecha, guarda el experimento, crea documento de notas y confirma con resumen y el enlace incluido.
+  Slice A1 — continuar pese a coincidencia detectada   ——> nombrado, sin desarrollar
+  Slice A2 — cancelar por coincidencia detectada       ——> nombrado, sin desarrollar
+  Slice A3 — proyecto ya no existe                     ——> nombrado, sin desarrollar
+  Slice A4 — campo obligatorio vacío                   ——> nombrado, sin desarrollar
+  Slice E1 — falla en creación de documento de notas   ——> nombrado, sin desarrollar
+  Slice E2 — conexión interrumpida durante el guardado ——> nombrado, sin desarrollar
+  ```
+
+## **Historias de usuario**
+```
+HU-01.B1 · Registrar experimento de docking
+Deriva de: CU-01, slice B1 (básico)
+Como investigador/a, quiero registrar un experimento de docking con sus parámetros y saber si ya se probó algo similar, para no repetir un ensayo sin saberlo y dejar el catálogo del grupo actualizado.
+
+Criterios de aceptación:
+- Given un proyecto existente, todos los campos obligatorios completos y sin coincidencias previas para esa molécula/ligando, 
+When el investigador/a confirma el registro, 
+Then el sistema guarda el experimento con autor y fecha asignados automáticamente, crea el documento de notas en Google Docs, y muestra el resumen del experimento con el enlace al documento.
+- Given un experimento previo con la misma molécula/ligando pero marcado como estado_validez "inválido",
+When el investigador/a confirma el registro,
+Then el sistema NO lo reporta como coincidencia y completa el registro como en el camino normal.
+  ```
