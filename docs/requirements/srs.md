@@ -274,3 +274,31 @@ Then el sistema guarda el experimento con autor y fecha asignados automáticamen
 When el investigador/a confirma el registro,
 Then el sistema NO lo reporta como coincidencia y completa el registro como en el camino normal.
   ```
+
+## **CU-02 · Consultar y filtrar experimentos (Proceso 2)**
+```
+Actor principal: Usuario del sistema (generalización de Investigador/a y
+  Director/a — ambos roles ejecutan este caso de uso de forma idéntica,
+  sin distinción de permisos)
+Realiza: RF-06, RF-07
+
+Precondición: el usuario está autenticado, con rol Investigador/a o Director/a.
+  Hay al menos un experimento cargado en el catálogo (postcondición de CU-01).
+Disparador: el usuario necesita saber si un experimento ya fue realizado, o
+  quiere revisar el historial del catálogo.
+
+Flujo principal:
+  1. El usuario selecciona uno o más criterios de filtro: fecha, autor o proyecto.
+  2. El sistema busca los experimentos del catálogo que cumplen los criterios.
+  3. El sistema muestra la lista de experimentos coincidentes, con sus datos
+     principales (tipo, molécula/ligando, autor, fecha, estado).
+  4. El usuario selecciona un experimento de la lista.
+  5. El sistema muestra el detalle completo del experimento seleccionado.
+
+Flujos alternativos: A1 no hay resultados que cumplan los criterios de
+  búsqueda (diverge en el paso 2).
+
+Sin flujos de excepción — a diferencia de CU-01, este proceso no depende de
+  ningún servicio externo, por lo que no hay puntos de falla que documentar.
+```
+
