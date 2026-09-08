@@ -323,6 +323,7 @@ Criterios de aceptación:
   When aplico un filtro por autor,
   Then el sistema muestra solo los experimentos de ese autor con sus datos
   principales.
+```
 
 ```
 HU-02.B2 · Ver detalle de un experimento
