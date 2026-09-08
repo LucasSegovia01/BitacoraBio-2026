@@ -302,3 +302,53 @@ Sin flujos de excepción — a diferencia de CU-01, este proceso no depende de
   ningún servicio externo, por lo que no hay puntos de falla que documentar.
 ```
 
+## **Slices -- el básico se subdivide entre buscar/listar y ver detalle, dos unidades de valor independientes:**
+```
+CU-02
+  Slice B1 — pasos 1-3: filtrar y listar resultados
+  Slice B2 — pasos 4-5: ver detalle de un experimento
+  Slice A1 — sin resultados de búsqueda
+```
+
+## **Historias de usuario de CU-02**
+```
+HU-02.B1 · Filtrar experimentos del catálogo
+Deriva de: CU-02, slice B1
+Como investigador/a o director/a,
+quiero filtrar el catálogo de experimentos por fecha, autor o proyecto,
+para encontrar rápido si un ensayo similar ya fue realizado antes.
+
+Criterios de aceptación:
+- Given que existen experimentos cargados en el catálogo,
+  When aplico un filtro por autor,
+  Then el sistema muestra solo los experimentos de ese autor con sus datos
+  principales.
+
+```
+HU-02.B2 · Ver detalle de un experimento
+Deriva de: CU-02, slice B2
+Como investigador/a o director/a,
+quiero ver el detalle completo de un experimento desde los resultados de
+búsqueda,
+para revisar sus parámetros y resultado sin pedírselo a quien lo cargó.
+
+Criterios de aceptación:
+- Given que selecciono un experimento de la lista de resultados,
+  When accedo a su detalle,
+  Then el sistema muestra todos sus campos, parámetros, resultado principal,
+  estados y el enlace a Google Docs.
+```
+
+```
+HU-02.A1 · Sin resultados de búsqueda
+Deriva de: CU-02, slice A1
+Como investigador/a o director/a,
+quiero que el sistema me avise claramente cuando ningún experimento cumple
+mis criterios de búsqueda,
+para no confundirlo con un error del sistema.
+
+Criterios de aceptación:
+- Given que aplico un filtro que no coincide con ningún experimento cargado,
+  When confirmo la búsqueda,
+  Then el sistema muestra un mensaje de "sin resultados", sin generar un error.
+```
