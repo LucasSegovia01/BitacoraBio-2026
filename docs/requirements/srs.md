@@ -197,36 +197,45 @@ RF-07: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y
 **Nota sobre el diseño de permisos**: la distinción de roles entre investigador/a y director/a evita que la carga de un integrante sea modificada o eliminada por otro sin autorización, preservando la trazabilidad histórica que es el valor central del sistema. Ver bloque "Valor" en la sección 1.
 
 
-# **CU-01 * Cargar archivo de experimento (Proceso 1)**
+# **CU-01 * Registrar Experimento de Docking (Proceso 1)**
 ```
 Actor principal: Investigador/a
-Realiza: RF-01, RF-02, RF-03
+Actor secundario: Google Docs (sistema externo)
+Realiza: RF-01, RF-02, RF-03, RF-04, RF-05
+Incluye (<<include>>): CU-00 · Detectar Duplicado
+  (se factoriza aparte porque es una verificación autocontenida que el flujo principal invoca pero no resuelve inline; mantiene CU-01 enfocado en el registro en sí. Compara tipo + molécula/ligando contra D1, excluyendo inválidos.)
 
 Interesados e intereses:
-  - Investigador/a: cargar sus datos rápido y saber si están en condiciones de analizarse.
-  - Administrador/a del sistema: que no se acepten datos que comprometan el repositorio.
+  - Investigador/a: registrar su experimento rápido y saber si si ya se probó algo similar antes de perder tiempo repitiendo un ensayo.
+  - Director/a del grupo: que el catálogo quede consistente y confiable como fuente única de verdad del historial del laboratorio.
 
-Precondición: el/la investigador/a está autenticado/a y tiene un archivo en su equipo.
-Disparador: el/la investigador/a decide cargar un nuevo conjunto de datos.
-Garantía de éxito: el archivo queda almacenado, validado, disponible para análisis,
-  y el investigador/a tiene un resumen de lo cargado.
-Garantía mínima: el sistema nunca deja datos parcialmente almacenados ni corrompe
-  el repositorio.
+Precondición: el/la investigador/a está autenticado/a con rol Investigador/a.
+Disparador: el/la investigador/a finaliza un ensayo de docking (o quiere registrar uno en curso) y decide dejarlo asentado en el catálogo.
+Garantía de éxito: el experimento queda registrado con autor y fecha asignados automáticamente, sin duplicar sin que el investigador/a lo supiera un ensayo ya existente, y con su documento de notas de Google Docs ya asociado.
+Garantía mínima: el sistema nunca confirma un registro sin haber completado la verificación de duplicados, ni deja un experimento a medio guardar por falta de algún campo obligatorio.
 
 Flujo principal:
-  1. El/la investigador/a selecciona el archivo a cargar.
-  2. El sistema valida que el formato sea uno de los soportados (CSV, JSON).
-  3. El sistema valida que los datos cumplan los rangos y tipos del esquema.
-  4. El sistema almacena el archivo validado en el repositorio.
-  5. El sistema calcula un resumen estadístico del conjunto de datos.
-  6. El sistema confirma la carga exitosa y muestra el resumen.
+  1. El/la investigador/a selecciona el proyecto existente y completa los campos del experimento: molécula/proteína, ligando, software usado, parámetros clave, sitio activo e hipótesis (las notas quedan vacías por defecto; define el estado inicial).
+  2. El sistema verifica si existe un experimento previo del mismo tipo con la misma combinación molécula/ligando, excluyendo los marcados como inválidos <<include>> CU-00 · Detectar Duplicado.
+  3. El sistema no encuentra coincidencias y continúa el registro.
+  4. El sistema registra automáticamente el autor y la fecha/hora de carga.
+  5. El sistema guarda el experimento en el catálogo.
+  6. El sistema crea y asocia automáticamente un documento de Google Docs de notas para el experimento, y guarda el enlace devuelto.
+  7. El sistema confirma el registro y muestra el resumen del experimento cargado, incluyendo el enlace a su documento de notas.
 
 Flujos alternativos (nombrados):
-  - A1: el archivo tiene formato inválido (diverge en el paso 2).
-  - A2: el archivo está vacío o sin registros (diverge en el paso 2).
-  - A3: el investigador/a cancela antes de confirmar (diverge en el paso 1).
+  - A1: se detecta posible coincidencia y el/la investigador/a decide
+    continuar el registro de todos modos (diverge en el paso 2, retoma en el paso 4).
+  - A2: se detecta posible coincidencia y el/la investigador/a decide
+    cancelar el registro (diverge en el paso 2, sin guardar nada).
+  - A3: el proyecto seleccionado ya no existe al momento de confirmar
+    (diverge en el paso 1).
+  - A4: el/la investigador/a deja un campo obligatorio vacío (diverge en
+    el paso 1).
 
 Flujos de excepción (nombrados):
-  - E1: se interrumpe la conexión durante la carga (pasos 1-4).
-  - E2: el repositorio no tiene espacio disponible (paso 4).
+  - E1: falla la creación del documento de Google Docs, el servicio no
+    responde (diverge en el paso 6; el experimento queda guardado sin bitácora asociada).
+  - E2: se interrumpe la conexión durante el guardado del experimento
+    (pasos 1-5).
 ```
