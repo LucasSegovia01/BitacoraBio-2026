@@ -198,7 +198,7 @@ RF-07: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y
 
 
 # **CU-01 * Cargar archivo de experimento (Proceso 1)**
-´´´
+```mermaid
 Actor principal: Investigador/a
 Realiza: RF-01, RF-02, RF-03
 
@@ -229,4 +229,4 @@ Flujos alternativos (nombrados):
 Flujos de excepción (nombrados):
   - E1: se interrumpe la conexión durante la carga (pasos 1-4).
   - E2: el repositorio no tiene espacio disponible (paso 4).
-  ´´´
+```
