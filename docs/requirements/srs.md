@@ -411,3 +411,101 @@ Criterios de aceptación:
   When confirmo la búsqueda,
   Then el sistema muestra un mensaje de "sin resultados", sin generar un error.
 ```
+
+
+# **Atributos de calidad — escenarios (ISO 25010)**
+
+# Opciones mias
+
+# Atributo: Seguridad — Autorización
+Escenario 1 — entorno normal (acción autorizada)
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Director/a del grupo |
+| Estímulo | Solicita eliminar un experimento del catálogo |
+| Entorno | Operación normal |
+| Artefacto | Módulo de gestión de proyectos/experimentos (Proceso 8) |
+| Respuesta | El sistema ejecuta la eliminación y confirma |
+| Medida de respuesta | 100% de las solicitudes de director/a se ejecutan |
+
+Escenario 2 — entorno de intento no autorizado
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Intenta eliminar un experimento del catálogo (misma acción que el Escenario 1) |
+| Entorno | Mismo módulo, mismo tipo de solicitud, cambia solo el rol del actor que la emite |
+| Artefacto | Módulo de gestión de proyectos/experimentos (Proceso 8) |
+| Respuesta | El sistema rechaza la operación e informa que el rol no tiene permiso para ejecutarla |
+| Medida de respuesta | 0% de eliminaciones ejecutadas por un rol sin autorización |
+Atributo: Eficiencia de desempeño — Proceso 2
+
+# Atributo: Eficiencia de desempeño — Proceso 2
+Escenario 1 — entorno normal
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Consulta el catálogo filtrando por un solo criterio (ej. proteína) |
+| Entorno | Operación normal — 1 usuario conectado, catálogo con volumen típico (~1.000 experimentos) |
+| Artefacto | Módulo de consulta y filtro (Proceso 2) |
+| Respuesta | El sistema devuelve los experimentos que coinciden con el filtro |
+| Medida de respuesta | Se completa en 2 segundos o menos |
+
+Escenario 2 — entorno de sobrecarga (concurrencia)
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Múltiples investigadores/as (ej. todo el laboratorio consultando a la vez) |
+| Estímulo | Cada uno consulta el catálogo con el mismo tipo de filtro simple del Escenario 1 |
+| Entorno | Pico de uso — hasta 20 consultas concurrentes, mismo volumen de catálogo que el Escenario 1 |
+| Artefacto | Módulo de consulta y filtro (Proceso 2) |
+| Respuesta | El sistema resuelve todas las consultas sin bloquear ni descartar ninguna |
+| Medida de respuesta | Cada consulta individual se completa en 5 segundos o menos, con 0% de consultas fallidas o con timeout |
+
+Escenario 3 — entorno de gran volumen de datos
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a (mismo estímulo que el Escenario 1, sin concurrencia) |
+| Estímulo | Consulta el catálogo filtrando por el mismo criterio simple (proteína) |
+| Entorno | Catálogo con 100.000 experimentos registrados (en vez de ~1.000), 1 usuario conectado |
+| Artefacto | Módulo de consulta y filtro (Proceso 2) |
+| Respuesta | El sistema devuelve los experimentos que coinciden con el filtro |
+| Medida de respuesta | Se completa en 5 segundos o menos |
+Atributo: Fiabilidad — Proceso 1 (dependencia de Google Docs)
+
+# Atributo: Fiabilidad — Proceso 1 (dependencia de Google Docs)
+Escenario 1 — entorno normal
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a (vía CU-01) |
+| Estímulo | Confirma el registro de un experimento, disparando la creación automática del documento de notas |
+| Entorno | Servicio de Google Docs disponible, respondiendo con normalidad |
+| Artefacto | Módulo de creación/vinculación de documento de notas (paso 7 de CU-01, RF-05) |
+| Respuesta | El sistema crea el documento y lo asocia al experimento |
+| Medida de respuesta | 100% de los registros quedan con el documento vinculado en el primer intento |
+
+Escenario 2 — entorno degradado (servicio externo no disponible)
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a (mismo estímulo que el Escenario 1) |
+| Estímulo | Confirma el registro de un experimento |
+| Entorno | El servicio de Google Docs no responde o da timeout |
+| Artefacto | Mismo módulo (paso 7 de CU-01, RF-05), con el mecanismo de recuperación de RF-09/CU-01b |
+| Respuesta | El experimento queda guardado igual, con el documento de notas marcado como "no vinculado"; no se pierde ni se corrompe ningún dato ya guardado |
+| Medida de respuesta | 100% de los experimentos quedan en estado consistente (guardados, sin documento) aunque falle Google Docs; 0% de pérdida de datos del registro |
+
+Escenario 3 — recuperación tras la degradación
+
+| Campo | Detalle |
+|---|---|
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Dispara "reintentar vinculación" sobre un experimento en estado "no vinculado" (consecuencia del Escenario 2) |
+| Entorno | El servicio de Google Docs vuelve a estar disponible |
+| Artefacto | CU-01b · Reintentar Vinculación de Documento de Notas (RF-09) |
+| Respuesta | El sistema crea y asocia el documento sin pedirle al investigador/a ningún dato de nuevo |
+| Medida de respuesta | 95% o más de los reintentos se resuelven exitosamente sin intervención adicional |
