@@ -415,31 +415,6 @@ Criterios de aceptación:
 
 # **Atributos de calidad — escenarios (ISO 25010)**
 
-# Opciones mias
-
-# Atributo: Seguridad — Autorización
-Escenario 1 — entorno normal (acción autorizada)
-
-| Campo | Detalle |
-|---|---|
-| Fuente del estímulo | Director/a del grupo |
-| Estímulo | Solicita eliminar un experimento del catálogo |
-| Entorno | Operación normal |
-| Artefacto | Módulo de gestión de proyectos/experimentos (Proceso 8) |
-| Respuesta | El sistema ejecuta la eliminación y confirma |
-| Medida de respuesta | 100% de las solicitudes de director/a se ejecutan |
-
-Escenario 2 — entorno de intento no autorizado
-
-| Campo | Detalle |
-|---|---|
-| Fuente del estímulo | Investigador/a |
-| Estímulo | Intenta eliminar un experimento del catálogo (misma acción que el Escenario 1) |
-| Entorno | Mismo módulo, mismo tipo de solicitud, cambia solo el rol del actor que la emite |
-| Artefacto | Módulo de gestión de proyectos/experimentos (Proceso 8) |
-| Respuesta | El sistema rechaza la operación e informa que el rol no tiene permiso para ejecutarla |
-| Medida de respuesta | 0% de eliminaciones ejecutadas por un rol sin autorización |
-Atributo: Eficiencia de desempeño — Proceso 2
 
 # Atributo: Eficiencia de desempeño — Proceso 2
 Escenario 1 — entorno normal
@@ -509,3 +484,27 @@ Escenario 3 — recuperación tras la degradación
 | Artefacto | CU-01b · Reintentar Vinculación de Documento de Notas (RF-09) |
 | Respuesta | El sistema crea y asocia el documento sin pedirle al investigador/a ningún dato de nuevo |
 | Medida de respuesta | 95% o más de los reintentos se resuelven exitosamente sin intervención adicional |
+
+### Atributo: Mantenibilidad — Modificabilidad y analizabilidad
+
+**Escenario 1 — entorno normal (extensión planificada)**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Desarrollador/a del equipo |
+| Estímulo | Necesita agregar dinámica molecular como nueva técnica de experimento soportada |
+| Entorno | Mantenimiento planificado, con acceso completo a la documentación y al modelo de dominio original |
+| Artefacto | Modelo de datos de Experimento y ParametroExperimento (Proceso 1) |
+| Respuesta | La nueva técnica se agrega definiendo sus parámetros como nuevas filas de ParametroExperimento, sin modificar el esquema de las tablas ya existentes (Experimento, Proyecto) |
+| Medida de respuesta | La extensión no requiere alterar ni una sola columna de las tablas existentes; se implementa en menos de una jornada de trabajo |
+
+**Escenario 2 — entorno degradado (sin el conocimiento del diseño original)**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Un/a nuevo/a integrante del equipo, que no participó del diseño original |
+| Estímulo | Debe corregir un error reportado en la lógica de detección de duplicados |
+| Entorno | Degradado — sin acceso a quienes diseñaron el sistema originalmente, solo con la documentación disponible |
+| Artefacto | Módulo de detección de duplicados (CU-01, slice A2) y su documentación en el SRS |
+| Respuesta | El/la integrante localiza el módulo responsable apoyándose únicamente en el SRS y en el código, y aplica la corrección sin afectar otros procesos |
+| Medida de respuesta | Identifica el módulo responsable en menos de 30 minutos, y la corrección no introduce regresiones verificables en el resto del sistema |
