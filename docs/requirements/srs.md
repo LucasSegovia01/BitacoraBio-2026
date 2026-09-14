@@ -268,17 +268,27 @@ CU-01
 
 ## **Historias de usuario**
 ```
-HU-01.B1 · Registrar experimento de docking
-Deriva de: CU-01, slice B1 (básico)
+HU-01.B1.1 · Registrar experimento de docking (guardado)
+Deriva de: CU-01, slice B1.1 (básico, parte 1)
 Como investigador/a, quiero registrar un experimento de docking con sus parámetros y saber si ya se probó algo similar, para no repetir un ensayo sin saberlo y dejar el catálogo del grupo actualizado.
 
 Criterios de aceptación:
-- Given un proyecto existente, todos los campos obligatorios completos y sin coincidencias previas para esa molécula/ligando, 
-When el investigador/a confirma el registro, 
-Then el sistema guarda el experimento con autor y fecha asignados automáticamente, crea el documento de notas en Google Docs, y muestra el resumen del experimento con el enlace al documento.
+- Given un proyecto existente, todos los campos obligatorios completos y con formato válido, y sin coincidencias previas para esa molécula/ligando,
+When el investigador/a confirma el registro,
+Then el sistema registra automáticamente el autor y la fecha/hora de carga, y guarda el experimento en el catálogo.
 - Given un experimento previo con la misma molécula/ligando pero marcado como estado_validez "inválido",
 When el investigador/a confirma el registro,
-Then el sistema NO lo reporta como coincidencia y completa el registro como en el camino normal.
+Then el sistema NO lo reporta como coincidencia y guarda el experimento como en el camino normal.
+
+
+HU-01.B1.2 · Vincular documento de notas al experimento registrado
+Deriva de: CU-01, slice B1.2 (básico, parte 2)
+Como investigador/a, quiero que se cree automáticamente un documento de notas en Google Docs para mi experimento recién guardado, para tener un lugar donde dejar observaciones sin salir del flujo de carga.
+
+Criterios de aceptación:
+- Given un experimento recién guardado (resultado de B1.1),
+When el sistema crea el documento de notas en Google Docs,
+Then el sistema asocia el enlace al experimento y muestra el resumen del experimento junto con el enlace al documento de notas.
 ```
 ```
 HU-01.A1 · Continuar registro pese a coincidencia detectada
