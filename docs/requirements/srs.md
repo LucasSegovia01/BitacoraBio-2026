@@ -217,7 +217,7 @@ Postcondición: el llamador (CU-01) recibe el resultado de la verificación;
 ```
 Actor principal: Investigador/a
 Actor secundario: Google Docs (sistema externo)
-Realiza: RF-01, RF-02, RF-03, RF-04, RF-05
+Realiza: RF-01, RF-02, RF-03, RF-04, RF-05, RF-08
 Incluye (<<include>>): CU-00 · Detectar Duplicado
   (se factoriza aparte porque es una verificación autocontenida que el flujo principal invoca pero no resuelve inline; mantiene CU-01 enfocado en el registro en sí. Compara tipo + molécula/ligando contra D1, excluyendo inválidos.)
 
