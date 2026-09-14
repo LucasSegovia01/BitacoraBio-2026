@@ -515,3 +515,30 @@ Escenario 3 — recuperación tras la degradación
 | Artefacto | Módulo de detección de duplicados (CU-01, slice A2) y su documentación en el SRS |
 | Respuesta | El/la integrante localiza el módulo responsable apoyándose únicamente en el SRS y en el código, y aplica la corrección sin afectar otros procesos |
 | Medida de respuesta | Identifica el módulo responsable en menos de 30 minutos, y la corrección no introduce regresiones verificables en el resto del sistema |
+
+
+## Trazabilidad completa
+
+```
+RF-01, RF-02, RF-03, RF-04, RF-05, RF-08
+  └─ CU-01 · Registrar experimento de docking  (Proceso 1)
+       ├─ Incluye: CU-00 · Detectar Duplicado (RF-03)
+       ├─ Extiende: CU-01b · Reintentar Vinculación de Documento de Notas
+       │            (RF-09), punto de extensión posterior a E1
+       ├─ Slice B1.1 → HU-01.B1.1
+       ├─ Slice B1.2 → HU-01.B1.2
+       ├─ Slice A1 → HU-01.A1
+       ├─ Slice A2 → HU-01.A2
+       ├─ Slice E1 → HU-01.E1
+       └─ A3, A4, A5, E2 — nombrados, sin desarrollar
+
+RF-09
+  └─ CU-01b · Reintentar Vinculación de Documento de Notas (extiende CU-01)
+       └─ Flujo único — nombrado, sin HU propia desarrollada
+
+RF-06, RF-07
+  └─ CU-02 · Consultar y filtrar experimentos  (Proceso 2)
+       ├─ Slice B1 → HU-02.B1
+       ├─ Slice B2 → HU-02.B2
+       └─ Slice A1 → HU-02.A1
+```
