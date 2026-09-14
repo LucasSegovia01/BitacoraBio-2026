@@ -116,6 +116,18 @@
    como borrador de referencia, marcada para cotejar contra el archivo real
    antes de incorporarla.
 
+5. **Consulta:** se pidió una revisión de consistencia general del
+   documento antes de la entrega, más la trazabilidad completa.
+   **Generó:** detectó tres inconsistencias introducidas por ediciones
+   sucesivas: RF-08 no figuraba en el "Realiza" de CU-01 pese a estar
+   referenciado en el paso 2 del flujo; la historia de usuario HU-01.B1
+   citaba una slice ("B1") que ya había sido dividida en B1.1/B1.2 en una
+   edición posterior, sin actualizarse; y un encabezado duplicado con
+   contenido de una versión anterior del bloque de Fiabilidad.
+   **Resultado:** se corrigió el "Realiza" de CU-01; se decidió partir
+   HU-01.B1 en HU-01.B1.1 y HU-01.B1.2 para que coincida con la división
+   de slices ya adoptada; se eliminó el encabezado duplicado.
+
 **Qué se descartó y por qué:**
 - No se agregó un paso explícito de verificación de "proyecto existente"
   al flujo de CU-01 (propuesta de la IA en el punto 1): el grupo consideró
@@ -124,3 +136,98 @@
 **Errores o imprecisiones detectadas:** ninguno relevante en esta etapa —
 las correcciones fueron ajustes de precisión y alcance, no errores de
 contenido.
+
+## Uso de IA — Modelo de Dominio, Requerimientos Funcionales y Atributos de Calidad
+
+**Herramienta:** Claude (asistente de IA conversacional).
+
+**Registro de intercambios:**
+
+1. **Consulta:** se pidió una opinión honesta, con ventajas y desventajas,
+   entre la idea de catálogo de experimentos y una variante acotada de
+   consulta de biomarcadores oncológicos, antes de descartar esta última
+   definitivamente.
+   **Generó:** comparación de ambas, recomendando el catálogo por no
+   depender de servicios externos fuera del control del grupo; sugirió
+   sumar integración con Google Docs y un visor 3D de solo lectura
+   (3Dmol.js) para darle mayor profundidad de ingeniería sin ampliar el
+   alcance a dinámica molecular completa.
+   **Resultado:** se aceptó la recomendación y se sumaron ambas
+   funcionalidades al alcance del MVP.
+
+2. **Consulta:** se pidió armar el canvas de descubrimiento completo y el
+   DFD Nivel 0 a partir de las decisiones ya conversadas.
+   **Generó:** el canvas (dominio, datos, usuarios, valor, alcance,
+   riesgos, datos sensibles) y el diagrama en Mermaid con las entidades
+   externas del sistema.
+   **Resultado:** se aceptaron ambos, con correcciones menores de tipeo
+   antes de incorporarlos al SRS.
+
+3. **Consulta:** se preguntó si el Director del grupo debía tener permisos
+   distintos a los del Investigador/a, o si todos debían tener el mismo
+   nivel de acceso.
+   **Generó:** argumentos a favor (evitar que un integrante modifique o
+   borre la carga de otro sin autorización) y en contra (complejidad
+   adicional de control de acceso), dejando ambas opciones como válidas
+   según el tiempo disponible.
+   **Resultado:** se aceptó diferenciar roles (Investigador/a vs.
+   Director/a).
+
+4. **Consulta:** antes de descartar definitivamente la idea de
+   biomarcadores oncológicos, se preguntó si era realizable en la vida
+   real, con qué variante (epigenética o biomarcador genético clásico) y
+   qué fuentes públicas existían.
+   **Generó:** casos reales documentados en oncología (HER2/trastuzumab,
+   EGFR/inhibidores de tirosina-quinasa, KRAS/cetuximab) y las fuentes
+   públicas asociadas (TCGA/GDC, cBioPortal), junto con un análisis de por
+   qué el volumen de curación de evidencia necesario excedía el tiempo
+   del cuatrimestre.
+   **Resultado:** confirmó la decisión de descartar esa idea; se armó
+   además una consulta por mail al docente comparando ambas opciones
+   finalistas, cuya respuesta (fuente NCCN sin acceso público, riesgo de
+   incompatibilidad de vocabularios entre fuentes) reforzó la decisión
+   final por el catálogo de experimentos.
+
+5. **Consulta:** se pidió ayuda para redactar los requerimientos
+   funcionales a partir de una lista informal de ideas sueltas del grupo
+   (usuarios y roles, permisos de "jefes" sobre proyectos, filtros,
+   registro automático, enlace a Google Docs, detección de duplicados).
+   **Generó:** una primera versión numerada de RF, señalando ambigüedades
+   a resolver antes de continuar: si "proyecto" era una entidad nueva del
+   modelo de dominio, si "experimento" y "análisis" debían tratarse como
+   lo mismo, y una contradicción entre permisos de edición mencionados en
+   distintos momentos de la charla.
+   **Resultado:** se aceptaron las interpretaciones propuestas como punto
+   de partida, y se corrigieron en consultas posteriores a medida que el
+   grupo definía mejor el modelo (entidad Proyecto, estados de validez y
+   de análisis del experimento).
+
+6. **Consulta:** se pidió actualizar el modelo de dominio y el DFD Nivel 1
+   tras incorporar Proyecto y los estados del experimento; más adelante,
+   el grupo notó que faltaba un proceso de registro de usuario en ambos
+   niveles del DFD.
+   **Generó:** el diagrama de clases y el DFD Nivel 1 actualizados; luego,
+   el Proceso 9 (Registrar Usuario) y sus flujos correspondientes en el
+   DFD Nivel 0 y Nivel 1, junto con la observación de que el primer
+   Director del sistema no puede darse de alta a sí mismo por esta vía,
+   y requiere un dato de siembra inicial fuera de la interfaz.
+   **Resultado:** se aceptaron ambas actualizaciones.
+
+7. **Consulta:** se pidieron los escenarios de calidad (ISO 25010) para el
+   atributo de mantenibilidad, en el mismo formato de tabla de 6 campos
+   ya usado para fiabilidad y usabilidad.
+   **Generó:** dos escenarios (entorno normal de extensión planificada, y
+   entorno degradado sin conocimiento del diseño original), conectados
+   explícitamente con el riesgo de cambio de requerimientos ya
+   documentado en el canvas.
+   **Resultado:** se aceptaron ambos escenarios.
+
+**Qué se descartó y por qué:**
+- Se descartó por completo la idea de un sistema de consulta biomarcador-
+  tratamiento oncológico, pese a confirmarse su viabilidad científica y de
+  datos públicos, por exceder el tiempo disponible para curar evidencia
+  clínica de calidad en un cuatrimestre con dos personas.
+
+**Errores o imprecisiones detectadas:** ninguna imprecisión factual
+relevante de la IA en esta sección; las correcciones fueron ajustes de
+alcance y consistencia interna del propio documento en evolución.
