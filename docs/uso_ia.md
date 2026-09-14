@@ -1,29 +1,126 @@
 # Bitácora de Uso de IA
 
-**Herramienta utilizada:** Gemini (Google)
+## Uso de IA — Definición y acotación del proyecto (TP1)
 
-### 1. Tareas puntuales
-Se utilizó la herramienta a lo largo de varias iteraciones para definir y acotar el proyecto del TP1. Las consultas principales fueron:
-1.  **Brainstorming (15/08/26):** Evaluación de viabilidad entre un Motor de Evidencia Oncológica y una Bitácora de Experimentos Computacionales de Laboratorio, luego de presentarle ambas ideas y describir que era lo que se buscaba hacer con cada una.
-2.  **Análisis de riesgos críticos (15/08/26):** Consulta específica sobre si existía algún peligro extremo o riesgo oculto al trabajar con la opción oncológica (enfocado al manejo de datos).
-3.  **Priorización de alcance (16/08/26):** Consulta sobre si convenía enfocarnos en un ensayo específico (ej. Docking Molecular) o abarcar varios desde el inicio (trabajando con la bitácora).
-4.  **Evaluación de ciclos de vida (18/08/26):** Pedimos que nos enumere los pros y contras de los modelos de ciclo de vida (cascada, incremental e iterativo) para poder fundamentar nuestra elección metodológica en el repositorio.
-5.  **Sintaxis de diagramado (18/08/26):** Consultamos cómo estructurar visualmente un Diagrama de Contexto (DFD Nivel 0) usando el lenguaje Mermaid, ya que la herramienta no tiene soporte nativo para esto.
+**Herramienta:** Gemini (Google).
 
-### 2. Qué generó la IA
-*   **Sobre las ideas:** Recomendó la opción del catálogo de laboratorio, dado que no se estaba seguros de encontrar una fuente de información publica para realizar la otra opción.
-*   **Sobre los riesgos críticos:** La IA fue tajante: el fallo de un software médico puede llevar a diagnósticos erróneos, tratamientos incorrectos y daños directos al paciente. También recomendó evitar esta idea ya que se debía tener en cuenta cosas como el manejo de datos sensibles (como los datos de un expediente medico). 
-*   **Sobre los ensayos:** Recomendó empezar estrictamente por un solo ensayo (Docking) para evitar el "Desarrollo Acelerado", advirtiendo que el impulso por lanzar productos rápidamente lleva a la omisión de etapas críticas y a fallas graves.
-* **Sobre los ciclos de vida (Modelo en Cascada):** detalló que este modelo es muy claro, cada fase tiene identificados los entregables y se revisa cada entregable. Explicó que posee una estructura simple del proceso que facilita la gestión y la planificación. También que la documentación está bien definida, lo que ayuda a la gestión y control del proyecto. En cuanto a las desventajas, mencionó que es muy rígido y es difícil de adecuarse a los cambios.
-* **Sobre los ciclos de vida (Modelo Incremental):** La IA generó que una ventaja es la posibilidad de feedback de los clientes ya que se van mostrando y entregando partes funcionales, gracias a esto, inherentemente hay una visión de gestión de riesgo. Destacó que este enfoque permite ir mejorando la satisfacción del usuario al entregar cosas de valor desde etapas tempranas.
-* **Sobre Mermaid:** Explicó que se debe usar el tipo de gráfico genérico `flowchart TD` y explicó cómo utilizarlo.
+**Registro de intercambios:**
 
-### 3. Modificaciones, decisiones y justificación
-*   **Se descartó por completo** la idea del Motor Oncológico. La advertencia sobre el posible daño al paciente hizo notar que el rigor necesario para ese dominio excede los tiempos y objetivos de este trabajo práctico, así como también el conocimiento de los integrantes del grupo, generando cierta incertidumbre sobre la confianza tenida para el manejo de datos como los necesarios para el sistema.
-*   **Se aceptó** la recomendación de ir por el Catálogo de Laboratorio y acotar el alcance inicial a un solo ensayo (Docking). Esto nos permite concentrarnos en la calidad de los requerimientos y no caer en la ausencia de pruebas, para que el incremento inicial sea estable y verificable.
-* **Ciclos de Vida:** Basándonos en los pros y contras, descartamos el modelo en cascada por su rigidez. Decidimos adoptar el modelo iterativo e incremental para poder entregar nuestro MVP de Docking de manera temprana y adaptarnos a futuros cambios en el dominio.
-* **Diagrama:** Se redactó el código mapeando nuestras propias entidades, siguiendo las instrucciones dadas por la IA.
+1. **Consulta (15/08/26):** se le presentaron dos ideas de proyecto —un
+   Motor de Evidencia Oncológica y una Bitácora de Experimentos
+   Computacionales de Laboratorio— describiendo qué se buscaba hacer con
+   cada una, para evaluar su viabilidad.
+   **Generó:** recomendó la opción del catálogo de laboratorio, dado que no
+   había certeza de encontrar una fuente de información pública para la
+   otra opción.
+   **Resultado:** se descartó por completo la idea del Motor Oncológico.
 
-### 4. Errores o imprecisiones detectadas en la IA
-* En un inicio la IA utilizada sugirió que, para hacer el catálogo comercialmente mas llamativo, se incluyeran también módulos de Dinámica Molecular y otros tipos de ensayos para la primera entrega. Notamos que se ignoraba la restricción de tiempo y la cantidad de personas que formaban parte del equipo (2 personas). Aceptar eso hubiera empujado a un desarrollo acelerado, saltando fases cruciales para poder llegar a tiempo con las funcionalidades planteadas. Descartamos ese consejo y mantuvimos nuestro alcance acotado.
-* Al pedirle ayuda con el código de Mermaid, la IA generó un ejemplo genérico que incluía un "almacén de datos" (una base de datos). Leyendo la teoría de la cátedra, detectamos que esto se trata de un error conceptual: los almacenes de datos no deben graficarse en un DFD de Nivel 0. Descartamos ese ejemplo por completo para no arrastrar el error al trabajo práctico.
+2. **Consulta (15/08/26):** se preguntó puntualmente si existía algún
+   riesgo extremo u oculto en trabajar con la opción oncológica, enfocado
+   al manejo de datos.
+   **Generó:** advirtió que el fallo de un software médico puede derivar en
+   diagnósticos erróneos, tratamientos incorrectos y daño directo al
+   paciente, y recomendó evitar esa idea por el manejo de datos sensibles
+   (expedientes médicos).
+   **Resultado:** la advertencia confirmó que el rigor necesario para ese
+   dominio excedía los tiempos, los objetivos del TP y el conocimiento del
+   grupo; reforzó la decisión de descartar la opción oncológica.
+
+3. **Consulta (16/08/26):** se preguntó si convenía enfocarse en un solo
+   tipo de ensayo (ej. Docking Molecular) o abarcar varios desde el inicio.
+   **Generó:** recomendó empezar estrictamente por un solo ensayo (Docking)
+   para evitar el "desarrollo acelerado", advirtiendo que el impulso por
+   lanzar funcionalidades rápido lleva a omitir etapas críticas y a fallas
+   graves.
+   **Resultado:** se aceptó acotar el alcance inicial a un solo ensayo
+   (Docking), para concentrarse en la calidad de los requerimientos.
+
+4. **Consulta (18/08/26):** se pidió que enumere pros y contras de los
+   modelos de ciclo de vida (cascada, incremental, iterativo) para
+   fundamentar la elección metodológica.
+   **Generó:** sobre cascada, destacó claridad de fases y documentación
+   bien definida, pero rigidez frente a cambios; sobre incremental,
+   destacó la posibilidad de feedback temprano y entrega de valor desde
+   etapas tempranas.
+   **Resultado:** se descartó cascada por su rigidez; se adoptó el modelo
+   iterativo e incremental para entregar el MVP de Docking tempranamente y
+   poder adaptarse a cambios futuros en el dominio.
+
+5. **Consulta (18/08/26):** se consultó cómo estructurar visualmente un
+   Diagrama de Contexto (DFD Nivel 0) en Mermaid, por falta de soporte
+   nativo de la herramienta de diagramado.
+   **Generó:** indicó usar el tipo de gráfico `flowchart TD` y explicó su
+   sintaxis.
+   **Resultado:** se redactó el código mapeando las entidades propias del
+   proyecto, siguiendo la sintaxis indicada.
+
+**Qué se descartó y por qué:**
+- Se descartó una sugerencia inicial de la IA de sumar módulos de Dinámica
+  Molecular y otros tipos de ensayo a la primera entrega para hacer el
+  catálogo "comercialmente más llamativo": ignoraba la restricción de
+  tiempo y el tamaño del equipo (2 personas), y hubiera forzado un
+  desarrollo acelerado saltando fases críticas.
+- Se descartó el ejemplo genérico de Mermaid que la IA generó para el DFD,
+  porque incluía un almacén de datos (base de datos) en un diagrama de
+  Nivel 0 — un error conceptual detectado al revisar la teoría de la
+  cátedra, ya que los almacenes de datos no deben graficarse en ese nivel.
+
+**Errores o imprecisiones detectadas:**
+- La sugerencia de ampliar el alcance a varios tipos de ensayo en la
+  primera entrega, sin considerar las restricciones reales del equipo.
+- La inclusión de un almacén de datos en el ejemplo de DFD Nivel 0,
+  contrario a la convención de ese nivel de diagrama.
+
+## Uso de IA — Revisión de Casos de Uso e Historias de Usuario
+
+**Herramienta:** Claude (asistente de IA conversacional).
+
+**Registro de intercambios:**
+
+1. **Consulta:** se le pidió una devolución de CU-01 tal como estaba en el
+   SRS.
+   **Generó:** detectó ausencia de un CU para el Proceso 2 (elegido pero no
+   desarrollado), contradicción entre el campo "estado" singular de
+   Alcance/RF-01 y los dos campos separados del modelo de dominio, y el
+   archivo PDB mencionado en Datos pero ausente del flujo de CU-01.
+   **Resultado:** el CU-02 quedó a cargo de otro integrante del grupo; la
+   incorporación del PDB al flujo quedó a cargo del grupo; la
+   inconsistencia de "estado" se dejó pendiente, sin resolver por la IA.
+
+2. **Consulta:** se le pidió plantear un CU-00 (Detectar Duplicado) propio,
+   indicar dónde ubicarlo en el documento, y armar un cuadro de los slices
+   de CU-01 en formato Cockburn.
+   **Generó:** un CU-00 compacto (sin interesados ni disparador), con
+   recomendación de ubicarlo antes de CU-01, y el cuadro de slices
+   solicitado.
+   **Resultado:** se aceptó tal cual la propuesta y la ubicación.
+
+3. **Consulta:** se pidió dividir el slice básico de CU-01 en B1/B2, con un
+   criterio de división explícito (no solo "son dos tareas"), una historia
+   de usuario para el flujo de excepción E1 (falla de Google Docs), y un
+   slice adicional para formato de dato inválido.
+   **Generó:** el criterio de división (valor central sin dependencias
+   externas B1, vs. funcionalidad dependiente de un servicio externo B2),
+   la HU-01.E1 con criterios Given/When/Then, y el slice A5 propuesto.
+   **Resultado:** se aceptó el criterio de división B1/B2 y la HU-01.E1.
+
+4. **Consulta:** se pidió redactar RF-08 y RF-09 e incorporarlos al texto
+   del flujo de CU-01, relacionando RF-09 con un caso de uso propio.
+   **Generó:** el texto de RF-08 (validación de formato/completitud)
+   insertado como paso explícito del flujo, y RF-09 (reintento de
+   vinculación) modelado como CU-01b, caso de uso de extensión
+   (`<<extend>>` de CU-01).
+   **Resultado:** se aceptaron ambos RF y CU-01b tal cual. Se corrigieron
+   manualmente los puntos de divergencia exactos de los flujos
+   alternativos de CU-01; la renumeración que propuso la IA se usó solo
+   como borrador de referencia, marcada para cotejar contra el archivo real
+   antes de incorporarla.
+
+**Qué se descartó y por qué:**
+- No se agregó un paso explícito de verificación de "proyecto existente"
+  al flujo de CU-01 (propuesta de la IA en el punto 1): el grupo consideró
+  que ya quedaba suficientemente claro en el paso 1 y en el alternativo A3.
+
+**Errores o imprecisiones detectadas:** ninguno relevante en esta etapa —
+las correcciones fueron ajustes de precisión y alcance, no errores de
+contenido.

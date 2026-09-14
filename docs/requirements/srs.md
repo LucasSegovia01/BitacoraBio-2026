@@ -168,7 +168,6 @@ Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con 
 - Proceso 9 (Registrar Usuario): alta simple con asignación de rol, sin reglas de negocio propias más allá de la validación de datos básicos — se documenta a nivel de alcance, sin CU propio este cuatrimestre.
 
 # **Requerimientos funcionales**
-## Requerimientos funcionales
 ```
 RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, notas (vacías por defecto) y estado.
 
@@ -190,7 +189,6 @@ RF-09: El sistema debe permitir reintentar la creación del documento de notas d
 ```
 
 # **Stakeholders y roles**
-## 2. Stakeholders y roles
 
 | Rol | Tipo | Interacción con el sistema | Permisos |
 |---|---|---|---|
@@ -333,7 +331,7 @@ Flujos de excepción:
   - E1': la creación vuelve a fallar (diverge en el paso 2; el experimento permanece en "no_vinculado" y puede reintentarse nuevamente más tarde).
 ```
 
-## **CU-02 · Consultar y filtrar experimentos (Proceso 2)**
+# **CU-02 · Consultar y filtrar experimentos (Proceso 2)**
 ```
 Actor principal: Usuario del sistema (generalización de Investigador/a y
   Director/a — ambos roles ejecutan este caso de uso de forma idéntica,
@@ -416,7 +414,7 @@ Criterios de aceptación:
 # **Atributos de calidad — escenarios (ISO 25010)**
 
 
-# Atributo: Eficiencia de desempeño — Proceso 2
+## **Atributo: Eficiencia de desempeño — Proceso 2**
 Escenario 1 — entorno normal
 
 | Campo | Detalle |
@@ -449,9 +447,8 @@ Escenario 3 — entorno de gran volumen de datos
 | Artefacto | Módulo de consulta y filtro (Proceso 2) |
 | Respuesta | El sistema devuelve los experimentos que coinciden con el filtro |
 | Medida de respuesta | Se completa en 5 segundos o menos |
-Atributo: Fiabilidad — Proceso 1 (dependencia de Google Docs)
 
-# Atributo: Fiabilidad — Proceso 1 (dependencia de Google Docs)
+## **Atributo: Fiabilidad — Proceso 1 (dependencia de Google Docs)**
 Escenario 1 — entorno normal
 
 | Campo | Detalle |
@@ -485,7 +482,7 @@ Escenario 3 — recuperación tras la degradación
 | Respuesta | El sistema crea y asocia el documento sin pedirle al investigador/a ningún dato de nuevo |
 | Medida de respuesta | 95% o más de los reintentos se resuelven exitosamente sin intervención adicional |
 
-### Atributo: Mantenibilidad — Modificabilidad y analizabilidad
+## **Atributo: Mantenibilidad — Modificabilidad y analizabilidad**
 
 **Escenario 1 — entorno normal (extensión planificada)**
 
