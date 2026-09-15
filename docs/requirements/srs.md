@@ -217,7 +217,7 @@ Postcondición: el llamador (CU-01) recibe el resultado de la verificación;
 ```
 Actor principal: Investigador/a
 Actor secundario: Google Docs (sistema externo)
-Realiza: RF-01, RF-02, RF-03, RF-04, RF-05, RF-08
+Realiza: RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09
 Incluye (<<include>>): CU-00 · Detectar Duplicado
   (se factoriza aparte porque es una verificación autocontenida que el flujo principal invoca pero no resuelve inline; mantiene CU-01 enfocado en el registro en sí. Compara tipo + molécula/ligando contra D1, excluyendo inválidos.)
 
@@ -242,14 +242,14 @@ Flujo principal:
 
 Flujos alternativos (nombrados):
   - A1: se detecta posible coincidencia y el/la investigador/a decide continuar el registro de todos modos (diverge en el paso 4).
-  - A2: se detecta posible coincidencia y el/la investigador/a decide cancelar el registro (diverge en el paso 4).
-  - A3: el proyecto seleccionado ya no existe al momento de confirmar (diverge en el paso 1).
-  - A4: el/la investigador/a deja un campo obligatorio vacío (diverge en el paso 2).
-  - A5: el/la investigador/a completa un campo con formato de dato inválido (ej. notación de molécula/ligando no reconocida) (diverge en el paso 2)
 
 Flujos de excepción (nombrados):
-  - E1: falla la creación del documento de Google Docs, el servicio no responde (diverge en el paso 7; el experimento queda guardado sin bitácora asociada).
+  - E1: falla la creación del documento de Google Docs, el servicio no responde (diverge en el paso 7). El experimento queda guardado sin bitácora asociada, marcado como "no vinculado". El/la investigador/a puede, en cualquier momento posterior, disparar "reintentar vinculación" sobre ese experimento (RF-09): el sistema repite únicamente la creación del documento sin pedir de nuevo ningún otro dato, y si tiene éxito, marca el experimento como "vinculado".
   - E2: se interrumpe la conexión durante el guardado del experimento (pasos 5-7).
+  - E3: se detecta posible coincidencia y el/la investigador/a decide cancelar el registro (diverge en el paso 4).
+  - E4: el proyecto seleccionado ya no existe al momento de confirmar (diverge en el paso 1).
+  - E5: el/la investigador/a deja un campo obligatorio vacío (diverge en el paso 2).
+  - E6: el/la investigador/a completa un campo con formato de dato inválido (ej. notación de molécula/ligando no reconocida) (diverge en el paso 2).
 ```
 
 ## **Slices** — Frontera entre valor central sin dependencias externas (B1.1) y funcionalidad adicional que depende de un servicio de terceros (B1.2).
@@ -258,12 +258,12 @@ CU-01
   Slice B1.1 — pasos 1-5: completar datos, validar y verificar duplicado (CU-00), registrar autor/fecha y guardar el experimento en el catálogo. Entrega el valor central por sí sola, sin depender de servicios externos.
   Slice B1.2 — pasos 6-7: crear y asociar el documento de notas en Google Docs, y confirmar con el resumen. Depende de un servicio externo; su falla (E1) no compromete lo ya guardado en B1.1.
   Slice A1 — continuar pese a coincidencia detectada   
-  Slice A2 — cancelar por coincidencia detectada    
-  Slice A3 — proyecto ya no existe                     ——> nombrado, sin desarrollar
-  Slice A4 — campo obligatorio vacío                   ——> nombrado, sin desarrollar
-  Slice A5 — campo con formato de dato inválido        ——> nombrado, sin desarrollar
+  Slice E3 — cancelar por coincidencia detectada    
   Slice E1 — falla en creación de documento de notas   ——> nombrado, sin desarrollar
   Slice E2 — conexión interrumpida durante el guardado ——> nombrado, sin desarrollar
+  Slice E4 — proyecto ya no existe                     ——> nombrado, sin desarrollar
+  Slice E5 — campo obligatorio vacío                   ——> nombrado, sin desarrollar
+  Slice E6 — campo con formato de dato inválido        ——> nombrado, sin desarrollar
   ```
 
 ## **Historias de usuario**
@@ -301,44 +301,27 @@ Criterios de aceptación:
   Then el sistema registra el experimento como uno nuevo (autor, fecha, documento de notas propio), sin sobrescribir ni vincular el experimento existente.
 ```
 ```
-HU-01.A2 · Cancelar registro por coincidencia detectada
-Deriva de: CU-01, slice A2
+HU-01.E1 · Falla al crear el documento de notas
+Deriva de: CU-01, slice E1
+Como investigador/a, quiero que mi experimento quede guardado aunque falle la creación del documento de notas en Google Docs, para no perder mi carga por un problema de un servicio externo que no puedo controlar.
+
+Criterios de aceptación:
+- Given el experimento ya fue guardado exitosamente (fin de B1.1) y falla la creación del documento en el paso 7,
+  When el sistema detecta la falla,
+  Then el experimento queda guardado igual, el campo de documento de notas queda marcado como "no vinculado", y se le informa al investigador/a que el registro se completó pero la bitácora no pudo crearse.
+- Given un experimento con documento de notas "no vinculado",
+  When el investigador/a dispara "reintentar vinculación" (RF-09),
+  Then el sistema le ofrece reintentar la creación del documento sin tener que volver a cargar ningún dato del experimento, y si tiene éxito lo marca como "vinculado".
+```
+```
+HU-01.E3 · Cancelar registro por coincidencia detectada
+Deriva de: CU-01, slice E3
 Como investigador/a, quiero poder cancelar mi registro cuando el sistema me muestra que ya existe un experimento similar, para no cargar un duplicado que no necesito.
 
 Criterios de aceptación:
 - Given una coincidencia detectada por CU-00 y mostrada al investigador/a,
   When el investigador/a elige cancelar,
   Then el sistema no guarda ningún dato del experimento ni crea documento de notas, y el investigador/a puede consultar el experimento existente que se le mostró como coincidencia.
-```
-```
-HU-01.E1 · Falla al crear el documento de notas
-Deriva de: CU-01, slice E1
-Como investigador/a, quiero que mi experimento quede guardado aunque falle la creación del documento de notas en Google Docs, para no perder mi carga por un problema de un servicio externo que no puedo controlar.
-
-Criterios de aceptación:
-- Given el experimento ya fue guardado exitosamente (fin de B1) y falla la creación del documento en el paso 6,
-  When el sistema detecta la falla,
-  Then el experimento queda guardado igual, el campo de documento de notas queda marcado como "no vinculado", y se le informa al investigador/a que el registro se completó pero la bitácora no pudo crearse.
-- Given un experimento con documento de notas "no vinculado",
-  When el investigador/a lo consulta más tarde,
-  Then el sistema le ofrece reintentar la creación del documento sin tener que volver a cargar ningún dato del experimento.
-```
-
-# **CU-01b · Reintentar Vinculación de Documento de Notas (extiende a CU-01)**
-```
-Actor principal: Investigador/a
-Actor secundario: Google Docs (sistema externo)
-Realiza: RF-09
-Extiende (<<extend>>): CU-01, punto de extensión posterior a E1
-Precondición: existe un experimento con documento_notas = "no_vinculado" (consecuencia de E1 en CU-01).
-
-Flujo:
-  1. El/la investigador/a selecciona un experimento con estado "no_vinculado" y dispara "reintentar vinculación".
-  2. El sistema repite únicamente el paso 7 de CU-01 (crear y asociar documento de Google Docs) sin pedir de nuevo ningún otro dato.
-  3. El sistema guarda el enlace devuelto y marca el experimento como "vinculado".
-
-Flujos de excepción:
-  - E1': la creación vuelve a fallar (diverge en el paso 2; el experimento permanece en "no_vinculado" y puede reintentarse nuevamente más tarde).
 ```
 
 # **CU-02 · Consultar y filtrar experimentos (Proceso 2)**
@@ -520,21 +503,15 @@ Escenario 3 — recuperación tras la degradación
 ## Trazabilidad completa
 
 ```
-RF-01, RF-02, RF-03, RF-04, RF-05, RF-08
+RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09
   └─ CU-01 · Registrar experimento de docking  (Proceso 1)
        ├─ Incluye: CU-00 · Detectar Duplicado (RF-03)
-       ├─ Extiende: CU-01b · Reintentar Vinculación de Documento de Notas
-       │            (RF-09), punto de extensión posterior a E1
        ├─ Slice B1.1 → HU-01.B1.1
        ├─ Slice B1.2 → HU-01.B1.2
        ├─ Slice A1 → HU-01.A1
-       ├─ Slice A2 → HU-01.A2
-       ├─ Slice E1 → HU-01.E1
-       └─ A3, A4, A5, E2 — nombrados, sin desarrollar
-
-RF-09
-  └─ CU-01b · Reintentar Vinculación de Documento de Notas (extiende CU-01)
-       └─ Flujo único — nombrado, sin HU propia desarrollada
+       ├─ Slice E3 → HU-01.E3
+       ├─ Slice E1 → HU-01.E1 (incluye recuperación RF-09, sin CU propio)
+       └─ E2, E4, E5, E6 — nombrados, sin desarrollar
 
 RF-06, RF-07
   └─ CU-02 · Consultar y filtrar experimentos  (Proceso 2)
