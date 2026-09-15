@@ -186,6 +186,8 @@ RF-07: El sistema debe permitir filtrar y buscar experimentos por fecha, autor y
 RF-08: El sistema debe validar que los campos obligatorios del experimento estén completos y que su formato sea válido, antes de continuar con la verificación de duplicados, indicando al investigador/a el campo específico que no cumple.
 
 RF-09: El sistema debe permitir reintentar la creación del documento de notas de un experimento cuya vinculación inicial con Google Docs haya fallado, sin requerir que el investigador/a vuelva a cargar ningún otro dato del experimento.
+
+RF-10: El sistema debe permitir visualizar la pose resultante de un experimento de docking en un visor 3D de solo lectura (ej. 3Dmol.js), a partir del archivo de resultado en formato PDB asociado al experimento, sin requerir su descarga ni el uso de software externo.
 ```
 
 # **Stakeholders y roles**
@@ -518,4 +520,9 @@ RF-06, RF-07
        ├─ Slice B1 → HU-02.B1
        ├─ Slice B2 → HU-02.B2
        └─ Slice A1 → HU-02.A1
+
+RF-10
+  └─ Proceso 4 · Visualizar Pose 3D — fuera de profundización esta entrega
+       (ver "Selección de proceso(s) a desarrollar en profundidad";
+       resuelto mediante librería externa 3Dmol.js, sin CU propio)
 ```
