@@ -96,13 +96,15 @@
    **Resultado:** se aceptó tal cual la propuesta y la ubicación.
 
 3. **Consulta:** se pidió dividir el slice básico de CU-01 en B1/B2, con un
-   criterio de división explícito (no solo "son dos tareas"), una historia
-   de usuario para el flujo de excepción E1 (falla de Google Docs), y un
-   slice adicional para formato de dato inválido.
-   **Generó:** el criterio de división (valor central sin dependencias
-   externas B1, vs. funcionalidad dependiente de un servicio externo B2),
-   la HU-01.E1 con criterios Given/When/Then, y el slice A5 propuesto.
-   **Resultado:** se aceptó el criterio de división B1/B2 y la HU-01.E1.
+   criterio de división explícito (valor central sin dependencias
+   externas B1, vs. funcionalidad dependiente de un servicio externo B2), 
+   una historia de usuario para el flujo de excepción E1 (falla de Google 
+   Docs), y un slice adicional para formato de dato inválido.
+   **Generó:** la HU-01.E1 con criterios Given/When/Then, y el slice A5 
+   propuesto.
+   **Resultado:** se aceptó la redacción de división B1/B2 y la HU-01.E1.
+   **Nota:** la notación utilizada finalmente fue cambiada por el equipo:
+   B1/B2 → B1.1/B1.2
 
 4. **Consulta:** se pidió redactar RF-08 y RF-09 e incorporarlos al texto
    del flujo de CU-01, relacionando RF-09 con un caso de uso propio.
@@ -116,26 +118,117 @@
    como borrador de referencia, marcada para cotejar contra el archivo real
    antes de incorporarla.
 
-5. **Consulta:** se pidió una revisión de consistencia general del
-   documento antes de la entrega, más la trazabilidad completa.
-   **Generó:** detectó tres inconsistencias introducidas por ediciones
-   sucesivas: RF-08 no figuraba en el "Realiza" de CU-01 pese a estar
-   referenciado en el paso 2 del flujo; la historia de usuario HU-01.B1
-   citaba una slice ("B1") que ya había sido dividida en B1.1/B1.2 en una
-   edición posterior, sin actualizarse; y un encabezado duplicado con
-   contenido de una versión anterior del bloque de Fiabilidad.
-   **Resultado:** se corrigió el "Realiza" de CU-01; se decidió partir
-   HU-01.B1 en HU-01.B1.1 y HU-01.B1.2 para que coincida con la división
-   de slices ya adoptada; se eliminó el encabezado duplicado.
+5. **Consulta:** el docente recomendó dos correcciones sobre lo anterior:
+   (a) un camino solo es "alternativo" si se cumple la función del caso de
+   uso — todo lo que no la cumple es "excepción"; (b) CU-01b no debía ser
+   un caso de uso aparte, sino una rama de recuperación dentro de la
+   excepción E1 de CU-01. Se pidió aplicar ambos cambios y verificar
+   consistencia en todo el documento.
+   **Generó:** reclasificó los flujos "cancelar registro", "proyecto
+   inexistente", "campo vacío" y "formato inválido" —antes A2, A3, A4, A5—
+   como excepciones E3, E4, E5, E6, dejando A1 como único alternativo
+   (es el único que termina con el experimento registrado). Plegó el
+   mecanismo de reintento de RF-09 directamente en el texto de la
+   excepción E1, eliminando CU-01b como caso de uso independiente.
+   **Resultado:** se aceptaron ambos cambios. Al revisar el resto del
+   documento se encontraron y corrigieron referencias que habían quedado
+   con el nombramiento viejo: la HU-01.E1 citaba "slice A2" y "paso 6" en
+   vez de "slice E3"/"E1" y "paso 7"; la trazabilidad completa seguía
+   listando "Slice A2 → HU-01.A2"; y los escenarios de calidad de
+   Fiabilidad y Mantenibilidad todavía mencionaban a CU-01b y al slice A2
+   como si siguieran existiendo.
+
+6. **Consulta:** se le pidió a la IA que comenzara a redactar las Historias de 
+   Usuario (HU) con sus criterios de aceptación (Given/When/Then) a partir 
+   de los slices de los casos de uso.
+   **Generó:** redactó únicamente las historias correspondientes a los flujos 
+   básicos, ignorando por completo los slices secundarios (excepciones y 
+   alternativos, se especificó explicitamente cuales seria desarrollados). 
+   Además, las historias eran excesivamente largas, incluían detalles técnicos
+   de implementación en el "Then" (ej. consultas a la base de datos) o 
+   incluyendo detalles correspondientes al Proceso de Gestión de Usuarios, el 
+   cual no estaba entre los procesos seleccionados para profundizar.
+   **Resultado:** se rechazó la generación inicial. Se le marcaron los errores
+   basándonos en la teoría: los criterios de aceptación no deben describir 
+   implementación técnica interna y solo se deben redactar HUs para los 
+   procesos elegidos en el alcance. Se le escribió manualmente una historia de
+   usuario como ejemplo (HU-01.B1.1) y se le pidió a la IA rehacer todo el 
+   lote basándose exclusivamente en ese molde.
 
 **Qué se descartó y por qué:**
 - No se agregó un paso explícito de verificación de "proyecto existente"
-  al flujo de CU-01 (propuesta de la IA en el punto 1): el grupo consideró
-  que ya quedaba suficientemente claro en el paso 1 y en el alternativo A3.
+  al flujo de CU-01: el grupo consideró que ya quedaba suficientemente
+  claro en el paso 1 y en el alternativo (hoy excepción) E4.
+- La incorporación del archivo PDB al flujo de registro quedó a cargo del
+  grupo, no de la IA.
+- **Se descartó el diseño de CU-01b como caso de uso de extensión**
+  (`<<extend>>`), armado en un intercambio anterior con la misma IA: por
+  indicación del docente, el reintento de vinculación con Google Docs no
+  amerita un caso de uso propio, es la rama de recuperación de la
+  excepción E1 de CU-01. Se refactorizó en consecuencia.
+- **Se descartó la clasificación original de cuatro flujos como alternativos** 
+  (A2-A5: cancelar, proyecto inexistente, campo vacío, formato inválido): 
+  con el criterio del docente, ninguno de los cuatro termina con el experimento 
+  registrado, así que se reclasificaron como excepciones (E3-E6).
+- **Se descartaron todas las Historias de Usuario generadas por la IA con detalle 
+  excesivo o detalles de procesos satelitales** (como el CRUD de Usuarios). La 
+  justificación es que el alcance de TP1 exige desarrollar en profundidad solo los
+  procesos seleccionados en el DFD, y aceptar esas historias hubiera significado 
+  inflar el alcance artificialmente.
 
-**Errores o imprecisiones detectadas:** ninguno relevante en esta etapa —
-las correcciones fueron ajustes de precisión y alcance, no errores de
-contenido.
+**Errores o imprecisiones detectadas:**
+- Al aplicar la reclasificación A→E, la IA no propagó el cambio de nombre
+  a todas las referencias existentes en el documento (trazabilidad, una
+  historia de usuario, dos escenarios de calidad): quedaron varias
+  menciones sueltas a nombres de slice viejos y a CU-01b, que hubo que
+  revisar manualmente en una vuelta aparte hasta encontrarlas todas. Queda
+  como aprendizaje: después de un renombrado, conviene pedir explícitamente
+  una búsqueda de referencias cruzadas en todo el documento, no asumir que
+  el cambio se propaga solo.
+- Se detectó que la IA tiene una tendencia a sobre-especificar técnicamente las
+  Historias de Usuario, introduciendo lógica de base de datos o código en los 
+  criterios "Then". Se corrigió imponiendo un ejemplo manual (Prompt con Few-Shot).
+
+## Uso de IA — Atributos de Calidad
+
+1. **Consulta:** se presentaron seis ideas propias de escenarios de
+   calidad (ISO 25010), y se pidió una idea adicional propia de la IA 
+   (excluyendo Mantenibilidad, ya tomada por otro integrante).
+   **Generó:** señaló que una idea de Rendimiento mezclaba dos variables
+   distintas (complejidad de filtro y concurrencia) en un mismo par de
+   escenarios; que una idea de Usabilidad sobre duplicados no detectados
+   (falso negativo); y que dos ideas (parámetro nuevo vía JSON, nuevo tipo
+   de análisis) caían bajo la misma característica ISO 25010
+   (Mantenibilidad o Modificabilidad) que ya había elegido el otro
+   integrante. Propuso un escenario propio de Seguridad (autorización),
+   basado en la tabla de roles ya existente en el SRS.
+   **Resultado:** se aceptó la idea de Seguridad propuesta por la IA. Se
+   descartó la mitad de la idea de Usabilidad (el caso de falso negativo), 
+   dado que al grupo le pareció finalmente que correspondía mas con manejo 
+   de excepciones que con un Escenario de un Atributo de Calidad.
+   La superposición con Mantenibilidad quedó marcada para coordinar con el
+   otro integrante, sin resolver en esta conversación.
+
+2. **Consulta:** se pidió desarrollar los tres escenarios de Rendimiento
+   (Proceso 2) y los de Fiabilidad (dependencia de Google Docs), en
+   formato de tabla (fuente-estímulo-artefacto-entorno-respuesta-medida),
+   como código para pegar en el documento.
+   **Generó:** tres escenarios de Rendimiento (normal, sobrecarga por
+   concurrencia, gran volumen de datos) y tres de Fiabilidad (normal,
+   servicio caído, recuperación vía RF-09/CU-01b), además del escenario de
+   Seguridad ya mencionado, todos en el formato de tabla pedido.
+   **Resultado:** se aceptaron los seis escenarios.
+
+**Qué se descartó y por qué:**
+- Se descartó la mitad de la idea de Usabilidad sobre duplicados no
+  detectados (falso negativo): no es un atributo de calidad, es un defecto
+  de corrección funcional de RF-03.
+
+**Errores o imprecisiones detectadas:**
+- En un primer intento de escenario de Rendimiento, la IA combinó
+  complejidad de filtro y concurrencia en el mismo par de escenarios,
+  violando el criterio de "una sola variable de entorno por par"; se
+  separaron en dos ideas independientes antes de desarrollarlas.
 
 ## Uso de IA — Modelo de Dominio, Requerimientos Funcionales y Atributos de Calidad
 
