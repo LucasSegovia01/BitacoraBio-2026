@@ -439,7 +439,7 @@ Escenario 3 — entorno de gran volumen de datos
 | Fuente del estímulo | Investigador/a (mismo estímulo que el Escenario 1, sin concurrencia) |
 | Estímulo | Consulta el catálogo filtrando por el mismo criterio simple (proteína) |
 | Entorno | Catálogo con 100.000 experimentos registrados (en vez de ~1.000), 1 usuario conectado |
-| Artefacto | Módulo de consulta y filtro (Proceso 2) |
+| Artefacto | Módulo de consulta y filtro |
 | Respuesta | El sistema devuelve los experimentos que coinciden con el filtro |
 | Medida de respuesta | Se completa en 5 segundos o menos |
 
@@ -451,7 +451,7 @@ Escenario 1 — entorno normal
 | Fuente del estímulo | Investigador/a (vía CU-01) |
 | Estímulo | Confirma el registro de un experimento, disparando la creación automática del documento de notas |
 | Entorno | Servicio de Google Docs disponible, respondiendo con normalidad |
-| Artefacto | Módulo de creación/vinculación de documento de notas (paso 7 de CU-01, RF-05) |
+| Artefacto | Módulo de creación/vinculación de documento de notas |
 | Respuesta | El sistema crea el documento y lo asocia al experimento |
 | Medida de respuesta | 100% de los registros quedan con el documento vinculado en el primer intento |
 
@@ -462,7 +462,7 @@ Escenario 2 — entorno degradado (servicio externo no disponible)
 | Fuente del estímulo | Investigador/a (mismo estímulo que el Escenario 1) |
 | Estímulo | Confirma el registro de un experimento |
 | Entorno | El servicio de Google Docs no responde o da timeout |
-| Artefacto | Mismo módulo (paso 7 de CU-01, RF-05), con el mecanismo de recuperación de RF-09/CU-01b |
+| Artefacto | Módulo de creación/vinculación de documento de notas, con el mecanismo de recuperación |
 | Respuesta | El experimento queda guardado igual, con el documento de notas marcado como "no vinculado"; no se pierde ni se corrompe ningún dato ya guardado |
 | Medida de respuesta | 100% de los experimentos quedan en estado consistente (guardados, sin documento) aunque falle Google Docs; 0% de pérdida de datos del registro |
 
@@ -473,7 +473,7 @@ Escenario 3 — recuperación tras la degradación
 | Fuente del estímulo | Investigador/a |
 | Estímulo | Dispara "reintentar vinculación" sobre un experimento en estado "no vinculado" (consecuencia del Escenario 2) |
 | Entorno | El servicio de Google Docs vuelve a estar disponible |
-| Artefacto | CU-01b · Reintentar Vinculación de Documento de Notas (RF-09) |
+| Artefacto | Rama de recuperación de vinculación al documento de notas |
 | Respuesta | El sistema crea y asocia el documento sin pedirle al investigador/a ningún dato de nuevo |
 | Medida de respuesta | 95% o más de los reintentos se resuelven exitosamente sin intervención adicional |
 
@@ -486,7 +486,7 @@ Escenario 3 — recuperación tras la degradación
 | Fuente del estímulo | Desarrollador/a del equipo |
 | Estímulo | Necesita agregar dinámica molecular como nueva técnica de experimento soportada |
 | Entorno | Mantenimiento planificado, con acceso completo a la documentación y al modelo de dominio original |
-| Artefacto | Modelo de datos de Experimento y ParametroExperimento (Proceso 1) |
+| Artefacto | Modelo de datos de Experimento y ParametroExperimento |
 | Respuesta | La nueva técnica se agrega definiendo sus parámetros como nuevas filas de ParametroExperimento, sin modificar el esquema de las tablas ya existentes (Experimento, Proyecto) |
 | Medida de respuesta | La extensión no requiere alterar ni una sola columna de las tablas existentes; se implementa en menos de una jornada de trabajo |
 
@@ -497,10 +497,48 @@ Escenario 3 — recuperación tras la degradación
 | Fuente del estímulo | Un/a nuevo/a integrante del equipo, que no participó del diseño original |
 | Estímulo | Debe corregir un error reportado en la lógica de detección de duplicados |
 | Entorno | Degradado — sin acceso a quienes diseñaron el sistema originalmente, solo con la documentación disponible |
-| Artefacto | Módulo de detección de duplicados (CU-01, slice A2) y su documentación en el SRS |
+| Artefacto | Detector de Duplicados |
 | Respuesta | El/la integrante localiza el módulo responsable apoyándose únicamente en el SRS y en el código, y aplica la corrección sin afectar otros procesos |
 | Medida de respuesta | Identifica el módulo responsable en menos de 30 minutos, y la corrección no introduce regresiones verificables en el resto del sistema |
 
+## **Atributo: Adecuanción Funcional — Pertinencia Funcional**
+**Escenario 1 — entorno sobre-estimulado (alto volumen de resultados de búsqueda)**
+
+| Campo | Detalle |
+|---|---|
+| Subcaracterística | Pertinencia funcional |
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Revisa las poses de varios experimentos de una misma búsqueda, uno después del otro |
+| Entorno | Sobre-estimulado — resultado de búsqueda con alto número de coincidencias (ej. 20 o más experimentos) |
+| Artefacto | Visor 3D de solo lectura |
+| Respuesta | El investigador/a accede a la pose de cualquier experimento del listado de resultados sin pasos de navegación adicionales a medida que crece la cantidad de resultados — no se le exige paginar, recargar la lista completa, ni salir de la pantalla de resultados para llegar a la pose |
+| Medida de respuesta | La cantidad de acciones del usuario para pasar de una fila del resultado a ver su pose se mantiene en 1, verificado sobre conjuntos de resultados de 20, 100 y 500 experimentos |
+
+**Escenario 2 — entorno sobre-estimulado (estudio de sensibilidad de parámetros)**
+
+| Campo | Detalle |
+|---|---|
+| Subcaracterística | Pertinencia funcional |
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Registra varios experimentos sucesivos sobre el mismo par molécula/ligando, variando parámetros de la corrida (exhaustividad, función de scoring, software), para verificar la reproducibilidad del resultado |
+| Entorno | Sobre-estimulado — ya existen 5 o más experimentos previos cargados para ese mismo par molécula/ligando, producto de un estudio de sensibilidad de parámetros; RF-03 no distingue por parámetro, solo por molécula/ligando |
+| Artefacto | Detector de Duplicados |
+| Respuesta | Cuando existen coincidencias previas para el par molécula/ligando, el sistema las muestra en una única lista o tabla (una sola pantalla o pop-up), sin abrir una pantalla separada por cada coincidencia encontrada; el investigador/a confirma "continuar" o cancela desde esa misma vista |
+| Medida de respuesta | La cantidad de pantallas o pop-ups mostrados para revisar las coincidencias se mantiene en 1, verificado con conjuntos de 1, 5 y 10 coincidencias previas para el mismo par molécula/ligando |
+
+## **Atributo: Capacidad de Interacción — Operabilidad**
+
+**Escenario 1 — entorno sobre-estimulado (múltiples coincidencias detectadas)**
+
+| Campo | Detalle |
+|---|---|
+| Subcaracterística | Operabilidad |
+| Fuente del estímulo | Investigador/a |
+| Estímulo | Al registrar un experimento, CU-00 detecta varias coincidencias posibles a la vez (no una sola) |
+| Entorno | Sobre-estimulado — más de una coincidencia mostrada simultáneamente para el mismo intento de registro |
+| Artefacto | Interfaz de alerta de duplicado |
+| Respuesta | El investigador/a puede revisar cada coincidencia individualmente y decidir continuar o cancelar sin perder de vista los datos que ya había cargado |
+| Medida de respuesta | El investigador/a completa la decisión (continuar/cancelar) sin tener que volver a cargar ningún campo del formulario, cualquiera sea la cantidad de coincidencias mostradas |
 
 ## Trazabilidad completa
 
