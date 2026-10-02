@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Posibles coincidencias</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal {
+    background: #fff; border-radius: 14px; max-width: 720px; width: 100%;
+    max-height: 86vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(15,23,42,0.25);
+  }
+  .modal-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .modal-header .alert-icon {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--warning-bg);
+    color: var(--warning-text); display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+</style>
+</head>
+<body style="background:var(--navy-900);">
+
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size:16px;">Posibles coincidencias encontradas</h2>
+        <p style="margin:4px 0 0; color:var(--text-secondary); font-size:13.5px;">
+          Ya existen experimentos de docking cargados para el par
+          <strong>N-proteasa&nbsp;/&nbsp;LIG-235</strong>. Revisá la lista antes de confirmar tu registro.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Fecha</th><th>Autor</th><th>Software</th><th>Parámetros destacados</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="id-link" target="_blank" href="HU-02.B2-detalle-experimento.html">EXP-0043</a></td>
+            <td class="muted">10/09/2025</td>
+            <td class="muted">M. Torres</td>
+            <td>AutoDock Vina</td>
+            <td class="muted">Rígido · Exhaustiveness 8</td>
+            <td><span class="badge badge-success">Éxito</span></td>
+          </tr>
+          <tr>
+            <td><a class="id-link" target="_blank" href="HU-02.B2-detalle-experimento.html">EXP-0035</a></td>
+            <td class="muted">28/08/2025</td>
+            <td class="muted">J. Nuñez</td>
+            <td>AutoDock Vina</td>
+            <td class="muted">Flexible · Exhaustiveness 16</td>
+            <td><span class="badge badge-warning">En curso</span></td>
+          </tr>
+          <tr>
+            <td><a class="id-link" target="_blank" href="HU-02.B2-detalle-experimento.html">EXP-0022</a></td>
+            <td class="muted">11/08/2025</td>
+            <td class="muted">Dra. A. Silva</td>
+            <td>Glide</td>
+            <td class="muted">Rígido · Precisión SP</td>
+            <td><span class="badge badge-danger">Fallido</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="hint" style="margin-top:14px;">
+        Esto no es necesariamente un error: podés estar repitiendo la corrida a propósito
+        (ej. probando otro software o parámetros distintos). El sistema solo te avisa
+        para que decidas con la información completa.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger-outline" onclick="location.href='HU-01.B1.1-B1.2-cargar-experimento.html'">Cancelar registro</button>
+      <button class="btn btn-primary" onclick="location.href='HU-02.B2-detalle-experimento.html'">Continuar de todos modos</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Mis proyectos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="HU-01.B1.1-B1.2-cargar-experimento.html">Inicio</a>
+      <a href="SIN-HU-proyectos-listado.html" class="active">Mis proyectos</a>
+      <a href="HU-02.B1-mis-experimentos.html">Experimentos</a>
+      <a href="HU-02.B1-A1-busqueda-filtros.html">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><span>Mis proyectos</span></div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <button class="btn btn-secondary btn-sm" type="button">Ayuda</button>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">JN</span>
+            <span class="user-info"><div class="name">Juliana Nuñez</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a><a href="#">Preferencias</a><hr><button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <h1>Mis proyectos</h1>
+          <p>Proyectos en los que participás, propios y de tus compañeros de grupo.</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-header" style="justify-content:flex-end;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary);">
+            Ordenar por
+            <select style="padding:6px 10px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:var(--font);">
+              <option>Última actividad</option>
+              <option>Nombre</option>
+              <option>Cantidad de experimentos</option>
+            </select>
+          </label>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Nombre</th><th>Descripción</th><th>Investigador/a responsable</th><th>Experimentos</th><th>Última actividad</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+              <td><a class="id-link">Docking de N-proteasa</a></td>
+              <td class="muted">Estudio de inhibidores de la N-proteasa de SARS-CoV-2.</td>
+              <td>Dra. A. Silva</td>
+              <td>12</td>
+              <td class="muted">10/09/2025</td>
+              <td><span class="badge badge-success">Activo</span></td>
+            </tr>
+            <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+              <td><a class="id-link">Lipasas CALA</a></td>
+              <td class="muted">Caracterización de lipasas en PCL.</td>
+              <td>Dr. R. Fontana</td>
+              <td>8</td>
+              <td class="muted">08/09/2025</td>
+              <td><span class="badge badge-success">Activo</span></td>
+            </tr>
+            <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+              <td><a class="id-link">Proyecto A</a></td>
+              <td class="muted">Análisis de variantes de AfEST.</td>
+              <td>Dra. A. Silva</td>
+              <td>5</td>
+              <td class="muted">05/09/2025</td>
+              <td><span class="badge badge-success">Activo</span></td>
+            </tr>
+            <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+              <td><a class="id-link">Proyecto B</a></td>
+              <td class="muted">Ensamblados genómicos de hongos.</td>
+              <td>Dr. R. Fontana</td>
+              <td>3</td>
+              <td class="muted">28/08/2025</td>
+              <td><span class="badge badge-warning">Pausado</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

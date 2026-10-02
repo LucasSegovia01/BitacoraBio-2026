@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · EXP-0043</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="HU-01.B1.1-B1.2-cargar-experimento.html">Inicio</a>
+      <a href="SIN-HU-proyectos-listado.html">Mis proyectos</a>
+      <a href="HU-02.B1-mis-experimentos.html" class="active">Experimentos</a>
+      <a href="HU-02.B1-A1-busqueda-filtros.html">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <a href="HU-02.B1-mis-experimentos.html">Experimentos</a> <span>›</span> <span>EXP-0043</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <button class="btn btn-secondary btn-sm" type="button">Ayuda</button>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">JN</span>
+            <span class="user-info"><div class="name">Juliana Nuñez</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a>
+            <a href="#">Preferencias</a>
+            <hr>
+            <button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <a href="HU-02.B1-mis-experimentos.html" class="muted" style="display:inline-block; margin-bottom:12px; font-size:13.5px;">← Volver</a>
+
+      <div class="content-header">
+        <div>
+          <h1>EXP-0043</h1>
+          <p>Docking - N-proteasa + LIG-235</p>
+        </div>
+        <div class="header-actions" style="align-items:center;">
+          <span class="badge badge-success">Éxito</span>
+          <span class="badge badge-warning">En análisis</span>
+          <button class="btn btn-secondary">Ver en Google Docs</button>
+          <button class="btn btn-secondary">Descargar PDB</button>
+          <button class="btn btn-secondary">Editar estado</button>
+          <button class="btn btn-secondary">Editar experimento</button>
+        </div>
+      </div>
+
+      <div class="tabs-container">
+        <div class="tabs">
+          <button class="tab active" data-tab="tab-resumen">Resumen</button>
+          <button class="tab" data-tab="tab-parametros">Parámetros</button>
+          <button class="tab" data-tab="tab-resultados">Resultados</button>
+          <button class="tab" data-tab="tab-notas">Notas</button>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="tab-panel active" id="tab-resumen">
+          <div class="grid-2">
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><h2>Información general</h2></div>
+                <div class="card-body">
+                  <table class="kv">
+                    <tr><td>Tipo de experimento</td><td>Docking</td></tr>
+                    <tr><td>Molécula / Proteína</td><td>N-proteasa</td></tr>
+                    <tr><td>Ligando</td><td>LIG-235</td></tr>
+                    <tr><td>Software utilizado</td><td>AutoDock Vina</td></tr>
+                    <tr><td>Autor</td><td>M. Torres</td></tr>
+                    <tr><td>Fecha de realización</td><td>10/09/2025</td></tr>
+                  </table>
+                  <div class="field" style="margin-top:16px; margin-bottom:0;">
+                    <label>Hipótesis <span class="opt">(opcional)</span></label>
+                    <p style="margin:0; color:var(--text-secondary);">Se espera que el ligando LIG-235 se una al sitio activo de la N-proteasa con una afinidad mayor a -8 kcal/mol.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header">
+                  <h2>Parámetros principales</h2>
+                  <button class="btn btn-secondary btn-sm" onclick="document.querySelector('[data-tab=tab-parametros]').click()">Ver todos</button>
+                </div>
+                <div class="card-body">
+                  <table class="kv">
+                    <tr><td>Modo de acoplamiento</td><td>Rígido</td></tr>
+                    <tr><td>Cantidad de poses</td><td>20</td></tr>
+                    <tr><td>Energía de unión (kcal/mol)</td><td>-9.2</td></tr>
+                    <tr><td>Sitio activo</td><td>SARS-CoV-2 (His41, Cys145)</td></tr>
+                    <tr><td>Caja de búsqueda (x, y, z)</td><td>(12.5, 8.3, 15.2) Å</td></tr>
+                    <tr><td>Otros parámetros</td><td>Exhaustiveness: 8 | Seed: 12345</td></tr>
+                  </table>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Archivos</h2></div>
+                <div class="card-body">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      
+                      <div>
+                        <div style="font-weight:600;">pose_0043.pdb</div>
+                        <div class="muted" style="font-size:12px;">245 KB</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm">Descargar</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><h2>Visor 3D de la pose</h2></div>
+                <div class="card-body" style="padding-top:0;">
+                  <div class="viewer">
+                    <div class="viewer-toolbar">
+                      <button title="Rotar">⟳</button>
+                      <button title="Mover">✛</button>
+                      <button title="Zoom">🔍</button>
+                      <button title="Pantalla completa">⛶</button>
+                    </div>
+                    <span class="viewer-lib-tag">3Dmol.js ▾</span>
+                    <span class="viewer-placeholder-text">[ Pose renderizada: N-proteasa + LIG-235 ]</span>
+                    <div class="viewer-legend">
+                      <span><i class="dot-protein"></i> Proteína</span>
+                      <span><i class="dot-ligand"></i> Ligando</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Información del proyecto</h2></div>
+                <div class="card-body">
+                  <table class="kv">
+                    <tr><td>Nombre del proyecto</td><td><a href="SIN-HU-proyecto-detalle.html" class="id-link">Docking de N-proteasa</a></td></tr>
+                    <tr><td>Descripción</td><td>Estudio de inhibidores de la N-proteasa de SARS-CoV-2.</td></tr>
+                    <tr><td>Investigador responsable</td><td>Dra. A. Silva</td></tr>
+                    <tr><td>Fecha de inicio</td><td>01/08/2025</td></tr>
+                    <tr><td>Estado del proyecto</td><td><span class="badge badge-success">Activo</span></td></tr>
+                  </table>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Notas</h2></div>
+                <div class="card-body">
+                  <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:4px;">M. Torres · 10/09/2025</div>
+                  <p style="margin:0;">El ligando muestra una buena afinidad en el sitio activo. Se adjunta pose en PDB y visualización en el visor.</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARÁMETROS -->
+        <div class="tab-panel" id="tab-parametros">
+          <section class="card">
+            <div class="card-header"><h2>Todos los parámetros del ensayo</h2></div>
+            <div class="card-body">
+              <table class="kv">
+                <tr><td>Modo de acoplamiento</td><td>Rígido</td></tr>
+                <tr><td>Cantidad de poses</td><td>20</td></tr>
+                <tr><td>Energía de unión (kcal/mol)</td><td>-9.2</td></tr>
+                <tr><td>Sitio activo</td><td>SARS-CoV-2 (His41, Cys145)</td></tr>
+                <tr><td>Caja de búsqueda (x, y, z)</td><td>(12.5, 8.3, 15.2) Å</td></tr>
+                <tr><td>Exhaustiveness</td><td>8</td></tr>
+                <tr><td>Seed</td><td>12345</td></tr>
+                <tr><td>pH</td><td>7.4</td></tr>
+                <tr><td>Temperatura</td><td>298 K</td></tr>
+              </table>
+              <p class="hint" style="margin-top:14px;">Los parámetros se guardan como pares clave-valor: la lista varía según el tipo de ensayo.</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div class="tab-panel" id="tab-resultados">
+          <section class="card">
+            <div class="card-header"><h2>Resultado principal</h2></div>
+            <div class="card-body">
+              <table class="kv">
+                <tr><td>Estado de validez</td><td><span class="badge badge-success">Éxito</span></td></tr>
+                <tr><td>Estado de análisis</td><td><span class="badge badge-warning">En análisis</span></td></tr>
+                <tr><td>Mejor energía de unión</td><td>-9.2 kcal/mol</td></tr>
+                <tr><td>Archivo de pose</td><td>pose_0043.pdb</td></tr>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- NOTAS -->
+        <div class="tab-panel" id="tab-notas">
+          <section class="card">
+            <div class="card-header"><h2>Notas del experimento</h2></div>
+            <div class="card-body">
+              <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:4px;">M. Torres · 10/09/2025</div>
+              <p style="margin:0 0 16px;">El ligando muestra una buena afinidad en el sitio activo. Se adjunta pose en PDB y visualización en el visor.</p>
+              <button class="btn btn-secondary btn-sm">Abrir bitácora en Google Docs</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

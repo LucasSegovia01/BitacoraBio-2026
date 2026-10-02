@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Inicio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="HU-01.B1.1-B1.2-cargar-experimento.html" class="active">Inicio</a>
+      <a href="SIN-HU-proyectos-listado.html">Mis proyectos</a>
+      <a href="HU-02.B1-mis-experimentos.html">Experimentos</a>
+      <a href="HU-02.B1-A1-busqueda-filtros.html">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><span>Inicio</span></div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <button class="btn btn-secondary btn-sm" type="button">Ayuda</button>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">JN</span>
+            <span class="user-info">
+              <div class="name">Juliana Nuñez</div>
+              <div class="role">Investigadora/a</div>
+            </span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a>
+            <a href="#">Preferencias</a>
+            <hr>
+            <button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <h1>Hola, Juliana</h1>
+          <p>Bienvenido/a al catálogo de experimentos de tu grupo de investigación.</p>
+        </div>
+        <div class="header-actions">
+          <a href="HU-02.B1-mis-experimentos.html" class="btn btn-secondary">Revisar mi historial</a>
+        </div>
+      </div>
+
+      <div class="toast toast-success" id="toast-ok">
+        <div>
+          <strong>Experimento guardado correctamente.</strong><br>
+          El documento de notas en Google Docs se creó y quedó vinculado.
+        </div>
+        <button class="close-toast" type="button">✕</button>
+      </div>
+      <div class="toast toast-warning" id="toast-sin-bitacora">
+        <div>
+          <strong>Experimento guardado, pero no se pudo crear la bitácora.</strong><br>
+          El documento de notas en Google Docs no respondió. El experimento quedó guardado igual; podés reintentar la vinculación más tarde desde su detalle.
+        </div>
+        <button class="close-toast" type="button">✕</button>
+      </div>
+      <div class="toast toast-danger" id="toast-error">
+        <div>
+          <strong>No se pudo guardar el experimento.</strong><br>
+          Motivo: se interrumpió la conexión durante el guardado. Tus datos no se perdieron, podés intentar guardar de nuevo.
+        </div>
+        <button class="close-toast" type="button">✕</button>
+      </div>
+      <p class="demo-toggle">
+        Demo de estados de guardado:
+        <button type="button" onclick="showToast('toast-sin-bitacora')">ver ejemplo sin bitácora</button> ·
+        <button type="button" onclick="showToast('toast-error')">ver ejemplo de error</button>
+      </p>
+
+      <div class="stack">
+
+        <!-- Mis proyectos -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Mis proyectos</h2>
+            <a href="SIN-HU-proyectos-listado.html" class="card-link">Ver todos →</a>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Nombre del proyecto</th><th>Descripción</th><th>Experimentos</th><th>Última actividad</th></tr>
+            </thead>
+            <tbody>
+              <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+                <td><a class="id-link">Docking de N-proteasa</a></td>
+                <td class="muted">Estudio de inhibidores de la N-proteasa de SARS-CoV-2.</td>
+                <td>12</td>
+                <td class="muted">10/09/2025</td>
+              </tr>
+              <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+                <td><a class="id-link">Lipasas CALA</a></td>
+                <td class="muted">Caracterización de lipasas en PCL.</td>
+                <td>8</td>
+                <td class="muted">08/09/2025</td>
+              </tr>
+              <tr class="row-link" onclick="location.href='SIN-HU-proyecto-detalle.html'">
+                <td><a class="id-link">Proyecto A</a></td>
+                <td class="muted">Análisis de variantes de AfEST.</td>
+                <td>5</td>
+                <td class="muted">05/09/2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Últimos experimentos -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Últimos experimentos</h2>
+            <a href="HU-02.B1-mis-experimentos.html" class="card-link">Ver todos →</a>
+          </div>
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Molécula / Proteína</th><th>Ligando</th><th>Autor</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              <tr class="row-link" onclick="location.href='HU-02.B2-detalle-experimento.html'">
+                <td><a class="id-link">EXP-0043</a></td>
+                <td class="muted">10/09/2025</td>
+                <td>Docking</td>
+                <td>N-proteasa</td>
+                <td>LIG-235</td>
+                <td class="muted">M. Torres</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr class="row-link" onclick="location.href='HU-02.B2-detalle-experimento.html'">
+                <td><a class="id-link">EXP-0042</a></td>
+                <td class="muted">09/09/2025</td>
+                <td>Docking</td>
+                <td>RdRp</td>
+                <td>Remdesivir</td>
+                <td class="muted">L. Gómez</td>
+                <td><span class="badge badge-warning">En curso</span></td>
+              </tr>
+              <tr class="row-link" onclick="location.href='HU-02.B2-detalle-experimento.html'">
+                <td><a class="id-link">EXP-0041</a></td>
+                <td class="muted">07/09/2025</td>
+                <td>Docking</td>
+                <td>Lipasa CALA</td>
+                <td>LIG-108</td>
+                <td class="muted">J. Nuñez</td>
+                <td><span class="badge badge-danger">Fallido</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Carga de experimento, embebida -->
+        <section class="card" id="cargar">
+          <div class="card-header">
+            <h2>Cargar nuevo experimento</h2>
+          </div>
+          <div class="card-body">
+            <form class="grid-2" id="form-cargar">
+              <div>
+                <div class="fieldset-title">Información general</div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>Proyecto *</label>
+                    <select id="campo-proyecto">
+                      <option value="">Seleccionar proyecto</option>
+                      <option value="Docking de N-proteasa">Docking de N-proteasa</option>
+                      <option value="Lipasas CALA">Lipasas CALA</option>
+                      <option value="Proyecto A">Proyecto A</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Tipo de experimento *</label>
+                    <select><option>Docking</option></select>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>Fecha de realización *</label>
+                    <input type="date">
+                  </div>
+                  <div class="field">
+                    <label>Software utilizado *<span class="help-icon" title="El software que corrió el ensayo (ej. AutoDock Vina, Glide). Si no está en la lista, podés escribirlo.">ⓘ</span></label>
+                    <select>
+                      <option value="">Seleccionar</option>
+                      <option>AutoDock Vina</option>
+                      <option>AutoDock4</option>
+                      <option>Glide</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="fieldset-title">Molécula / Proteína</div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>Molécula / Proteína *</label>
+                    <input type="text" placeholder="Seleccionar o escribir">
+                  </div>
+                  <div class="field">
+                    <label>Ligando *</label>
+                    <input type="text" placeholder="Seleccionar o escribir">
+                  </div>
+                </div>
+
+                <div class="fieldset-title">Replicación <span class="opt">(opcional)</span></div>
+                <div class="field">
+                  <label>Similar a<span class="help-icon" title="Elegí un experimento existente si esta carga es una repetición intencional (ej. variando parámetros para un estudio de sensibilidad). Así queda la relación registrada, en vez de que el sistema solo te avise del parecido.">ⓘ</span></label>
+                  <select>
+                    <option value="">Ninguno — experimento nuevo</option>
+                    <option>EXP-0043 — N-proteasa + LIG-235</option>
+                    <option>EXP-0035 — N-proteasa + LIG-235</option>
+                    <option>EXP-0022 — N-proteasa + LIG-235</option>
+                  </select>
+                </div>
+
+                <div class="fieldset-title">Parámetros principales<span class="help-icon" title="Se guardan como pares clave-valor: agregá los que necesites para este ensayo puntual, no hay una lista fija de columnas.">ⓘ</span></div>
+                <div id="params-list" class="stack" style="gap:10px;">
+                  <div class="param-row">
+                    <div class="field" style="margin-bottom:0"><input type="text" placeholder="Nombre del parámetro (ej. Sitio activo)"></div>
+                    <div class="field" style="margin-bottom:0"><input type="text" placeholder="Valor"></div>
+                    <button type="button" class="remove">✕ Quitar</button>
+                  </div>
+                </div>
+                <button type="button" class="add-param-btn" data-target="#params-list" style="margin-top:10px;">+ Agregar parámetro</button>
+
+                <div class="fieldset-title">Información adicional</div>
+                <div class="field">
+                  <label>Hipótesis <span class="opt">(opcional)</span></label>
+                  <textarea placeholder="Describí la hipótesis del experimento..."></textarea>
+                </div>
+                <div class="field">
+                  <label>Notas <span class="opt">(opcional)</span></label>
+                  <textarea placeholder="Agregá notas relevantes..."></textarea>
+                </div>
+              </div>
+
+              <div>
+                <div class="fieldset-title">Archivo de resultado</div>
+                <div class="field">
+                  <label>Archivo PDB *</label>
+                  <div class="dropzone">
+                    Arrastrá y soltá el archivo aquí<br>
+                    o <strong>seleccioná un archivo</strong>
+                    <div class="hint">Formatos permitidos: .pdb</div>
+                  </div>
+                </div>
+
+                <div class="fieldset-title">Vista previa de la pose</div>
+                <div class="viewer small">
+                  <span class="viewer-lib-tag">3Dmol.js ▾</span>
+                  <span class="viewer-placeholder-text">La vista previa aparece<br>al cargar el archivo PDB</span>
+                </div>
+
+                <div class="field" style="margin-top:18px;">
+                  <label>¿Querés crear o asociar un documento de Google Docs?</label>
+                  <div class="hint" style="margin-bottom:8px;">Se generará un enlace a la bitácora del experimento.</div>
+                  <button type="button" class="btn btn-secondary btn-sm">Crear / asociar documento</button>
+                </div>
+
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:26px;">
+                  <button type="button" class="btn btn-secondary">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Guardar experimento</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
