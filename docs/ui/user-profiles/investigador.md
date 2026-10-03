@@ -12,7 +12,7 @@
 
 *(Tomado de HU-01.B1.1 y HU-01.B1.2 del TP1.)*
 
-> Juliana termina de correr un ensayo de docking en su laptop del laboratorio. Entra a BitacoraBio 2026, va a Inicio, y completa el formulario de carga con los datos del experimento: proyecto, molécula/proteína, ligando, software usado y los parámetros clave de la corrida. Como está repitiendo el ensayo a propósito, variando parámetros para un estudio de sensibilidad, usa el campo "Similar a" para dejar esa relación registrada desde el principio. Al confirmar, el sistema verifica que no haya una coincidencia no reconocida, guarda el experimento, crea automáticamente el documento de notas en Google Docs, y Juliana ve el resumen con el enlace a la bitácora — sin haber tenido que enviar ningún archivo por mail ni avisarle a nadie manualmente.
+> Investigado/a X termina de correr un ensayo de docking en su laptop del laboratorio. Entra a BitacoraBio 2026, va a Inicio, y completa el formulario de carga con los datos del experimento: proyecto, molécula/proteína, ligando, software usado y los parámetros clave de la corrida. Como está repitiendo el ensayo a propósito, variando parámetros para un estudio de sensibilidad, usa el campo "Similar a" para dejar esa relación registrada desde el principio. Al confirmar, el sistema verifica que no haya una coincidencia no reconocida, guarda el experimento, crea automáticamente el documento de notas en Google Docs, y Juliana ve el resumen con el enlace a la bitácora — sin haber tenido que enviar ningún archivo por mail ni avisarle a nadie manualmente.
 
 ## Flujo de navegación
 
@@ -27,4 +27,3 @@ Flujos adicionales del mismo actor, también cubiertos por el maquetado:
 - **Buscar** (`HU-02.B1-A1-busqueda-filtros.html`) → **Detalle de experimento** — para chequear si un ensayo similar ya existe antes de correrlo.
 - **Experimentos** (`HU-02.B1-mis-experimentos.html`) → **Detalle de experimento** — para revisar su propio historial.
 
-> **Nota:** el flujo de navegación general de la interfaz también incluye un acceso a "Mis proyectos" (listado y detalle de proyecto). Esas dos pantallas no están respaldadas por ninguna historia de usuario del TP1 (el Proceso 6 quedó fuera de profundización) — ver la salvedad en `docs/ui/heuristic-review/SIN-HU-proyectos-listado.md` y `SIN-HU-proyecto-detalle.md`.

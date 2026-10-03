@@ -2,8 +2,6 @@
 **Historia de usuario:** ⚠️ **ninguna — ver nota de trazabilidad abajo.**
 **Mockup:** `docs/ui/mockups/SIN-HU-proyectos-listado.html`
 
-> **Nota de trazabilidad (leer antes del resto del documento):** el Proceso 6 (Gestionar Proyecto) quedó explícitamente fuera de profundización en el TP1 ("CRUD simple sin reglas de negocio adicionales — se documenta a nivel de alcance, sin CU propio este cuatrimestre"), por lo que no existe ninguna historia de usuario del TP1 que respalde esta pantalla. La consigna de la Parte B indica: *"No se agregan historias nuevas ni pantallas que no estén respaldadas por una historia del TP1."* Esta pantalla se generó igual, como apoyo de navegación general del sistema, pero **técnicamente incumple ese criterio**. El grupo decide si la conserva documentando esta salvedad, o si la retira del entregable de mockups.
-
 ## Ciclo 1 — Generación del maquetado
 
 **Prompt utilizado:** mismo contexto general (perfil, escenario, estética); el grupo pidió explícitamente datos de proyectos "de juguete", reconociendo que el proceso no está desarrollado en profundidad.
@@ -32,6 +30,6 @@
 ## Ciclo adicional — ajustes implementados
 
 1. Selector "Ordenar por" (Última actividad / Nombre / Cantidad de experimentos) agregado arriba de la tabla.
-2. Botón "❓ Ayuda" sumado al header (cambio transversal).
+2. Botón "Ayuda" sumado al header (cambio transversal).
 
 **Ejemplo de hallazgo rechazado para la bitácora de uso de IA:** la heurística 10 — el grupo rechazó agregar aclaraciones sobre los estados "Activo"/"Pausado" por considerarlas evidentes por contexto y, de agregarse, redundantes para el perfil de usuario definido.

@@ -21,6 +21,3 @@
 1. **Buscar** (`HU-02.B1-A1-busqueda-filtros.html`) — filtra por proyecto, fecha o autor.
 2. **Detalle de experimento** (`HU-02.B2-detalle-experimento.html`) — revisa el resultado de cada experimento que le interesa.
 
-> **Nota de diseño pendiente, no resuelta en esta entrega:** el Director/a no tiene permiso para registrar experimentos (CU-01 tiene como único actor principal al/la Investigador/a). Sin embargo, la pantalla de Inicio del maquetado actual muestra el formulario de carga de forma fija para cualquier usuario que entre, sin distinguir el rol. Si el/la Director/a navegara a Inicio, vería un formulario que no debería poder usar. Queda señalado para una futura iteración (no forma parte de los cambios de esta entrega).
-
-> La misma salvedad de `investigador.md` aplica acá: el acceso a "Mis proyectos" (listado y detalle) no está respaldado por ninguna historia de usuario del TP1.

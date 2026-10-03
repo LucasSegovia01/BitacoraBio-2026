@@ -29,8 +29,8 @@
 
 ## Ciclo adicional — ajustes implementados
 
-1. Botón "+ Cargar experimento para este proyecto" agregado junto al badge de estado; redirige al formulario de carga con el campo "Proyecto" ya preseleccionado (vía parámetro en la URL, funcional en el mockup).
-2. Botón "❓ Ayuda" sumado al header (cambio transversal).
+1. Botón "Cargar experimento para este proyecto" agregado junto al badge de estado; redirige al formulario de carga con el campo "Proyecto" ya preseleccionado (vía parámetro en la URL, funcional en el mockup).
+2. Botón "Ayuda" sumado al header (cambio transversal).
 
 **Ejemplos de hallazgos rechazados para la bitácora de uso de IA:**
 - Heurística 7: se rechazó agregar filtros en esta pantalla, para no duplicar la función de la pantalla de Buscar.
