@@ -324,3 +324,46 @@
 **Errores o imprecisiones detectadas:** ninguna imprecisión factual
 relevante de la IA en esta sección; las correcciones fueron ajustes de
 alcance y consistencia interna del propio documento en evolución.
+
+
+# Uso de IA — Parte A: Atributos de calidad
+
+**Herramienta:** Claude (asistente de IA conversacional).
+
+> El registro de uso de IA de la Parte B (interfaz de usuario) está documentado por pantalla en `docs/ui/heuristic-review/`, tal como pide la sección 4.7 de la consigna. Este documento cubre únicamente la Parte A.
+
+## Registro de intercambios
+
+1. **Consulta:** ya con la consigna de esta entrega (TP2), que exige taxonomía ISO/IEC 25010:2023, cinco atributos en total, y mayoría de escenarios en entornos degradados o sobre-estimulados, se pidió: asignar la subcaracterística correspondiente a cada escenario ya escrito de Eficiencia de desempeño y Fiabilidad (el grupo no estaba seguro de cuáles eran); confirmar o ajustar las subcaracterísticas de Mantenibilidad; y generar opciones de escenarios para los dos atributos nuevos elegidos por el grupo (Adecuación funcional → Pertinencia funcional, Capacidad de interacción → Operabilidad).
+   **Generó:** asignó Comportamiento temporal al escenario normal de Eficiencia de desempeño y Capacidad a los otros dos (concurrencia y volumen, por coincidir con los ejemplos textuales de la norma); asignó Disponibilidad, Tolerancia a fallos y Capacidad de recuperación a los tres escenarios de Fiabilidad; confirmó que el título ya existente de Mantenibilidad ("Modificabilidad y analizabilidad") ya anticipaba correctamente la subcaracterística de cada uno de sus dos escenarios. Aclaró que "la arquitectura de Clements" referida por el grupo es la estructura de seis campos de Bass/Clements/Kazman, ya en uso, sin requerir cambios de formato. Señaló que Mantenibilidad tenía solo 1 de 2 escenarios en entorno degradado, por debajo del criterio de "mayoría" que pide la consigna, como alerta no vinculante. Propuso tres opciones de escenario para Pertinencia funcional y tres para Operabilidad.
+   **Resultado:** se aceptaron las subcaracterísticas asignadas a los tres atributos ya existentes. La alerta sobre el balance de Mantenibilidad quedó registrada, sin que el grupo decidiera modificarlo.
+
+2. **Consulta:** sobre las opciones de Pertinencia funcional, se pidió justificar en detalle la Opción A (el grupo no entendía en qué situación ocurriría, y pidió una definición concreta de "alta densidad de experimentos similares"); se descartó la Opción B; se pidió reforzar la justificación de la Opción C por posible malentendido.
+   **Generó:** reconoció que el ejemplo original de la Opción A (40 ensayos del mismo par) no era realista para el dominio, y la reformuló en torno a un estudio de sensibilidad de parámetros o de reproducibilidad (práctica real y común en docking), definiendo "alta densidad" como 5 o más experimentos previos para el mismo par. Aclaró que la Opción C no implicaba renderizar múltiples visores 3D a la vez, sino acceder de a uno por fila desde el resultado de búsqueda, vinculándolo explícitamente con el problema de "alta fricción" ya descrito en el propio SRS.
+   **Resultado:** se aceptó la Opción A reformulada y la Opción C con la aclaración. Se descartó la Opción B por no ser representativa del dominio (el grupo señaló que cargar un volumen tan alto de parámetros no ocurre en la práctica).
+
+3. **Consulta:** sobre las opciones de Capacidad de interacción, el grupo señaló que las Opciones A y B habían sido ideas propias del grupo, propuestas en un intercambio anterior, y que la IA las había reformulado sin dejarlo claro. Se aceptó la Opción A sin cambios, se rechazó la Opción B (considerada un comportamiento base ya dado por hecho, sin necesidad de documentarlo como escenario crítico), y se rechazó la Opción C (dependencia de una librería externa que el grupo no puede validar con el tiempo disponibles).
+   **Generó:** reconoció el error de atribución. Aceptó sin objeciones las tres decisiones del grupo.
+   **Resultado:** Capacidad de interacción quedó con un único escenario (la Opción A), dentro del rango de 1 a 3 que permite la consigna.
+
+4. **Consulta:** se pidió verificar, contra los criterios de Bass/Clements/Kazman, si la Respuesta y la Medida de la respuesta de la Opción C de Pertinencia funcional estaban bien definidas.
+   **Generó:** identificó que la Medida de la respuesta era una paráfrasis de la Respuesta, sin aportar un criterio de verificación independiente, y que un detalle de implementación se había colado en la Respuesta. Reescribió ambos campos: la Respuesta describiendo el comportamiento observable sin asumir una solución técnica, y la Medida con un número concreto (1 acción) y condiciones de prueba explícitas (20/100/500 resultados).
+   **Resultado:** se aceptó el ajuste.
+
+5. **Consulta:** se aportó el detalle funcional ya definido para la pantalla de posibles coincidencias (una sola tabla o pop-up con todas las coincidencias) y se pidió verificar si, con ese contexto, el Escenario A de Pertinencia funcional seguía siendo válido o necesitaba ajuste.
+   **Generó:** detectó el mismo problema de redundancia entre Respuesta y Medida que en la Opción C, y lo corrigió usando el detalle funcional aportado: la Respuesta describe que las coincidencias se muestran en una única pantalla, y la Medida fija ese número en 1, verificado con conjuntos de 1/5/10 coincidencias.
+   **Resultado:** se aceptó el ajuste.
+
+## Qué se descartó y por qué
+
+- La mitad de la idea original de Usabilidad referida a duplicados no detectados por el sistema: no es un atributo de calidad no funcional, es un defecto de corrección funcional de RF-03.
+- Las dos ideas originales de mantenibilidad/modificabilidad propuestas por el grupo: quedaron señaladas como redundantes con el atributo ya tomado por el otro integrante; la coordinación entre ambos quedó fuera del alcance de esta conversación.
+- La Opción B de Pertinencia funcional (volumen alto de parámetros cargados de una sola vez): el grupo la consideró poco representativa del dominio real de docking.
+- La Opción B de Capacidad de interacción (filtros combinados): el grupo la consideró un comportamiento esperado por defecto de cualquier interfaz de filtros, sin tensión de diseño real que justifique documentarla como escenario crítico.
+- La Opción C de Capacidad de interacción (control del visor 3D): el grupo la descartó por depender de una librería externa (3Dmol.js) que no puede validar con los conocimientos y el tiempo disponibles para esta entrega.
+
+## Errores o imprecisiones detectadas
+
+- El primer planteo de la Opción A de Pertinencia funcional usaba un ejemplo poco realista para el dominio (40 ensayos del mismo par molécula/ligando); el grupo lo marcó como poco creíble y la IA lo reformuló en torno a una práctica real (estudio de sensibilidad de parámetros).
+- Dos escenarios de Pertinencia funcional (Opciones A y C) tenían, en su primera versión, una Medida de la respuesta que repetía la Respuesta en otras palabras en vez de aportar un criterio de verificación propio — detectado recién al pedir explícitamente el chequeo contra la bibliografía de Bass/Clements/Kazman, no de forma espontánea por la IA.
+- La IA atribuyó como propias dos ideas de escenario de Capacidad de interacción que en realidad habían sido propuestas originalmente por el grupo en una conversación anterior sobre Fiabilidad — el grupo lo marcó explícitamente y la IA reconoció el error.
