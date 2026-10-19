@@ -23,7 +23,7 @@
     <header class="topbar">
       <div class="breadcrumb"><span>Inicio</span></div>
       <div style="display:flex; align-items:center; gap:14px;">
-        <button class="btn btn-secondary btn-sm" type="button">Ayuda</button>
+        <a href="SIN-HU-ayuda.html" class="btn btn-secondary btn-sm">Ayuda</a>
         <div class="user-menu">
           <button class="user-btn">
             <span class="avatar">JN</span>
@@ -164,37 +164,40 @@
             <h2>Cargar nuevo experimento</h2>
           </div>
           <div class="card-body">
-            <form class="grid-2" id="form-cargar">
+            <form class="grid-2" id="form-cargar" novalidate>
               <div>
                 <div class="fieldset-title">Información general</div>
                 <div class="field-row">
                   <div class="field">
                     <label>Proyecto *</label>
-                    <select id="campo-proyecto">
+                    <select id="campo-proyecto" required>
                       <option value="">Seleccionar proyecto</option>
                       <option value="Docking de N-proteasa">Docking de N-proteasa</option>
                       <option value="Lipasas CALA">Lipasas CALA</option>
                       <option value="Proyecto A">Proyecto A</option>
                     </select>
+                    <div class="field-error-msg">Elegí un proyecto para continuar.</div>
                   </div>
                   <div class="field">
                     <label>Tipo de experimento *</label>
-                    <select><option>Docking</option></select>
+                    <select required><option>Docking</option></select>
                   </div>
                 </div>
                 <div class="field-row">
                   <div class="field">
                     <label>Fecha de realización *</label>
-                    <input type="date">
+                    <input type="date" required>
+                    <div class="field-error-msg">Ingresá la fecha del ensayo.</div>
                   </div>
                   <div class="field">
                     <label>Software utilizado *<span class="help-icon" title="El software que corrió el ensayo (ej. AutoDock Vina, Glide). Si no está en la lista, podés escribirlo.">ⓘ</span></label>
-                    <select>
+                    <select required>
                       <option value="">Seleccionar</option>
                       <option>AutoDock Vina</option>
                       <option>AutoDock4</option>
                       <option>Glide</option>
                     </select>
+                    <div class="field-error-msg">Indicá qué software se usó.</div>
                   </div>
                 </div>
 
@@ -202,11 +205,13 @@
                 <div class="field-row">
                   <div class="field">
                     <label>Molécula / Proteína *</label>
-                    <input type="text" placeholder="Seleccionar o escribir">
+                    <input type="text" placeholder="Seleccionar o escribir" required>
+                    <div class="field-error-msg">Este campo es obligatorio.</div>
                   </div>
                   <div class="field">
                     <label>Ligando *</label>
-                    <input type="text" placeholder="Seleccionar o escribir">
+                    <input type="text" placeholder="Seleccionar o escribir" required>
+                    <div class="field-error-msg">Este campo es obligatorio.</div>
                   </div>
                 </div>
 
@@ -246,11 +251,15 @@
                 <div class="fieldset-title">Archivo de resultado</div>
                 <div class="field">
                   <label>Archivo PDB *</label>
-                  <div class="dropzone">
-                    Arrastrá y soltá el archivo aquí<br>
-                    o <strong>seleccioná un archivo</strong>
+                  <input type="file" id="archivo-pdb" accept=".pdb" required style="display:none">
+                  <div class="dropzone" style="cursor:pointer;">
+                    <span id="dropzone-label">
+                      Arrastrá y soltá el archivo aquí<br>
+                      o <strong>seleccioná un archivo</strong>
+                    </span>
                     <div class="hint">Formatos permitidos: .pdb</div>
                   </div>
+                  <div class="field-error-msg">Tenés que adjuntar el archivo de resultado.</div>
                 </div>
 
                 <div class="fieldset-title">Vista previa de la pose</div>

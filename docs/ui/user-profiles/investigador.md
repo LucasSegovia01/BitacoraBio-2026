@@ -12,7 +12,7 @@
 
 *(Tomado de HU-01.B1.1 y HU-01.B1.2 del TP1.)*
 
-> Investigado/a X termina de correr un ensayo de docking en su laptop del laboratorio. Entra a BitacoraBio 2026, va a Inicio, y completa el formulario de carga con los datos del experimento: proyecto, molécula/proteína, ligando, software usado y los parámetros clave de la corrida. Como está repitiendo el ensayo a propósito, variando parámetros para un estudio de sensibilidad, usa el campo "Similar a" para dejar esa relación registrada desde el principio. Al confirmar, el sistema verifica que no haya una coincidencia no reconocida, guarda el experimento, crea automáticamente el documento de notas en Google Docs, y Juliana ve el resumen con el enlace a la bitácora — sin haber tenido que enviar ningún archivo por mail ni avisarle a nadie manualmente.
+> Investigador/a X termina de correr un ensayo de docking en su laptop del laboratorio. Entra a BitacoraBio 2026, va a Inicio, y completa el formulario de carga con los datos del experimento: proyecto, molécula/proteína, ligando, software usado y los parámetros clave de la corrida. Como está repitiendo el ensayo a propósito, variando parámetros para un estudio de sensibilidad, usa el campo "Similar a" para dejar esa relación registrada desde el principio. Al confirmar, el sistema verifica que no haya una coincidencia no reconocida, guarda el experimento, crea automáticamente el documento de notas en Google Docs, y el investigador/a ve el resumen con el enlace a la bitácora — sin haber tenido que enviar ningún archivo por mail ni avisarle a nadie manualmente.
 
 ## Flujo de navegación
 

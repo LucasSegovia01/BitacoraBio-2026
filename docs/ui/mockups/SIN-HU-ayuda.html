@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Ayuda</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="HU-01.B1.1-B1.2-cargar-experimento.html">Inicio</a>
+      <a href="SIN-HU-proyectos-listado.html">Mis proyectos</a>
+      <a href="HU-02.B1-mis-experimentos.html">Experimentos</a>
+      <a href="HU-02.B1-A1-busqueda-filtros.html">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><span>Ayuda</span></div>
+      <div class="user-menu">
+        <button class="user-btn">
+          <span class="avatar">JN</span>
+          <span class="user-info"><div class="name">Juliana Nuñez</div><div class="role">Investigadora/a</div></span>
+          <span class="chevron">▾</span>
+        </button>
+        <div class="user-dropdown">
+          <a href="#">Mi perfil</a><a href="#">Preferencias</a><hr><button type="button">Cerrar sesión</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <h1>Ayuda</h1>
+          <p>Respuestas rápidas sobre cómo usar BitacoraBio 2026.</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start;">
+        <div class="stack">
+
+          <section class="card">
+            <div class="card-header"><h2>Registrar experimentos</h2></div>
+            <div class="card-body">
+              <div class="help-section">
+                <div class="help-item">
+                  <p class="q">¿Qué campos son obligatorios al cargar un experimento?</p>
+                  <p class="a">Todos los marcados con asterisco (*): proyecto, tipo de experimento, fecha, software utilizado, molécula/proteína, ligando y el archivo PDB de resultado. El sistema te avisa en rojo si falta alguno al intentar guardar.</p>
+                </div>
+                <div class="help-item">
+                  <p class="q">¿Qué significa que me avise de una posible coincidencia?</p>
+                  <p class="a">Ya existe un experimento cargado con la misma molécula y ligando. No es necesariamente un error: si estás repitiendo el ensayo a propósito (por ejemplo, variando parámetros), podés continuar igual. Revisá la tabla de coincidencias antes de decidir.</p>
+                </div>
+                <div class="help-item">
+                  <p class="q">¿Para qué sirve el campo "Similar a"?</p>
+                  <p class="a">Te permite declarar de entrada que tu experimento es una repetición intencional de otro ya cargado, para dejar esa relación registrada sin esperar a que el sistema te avise.</p>
+                </div>
+                <div class="help-item">
+                  <p class="q">¿Qué pasa si falla la creación del documento de notas?</p>
+                  <p class="a">El experimento se guarda igual. El documento queda marcado como "no vinculado" y podés reintentar la vinculación más tarde desde el detalle del experimento, sin volver a cargar ningún dato.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header"><h2>Buscar y consultar</h2></div>
+            <div class="card-body">
+              <div class="help-section">
+                <div class="help-item">
+                  <p class="q">¿Puedo combinar varios filtros a la vez?</p>
+                  <p class="a">Sí — autor, fecha (específica o por rango), proyecto y parámetros específicos (ej. pH, temperatura) se pueden usar juntos en la misma búsqueda.</p>
+                </div>
+                <div class="help-item">
+                  <p class="q">¿Qué es un "parámetro específico" en la búsqueda?</p>
+                  <p class="a">Es un criterio de búsqueda a definir por vos: cualquier parámetro clave-valor cargado en el experimento (ej. pH, temperatura, exhaustiveness).</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="stack">
+          <section class="card">
+            <div class="card-header"><h2>Glosario de parámetros técnicos</h2></div>
+            <div class="card-body">
+              <dl class="help-glossary">
+                <dt>Exhaustiveness</dt>
+                <dd>Qué tan exhaustiva es la búsqueda de poses en AutoDock Vina. Mayor valor, búsqueda más completa pero más lenta.</dd>
+                <dt>Seed</dt>
+                <dd>Número que fija el punto de partida aleatorio de la corrida, para poder reproducir el mismo resultado.</dd>
+                <dt>Caja de búsqueda</dt>
+                <dd>Las coordenadas (x, y, z) del volumen donde el software busca posibles poses de acoplamiento.</dd>
+                <dt>Modo de acoplamiento</dt>
+                <dd>Si la proteína y el ligando se tratan como estructuras rígidas o flexibles durante la corrida.</dd>
+                <dt>Estado de validez</dt>
+                <dd>Si el cálculo del experimento terminó correctamente (éxito, fallido, en curso) o fue marcado inválido.</dd>
+                <dt>Estado de análisis</dt>
+                <dd>Si el resultado ya fue revisado por el equipo (pendiente, en análisis, analizado) — independiente del estado de validez.</dd>
+              </dl>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header"><h2>¿No encontraste lo que buscabas?</h2></div>
+            <div class="card-body">
+              <p class="sub" style="margin:0;">Esta es una pantalla de ayuda general. Si tenés una duda puntual sobre un campo, buscá el ícono <span class="help-icon" title="Así se ve un ícono de ayuda con información puntual sobre ese campo.">ⓘ</span> junto a su etiqueta — tiene una explicación específica al pasar el cursor.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
