@@ -200,6 +200,16 @@
                     <div class="field-error-msg">Indicá qué software se usó.</div>
                   </div>
                 </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>Hardware utilizado <span class="opt">(opcional)</span><span class="help-icon" title="Las especificaciones de la máquina que corrió el cómputo (ej. CPU, GPU, RAM). Sirve para comparar tiempos entre experimentos.">ⓘ</span></label>
+                    <input type="text" placeholder="Ej. GPU RTX 3060, 16 GB RAM">
+                  </div>
+                  <div class="field">
+                    <label>Tiempo de procesamiento <span class="opt">(opcional)</span></label>
+                    <input type="text" placeholder="Ej. 2h 15min">
+                  </div>
+                </div>
 
                 <div class="fieldset-title">Molécula / Proteína</div>
                 <div class="field-row">
@@ -228,15 +238,20 @@
 
                 <div class="fieldset-title">Parámetros principales<span class="help-icon" title="Se guardan como pares clave-valor: agregá los que necesites para este ensayo puntual, no hay una lista fija de columnas.">ⓘ</span></div>
                 <div id="params-list" class="stack" style="gap:10px;">
-                  <div class="param-row">
+                  <div class="param-row-unidad">
                     <div class="field" style="margin-bottom:0"><input type="text" placeholder="Nombre del parámetro (ej. Sitio activo)"></div>
                     <div class="field" style="margin-bottom:0"><input type="text" placeholder="Valor"></div>
+                    <div class="field" style="margin-bottom:0"><input type="text" placeholder="Unidad (ej. Å)"></div>
                     <button type="button" class="remove">✕ Quitar</button>
                   </div>
                 </div>
                 <button type="button" class="add-param-btn" data-target="#params-list" style="margin-top:10px;">+ Agregar parámetro</button>
 
                 <div class="fieldset-title">Información adicional</div>
+                <div class="field">
+                  <label>Objetivo <span class="opt">(opcional)</span><span class="help-icon" title="Para qué se corre este experimento. Distinto de la hipótesis: el objetivo es la finalidad, la hipótesis es lo que esperás encontrar.">ⓘ</span></label>
+                  <textarea placeholder="Describí el objetivo de este experimento..."></textarea>
+                </div>
                 <div class="field">
                   <label>Hipótesis <span class="opt">(opcional)</span></label>
                   <textarea placeholder="Describí la hipótesis del experimento..."></textarea>
@@ -266,6 +281,19 @@
                 <div class="viewer small">
                   <span class="viewer-lib-tag">3Dmol.js ▾</span>
                   <span class="viewer-placeholder-text">La vista previa aparece<br>al cargar el archivo PDB</span>
+                </div>
+
+                <div class="fieldset-title">Capturas que respaldan el resultado <span class="opt">(opcional)</span><span class="help-icon" title="Capturas de pantalla del software o de los resultados, para que el Director pueda corroborarlos. Solo vos vas a poder modificarlas o agregar más después.">ⓘ</span></div>
+                <div class="field">
+                  <input type="file" id="capturas-input" accept="image/*" multiple style="display:none">
+                  <div class="dropzone" id="capturas-dropzone" style="cursor:pointer;">
+                    <span id="capturas-dropzone-label">
+                      Arrastrá y soltá una o más capturas aquí<br>
+                      o <strong>seleccioná los archivos</strong>
+                    </span>
+                    <div class="hint">Formatos permitidos: .png, .jpg, .jpeg</div>
+                  </div>
+                  <div class="capturas-grid" id="capturas-preview" style="margin-top:10px;"></div>
                 </div>
 
                 <div class="field" style="margin-top:18px;">

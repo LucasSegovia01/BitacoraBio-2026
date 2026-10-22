@@ -27,21 +27,33 @@ document.querySelectorAll('.tabs').forEach(function (tabGroup) {
   });
 });
 
-// Agregar / quitar filas de parámetro dinámicas (carga y búsqueda)
+// Agregar / quitar filas de parámetro dinámicas (carga con unidad, búsqueda sin unidad)
 document.querySelectorAll('.add-param-btn').forEach(function (btn) {
   btn.addEventListener('click', function () {
     const list = document.querySelector(btn.getAttribute('data-target'));
     if (!list) return;
+    const esCarga = btn.getAttribute('data-target') === '#params-list';
     const row = document.createElement('div');
-    row.className = 'param-row';
-    row.innerHTML = `
+    row.className = esCarga ? 'param-row-unidad' : 'param-row';
+    row.innerHTML = esCarga ? `
       <div class="field" style="margin-bottom:0">
         <input type="text" placeholder="Nombre del parámetro (ej. pH)">
       </div>
       <div class="field" style="margin-bottom:0">
         <input type="text" placeholder="Valor">
       </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Unidad (ej. Å)">
+      </div>
       <button type="button" class="remove" title="Quitar parámetro">✕ Quitar</button>
+    ` : `
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Parámetro (ej. pH)">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Valor o rango">
+      </div>
+      <button type="button" class="remove" title="Quitar parámetro">✕</button>
     `;
     list.appendChild(row);
   });
@@ -49,7 +61,8 @@ document.querySelectorAll('.add-param-btn').forEach(function (btn) {
 
 document.addEventListener('click', function (e) {
   if (e.target.closest('.remove')) {
-    e.target.closest('.param-row').remove();
+    const row = e.target.closest('.param-row, .param-row-unidad');
+    if (row) row.remove();
   }
 });
 
@@ -99,6 +112,34 @@ if (saveForm) {
     });
     dropzone.addEventListener('click', () => pdbInput && pdbInput.click());
   }
+
+  // Capturas: varios archivos de imagen, con miniaturas y opción de quitar antes de guardar
+  const capturasInput = document.querySelector('#capturas-input');
+  const capturasDropzone = document.querySelector('#capturas-dropzone');
+  const capturasPreview = document.querySelector('#capturas-preview');
+  function agregarCapturas(files) {
+    Array.from(files).forEach(function (f) {
+      const thumb = document.createElement('div');
+      thumb.className = 'captura-thumb';
+      thumb.title = f.name;
+      thumb.innerHTML = '🖼️<button type="button" class="remove-captura" title="Quitar">✕</button>';
+      capturasPreview.appendChild(thumb);
+    });
+  }
+  if (capturasInput) {
+    capturasInput.addEventListener('change', () => { if (capturasInput.files.length) agregarCapturas(capturasInput.files); });
+  }
+  if (capturasDropzone) {
+    capturasDropzone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) agregarCapturas(e.dataTransfer.files);
+    });
+    capturasDropzone.addEventListener('click', () => capturasInput && capturasInput.click());
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.remove-captura')) {
+      e.target.closest('.captura-thumb').remove();
+    }
+  });
 
   saveForm.addEventListener('submit', function (e) {
     e.preventDefault();

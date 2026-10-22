@@ -265,6 +265,25 @@ td a.id-link, a.id-link { color: var(--blue-600); font-weight: 600; }
 .filters-panel { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .param-row { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 8px; align-items: end; }
 .param-row .remove { color: var(--text-muted); background: none; border: none; cursor: pointer; font-size: 13px; height: 36px; }
+
+/* Fila de parámetro con unidad (solo carga de experimento; la búsqueda usa .param-row sin unidad) */
+.param-row-unidad { display: grid; grid-template-columns: 1fr 1fr 1fr 90px; gap: 8px; align-items: end; }
+.param-row-unidad .remove { color: var(--text-muted); background: none; border: none; cursor: pointer; font-size: 13px; height: 36px; }
+
+/* Unidad al lado del valor, en las tablas de detalle */
+.kv .unit { color: var(--text-muted); font-weight: 400; font-size: 12px; margin-left: 4px; }
+
+/* Capturas que respaldan el resultado */
+.capturas-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.captura-thumb {
+  width: 84px; height: 84px; border-radius: 8px; background: var(--bg-page);
+  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--text-muted); position: relative; overflow: hidden;
+}
+.captura-thumb .remove-captura {
+  position: absolute; top: 2px; right: 2px; background: rgba(15,23,42,0.6); color: #fff;
+  border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; cursor: pointer; line-height: 1;
+}
 .add-param-btn {
   background: none; border: 1px dashed var(--border); color: var(--blue-600);
   font-weight: 600; font-size: 13px; padding: 8px; border-radius: 8px; cursor: pointer; font-family: var(--font);
@@ -345,4 +364,5 @@ td a.id-link, a.id-link { color: var(--blue-600); font-weight: 600; }
   .grid-2 { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
   .param-row { grid-template-columns: 1fr; }
+  .param-row-unidad { grid-template-columns: 1fr; }
 }
