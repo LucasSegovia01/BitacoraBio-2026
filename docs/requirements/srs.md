@@ -133,7 +133,7 @@ Los 16 flujos externos del Nivel 0 están todos presentes acá, repartidos entre
 
 # **Modelo de Dominio Conceptual**
 
-```mermaid
+```
 classDiagram
     class Usuario {
         <<Investigador o Director>>
@@ -142,9 +142,17 @@ classDiagram
     class Experimento {
         <<estado_validez: invalido | finalizado | en_curso>>
         <<estado_analisis: pendiente | en_analisis | analizado>>
+        objetivo: texto
+        hardware_usado: texto  
+        tiempo_procesamiento: texto 
     }
-    class ParametroExperimento
+    class ParametroExperimento {
+        clave: texto
+        valor: texto
+        unidad: texto — nullable, no todos los parámetros tienen unidad (ej. software usado)
+    }
     class ArchivoResultado
+    class CapturaResultado
     class DocumentoNotas
 
     Usuario "1" --> "*" Proyecto : crea (solo Director)
@@ -152,6 +160,7 @@ classDiagram
     Usuario "1" --> "*" Experimento : registra
     Experimento "1" --> "*" ParametroExperimento : tiene
     Experimento "1" --> "0..1" ArchivoResultado : produce
+    Experimento "1" --> "*" CapturaResultado : respalda con
     Experimento "1" --> "0..1" DocumentoNotas : enlaza
 ```
 
