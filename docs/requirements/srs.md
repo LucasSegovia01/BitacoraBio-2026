@@ -178,7 +178,7 @@ Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con 
 
 # **Requerimientos funcionales**
 ```
-RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, notas (vacías por defecto) y estado.
+RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, objetivo, notas (vacías por defecto), hardware usado, tiempo de procesamiento y estado.
 
 RF-02: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
 
@@ -197,6 +197,10 @@ RF-08: El sistema debe validar que los campos obligatorios del experimento esté
 RF-09: El sistema debe permitir reintentar la creación del documento de notas de un experimento cuya vinculación inicial con Google Docs haya fallado, sin requerir que el investigador/a vuelva a cargar ningún otro dato del experimento.
 
 RF-10: El sistema debe permitir visualizar la pose resultante de un experimento de docking en un visor 3D de solo lectura (ej. 3Dmol.js), a partir del archivo de resultado en formato PDB asociado al experimento, sin requerir su descarga ni el uso de software externo.
+
+RF-11: El sistema debe permitir adjuntar una o más capturas de imagen a un experimento ya registrado, visibles junto con el resto de su detalle.
+
+RF-12: El sistema debe mostrar, junto a cada parámetro del experimento, su unidad cuando esté definida.
 ```
 
 # **Stakeholders y roles**
