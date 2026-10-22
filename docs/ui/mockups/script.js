@@ -76,8 +76,48 @@ document.addEventListener('click', function (e) {
 });
 const saveForm = document.querySelector('#form-cargar');
 if (saveForm) {
+  // Dropzone: el archivo PDB ahora es un campo obligatorio real
+  const pdbInput = document.querySelector('#archivo-pdb');
+  const dropzone = document.querySelector('.dropzone');
+  const dropzoneLabel = document.querySelector('#dropzone-label');
+  function setPdbFile(name) {
+    if (!name) return;
+    dropzone.classList.add('has-file');
+    dropzoneLabel.innerHTML = name + '<br><span style="font-weight:400;">o <strong>elegí otro archivo</strong></span>';
+    dropzone.closest('.field').classList.remove('field-error');
+  }
+  if (pdbInput) {
+    pdbInput.addEventListener('change', () => { if (pdbInput.files[0]) setPdbFile(pdbInput.files[0].name); });
+  }
+  if (dropzone) {
+    dropzone.addEventListener('drop', e => {
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        try { if (pdbInput) pdbInput.files = e.dataTransfer.files; } catch (err) {}
+        setPdbFile(f.name);
+      }
+    });
+    dropzone.addEventListener('click', () => pdbInput && pdbInput.click());
+  }
+
   saveForm.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    // Validación en vivo de campos obligatorios
+    let firstInvalid = null;
+    saveForm.querySelectorAll('[required]').forEach(el => {
+      const field = el.closest('.field');
+      if (!field) return;
+      const isFile = el.type === 'file';
+      const empty = isFile ? el.files.length === 0 : el.value.trim() === '';
+      field.classList.toggle('field-error', empty);
+      if (empty && !firstInvalid) firstInvalid = field;
+    });
+
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     showToast('toast-ok');
   });
 }

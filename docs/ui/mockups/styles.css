@@ -316,6 +316,28 @@ td a.id-link, a.id-link { color: var(--blue-600); font-weight: 600; }
 }
 .demo-toggle button:hover { text-decoration: underline; }
 
+/* ---------- Validación en vivo ---------- */
+.field.field-error input,
+.field.field-error select,
+.field.field-error .dropzone { border-color: var(--danger-text) !important; background: var(--danger-bg); }
+.field-error-msg {
+  display: none; color: var(--danger-text); font-size: 12px; margin-top: 5px; font-weight: 600;
+}
+.field.field-error .field-error-msg { display: block; }
+.dropzone.has-file { border-style: solid; border-color: var(--success-text); background: var(--success-bg); color: var(--success-text); }
+
+/* ---------- Página de Ayuda ---------- */
+.help-section { margin-bottom: 28px; }
+.help-section:last-child { margin-bottom: 0; }
+.help-section h3 { font-size: 15px; color: var(--navy-900); margin: 0 0 10px; }
+.help-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+.help-item:last-child { border-bottom: none; }
+.help-item .q { font-weight: 700; font-size: 14px; margin-bottom: 6px; color: var(--text-primary); }
+.help-item .a { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin: 0; }
+.help-glossary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+.help-glossary dt { font-weight: 700; font-size: 13.5px; color: var(--navy-900); }
+.help-glossary dd { margin: 2px 0 10px; font-size: 13px; color: var(--text-secondary); }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 880px) {
   .app { grid-template-columns: 1fr; }
