@@ -198,7 +198,7 @@ RF-09: El sistema debe permitir reintentar la creación del documento de notas d
 
 RF-10: El sistema debe permitir visualizar la pose resultante de un experimento de docking en un visor 3D de solo lectura (ej. 3Dmol.js), a partir del archivo de resultado en formato PDB asociado al experimento, sin requerir su descarga ni el uso de software externo.
 
-RF-11: El sistema debe permitir adjuntar una o más capturas de imagen a un experimento ya registrado, visibles junto con el resto de su detalle.
+RF-11: El sistema debe permitir adjuntar una o más capturas de imagen a un experimento ya registrado, visibles junto con el resto de su detalle. Solo el autor del experimento puede agregar o modificar sus capturas.
 
 RF-12: El sistema debe mostrar, junto a cada parámetro del experimento, su unidad cuando esté definida.
 ```
@@ -232,7 +232,7 @@ Postcondición: el llamador (CU-01) recibe el resultado de la verificación;
 ```
 Actor principal: Investigador/a
 Actor secundario: Google Docs (sistema externo)
-Realiza: RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09
+Realiza: RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09, RF-11
 Incluye (<<include>>): CU-00 · Detectar Duplicado
   (se factoriza aparte porque es una verificación autocontenida que el flujo principal invoca pero no resuelve inline; mantiene CU-01 enfocado en el registro en sí. Compara tipo + molécula/ligando contra D1, excluyendo inválidos.)
 
@@ -246,7 +246,7 @@ Garantía de éxito: el experimento queda registrado con autor y fecha asignados
 Garantía mínima: el sistema nunca confirma un registro sin haber completado la verificación de duplicados, ni deja un experimento a medio guardar por falta de algún campo obligatorio.
 
 Flujo principal:
-  1. El/la investigador/a selecciona el proyecto existente y completa los campos del experimento: molécula/proteína, ligando, software usado, parámetros clave, sitio activo e hipótesis (las notas quedan vacías por defecto; define el estado inicial).
+  1. El/la investigador/a selecciona el proyecto existente y completa los campos del experimento: molécula/proteína, ligando, software usado, parámetros clave (incluido el sitio activo, con su unidad cuando corresponda), y opcionalmente hardware usado, tiempo de procesamiento, objetivo, hipótesis y capturas de resultado (las notas quedan vacías por defecto; define el estado inicial).
   2. El sistema valida que los campos obligatorios estén completos y que su formato sea válido (RF-08).
   3. El sistema verifica si existe un experimento previo del mismo tipo con la misma combinación molécula/ligando, excluyendo los marcados como inválidos <<include>> CU-00 · Detectar Duplicado.
   4. El sistema no encuentra coincidencias y continúa el registro.
@@ -270,8 +270,8 @@ Flujos de excepción (nombrados):
 ## **Slices** — Frontera entre valor central sin dependencias externas (B1.1) y funcionalidad adicional que depende de un servicio de terceros (B1.2).
 ```
 CU-01
-  Slice B1.1 — pasos 1-5: completar datos, validar y verificar duplicado (CU-00), registrar autor/fecha y guardar el experimento en el catálogo. Entrega el valor central por sí sola, sin depender de servicios externos.
-  Slice B1.2 — pasos 6-7: crear y asociar el documento de notas en Google Docs, y confirmar con el resumen. Depende de un servicio externo; su falla (E1) no compromete lo ya guardado en B1.1.
+  Slice B1.1 — pasos 1-6: completar datos, validar y verificar duplicado (CU-00), registrar autor/fecha y guardar el experimento en el catálogo. Entrega el valor central por sí sola, sin depender de servicios externos.
+  Slice B1.2 — pasos 7-8: crear y asociar el documento de notas en Google Docs, y confirmar con el resumen. Depende de un servicio externo; su falla (E1) no compromete lo ya guardado en B1.1.
   Slice A1 — continuar pese a coincidencia detectada   
   Slice E3 — cancelar por coincidencia detectada    
   Slice E1 — falla en creación de documento de notas   ——> nombrado, sin desarrollar
@@ -294,6 +294,9 @@ Then el sistema registra automáticamente el autor y la fecha/hora de carga, y g
 - Given un experimento previo con la misma molécula/ligando pero marcado como estado_validez "inválido",
 When el investigador/a confirma el registro,
 Then el sistema NO lo reporta como coincidencia y guarda el experimento como en el camino normal.
+- Given un proyecto existente y todos los campos obligatorios completos, con los campos opcionales (hardware, tiempo de procesamiento, objetivo, hipótesis, notas y capturas) vacíos,
+When el investigador/a confirma el registro,
+Then el sistema guarda el experimento sin exigir esos campos.
 
 
 HU-01.B1.2 · Vincular documento de notas al experimento registrado
@@ -344,7 +347,7 @@ Criterios de aceptación:
 Actor principal: Usuario del sistema (generalización de Investigador/a y
   Director/a — ambos roles ejecutan este caso de uso de forma idéntica,
   sin distinción de permisos)
-Realiza: RF-06, RF-07
+Realiza: RF-06, RF-07, RF-12
 
 Precondición: el usuario está autenticado, con rol Investigador/a o Director/a.
   Hay al menos un experimento cargado en el catálogo (postcondición de CU-01).
@@ -354,8 +357,7 @@ Disparador: el usuario necesita saber si un experimento ya fue realizado, o
 Flujo principal:
   1. El usuario selecciona uno o más criterios de filtro: fecha, autor o proyecto.
   2. El sistema busca los experimentos del catálogo que cumplen los criterios.
-  3. El sistema muestra la lista de experimentos coincidentes, con sus datos
-     principales (tipo, molécula/ligando, autor, fecha, estado).
+  3. El sistema muestra la lista de experimentos coincidentes, con sus datos principales (tipo, molécula/ligando, autor, fecha, estado).
   4. El usuario selecciona un experimento de la lista.
   5. El sistema muestra el detalle completo del experimento seleccionado.
 
@@ -400,8 +402,13 @@ para revisar sus parámetros y resultado sin pedírselo a quien lo cargó.
 Criterios de aceptación:
 - Given que selecciono un experimento de la lista de resultados,
   When accedo a su detalle,
-  Then el sistema muestra todos sus campos, parámetros, resultado principal,
-  estados y el enlace a Google Docs.
+  Then el sistema muestra todos sus campos, parámetros, resultado principal,  estados y el enlace a Google Docs.
+- Given un experimento con parámetros que tienen unidad y con capturas adjuntas,
+  When accedo a su detalle,
+  Then el sistema muestra cada parámetro junto a su unidad (cuando está definida) y las capturas junto con el resto de los datos.
+- Given un experimento cuyo documento de notas figura como "no vinculado",
+  When accedo a su detalle,
+  Then el sistema muestra ese estado junto con la opción de reintentar la vinculación (RF-09).
 ```
 
 ```
@@ -421,7 +428,7 @@ Criterios de aceptación:
 ## Trazabilidad completa
 
 ```
-RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09
+RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09, RF-11
   └─ CU-01 · Registrar experimento de docking  (Proceso 1)
        ├─ Incluye: CU-00 · Detectar Duplicado (RF-03)
        ├─ Slice B1.1 → HU-01.B1.1
@@ -431,7 +438,7 @@ RF-01, RF-02, RF-03, RF-04, RF-05, RF-08, RF-09
        ├─ Slice E1 → HU-01.E1 (incluye recuperación RF-09, sin CU propio)
        └─ E2, E4, E5, E6 — nombrados, sin desarrollar
 
-RF-06, RF-07
+RF-06, RF-07, RF-12
   └─ CU-02 · Consultar y filtrar experimentos  (Proceso 2)
        ├─ Slice B1 → HU-02.B1
        ├─ Slice B2 → HU-02.B2

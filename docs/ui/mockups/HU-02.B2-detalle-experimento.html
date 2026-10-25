@@ -53,12 +53,35 @@
         <div class="header-actions" style="align-items:center;">
           <span class="badge badge-success">Éxito</span>
           <span class="badge badge-warning">En análisis</span>
-          <button class="btn btn-secondary">Ver en Google Docs</button>
+          <button class="btn btn-secondary" id="doc-ver">Ver en Google Docs</button>
+          <span class="badge badge-warning" id="doc-badge" style="display:none;">Bitácora no vinculada</span>
+          <button class="btn btn-secondary" id="doc-reintentar" style="display:none;">Reintentar vinculación</button>
           <button class="btn btn-secondary">Descargar PDB</button>
           <button class="btn btn-secondary">Editar estado</button>
           <button class="btn btn-secondary">Editar experimento</button>
         </div>
       </div>
+
+      <div class="toast toast-success" id="toast-vinculado">
+        <div>
+          <strong>Bitácora vinculada.</strong><br>
+          El documento de notas en Google Docs se creó y quedó asociado a este experimento.
+        </div>
+        <button class="close-toast" type="button">✕</button>
+      </div>
+      <div class="toast toast-danger" id="toast-reintento-fallido">
+        <div>
+          <strong>No se pudo vincular la bitácora.</strong><br>
+          Google Docs no respondió. El experimento sigue guardado; podés volver a intentarlo más tarde.
+        </div>
+        <button class="close-toast" type="button">✕</button>
+      </div>
+      <p class="demo-toggle">
+        Demo del estado de la bitácora:
+        <button type="button" id="demo-no-vinculada">ver ejemplo no vinculada</button> ·
+        <button type="button" id="demo-vinculada">ver ejemplo vinculada</button> ·
+        <button type="button" id="demo-fallo">simular fallo del reintento</button>
+      </p>
 
       <div class="tabs-container">
         <div class="tabs">
@@ -229,7 +252,8 @@
             <div class="card-body">
               <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:4px;">M. Torres · 10/09/2025</div>
               <p style="margin:0 0 16px;">El ligando muestra una buena afinidad en el sitio activo. Se adjunta pose en PDB y visualización en el visor.</p>
-              <button class="btn btn-secondary btn-sm">Abrir bitácora en Google Docs</button>
+              <button class="btn btn-secondary btn-sm" id="notas-doc-btn">Abrir bitácora en Google Docs</button>
+              <p class="hint" id="notas-doc-aviso" style="display:none; margin:0;">La bitácora de este experimento todavía no está vinculada.</p>
             </div>
           </section>
         </div>

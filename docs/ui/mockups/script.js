@@ -196,3 +196,24 @@ if (toggleEmptyBtn) {
     toggleEmptyBtn.textContent = showingEmpty ? 'Ver ejemplo: sin resultados' : 'Ver ejemplo: con resultados';
   });
 }
+
+// Detalle: estado de la bitácora (vinculada / no vinculada) y reintento de vinculación
+const docReintentar = document.querySelector('#doc-reintentar');
+if (docReintentar) {
+  let fallaReintento = false;
+  function setDocVinculado(vinculado) {
+    document.querySelector('#doc-ver').style.display = vinculado ? '' : 'none';
+    document.querySelector('#doc-badge').style.display = vinculado ? 'none' : '';
+    docReintentar.style.display = vinculado ? 'none' : '';
+    document.querySelector('#notas-doc-btn').style.display = vinculado ? '' : 'none';
+    document.querySelector('#notas-doc-aviso').style.display = vinculado ? 'none' : '';
+  }
+  document.querySelector('#demo-no-vinculada').addEventListener('click', () => setDocVinculado(false));
+  document.querySelector('#demo-vinculada').addEventListener('click', () => setDocVinculado(true));
+  document.querySelector('#demo-fallo').addEventListener('click', () => { fallaReintento = true; setDocVinculado(false); });
+  docReintentar.addEventListener('click', function () {
+    if (fallaReintento) { fallaReintento = false; showToast('toast-reintento-fallido'); return; }
+    setDocVinculado(true);
+    showToast('toast-vinculado');
+  });
+}

@@ -3,6 +3,23 @@
 **Taxonomía utilizada:** ISO/IEC 25010:2023.
 **Trazabilidad:** este documento complementa el SRS del TP1 (`docs/requirements/srs.md`); los procesos, RF y CU referenciados se encuentran en ese documento.
 
+## Identificadores de los escenarios
+
+| Id | Atributo | Escenario |
+|---|---|---|
+| `EC-01` | Eficiencia de desempeño | 1 — entorno normal |
+| `EC-02` | Eficiencia de desempeño | 2 — sobrecarga (concurrencia) |
+| `EC-03` | Eficiencia de desempeño | 3 — gran volumen de datos |
+| `EC-04` | Fiabilidad | 1 — entorno normal |
+| `EC-05` | Fiabilidad | 2 — servicio externo no disponible |
+| `EC-06` | Fiabilidad | 3 — recuperación tras la degradación |
+| `EC-07` | Mantenibilidad | 1 — extensión planificada |
+| `EC-08` | Mantenibilidad | 2 — sin el conocimiento del diseño original |
+| `EC-09` | Adecuación funcional | 1 — alto volumen de resultados de búsqueda |
+| `EC-10` | Adecuación funcional | 2 — estudio de sensibilidad de parámetros |
+| `EC-11` | Capacidad de interacción | 1 — múltiples coincidencias detectadas |
+
+
 ## Selección de los 5 atributos y justificación
 
 El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuación funcional y Capacidad de interacción** por ser los que más directamente condicionan si BitacoraBio 2026 cumple el propósito por el que se construye, evitar que el laboratorio vuelva a las planillas sueltas y a la memoria informal que el propio SRS identifica como el problema original:
@@ -17,7 +34,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 
 **Entornos:** 2 de 3 escenarios en condiciones de sobrecarga o volumen (mayoría degradada).
 
-**Escenario 1 — entorno normal**
+**EC-01 · Escenario 1 — entorno normal**
 
 | Campo | Detalle |
 |---|---|
@@ -28,7 +45,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | El sistema devuelve los experimentos que coinciden con el filtro |
 | Medida de respuesta | Se completa en 2 segundos o menos |
 
-**Escenario 2 — entorno de sobrecarga (concurrencia)**
+**EC-02 · Escenario 2 — entorno de sobrecarga (concurrencia)**
 
 | Campo | Detalle |
 |---|---|
@@ -39,7 +56,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | El sistema resuelve todas las consultas sin bloquear ni descartar ninguna |
 | Medida de respuesta | Cada consulta individual se completa en 5 segundos o menos, con 0% de consultas fallidas o con timeout |
 
-**Escenario 3 — entorno de gran volumen de datos**
+**EC-03 · Escenario 3 — entorno de gran volumen de datos**
 
 | Campo | Detalle |
 |---|---|
@@ -54,7 +71,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 
 **Entornos:** 2 de 3 escenarios en condición degradada o de recuperación (mayoría degradada).
 
-**Escenario 1 — entorno normal**
+**EC-04 · Escenario 1 — entorno normal**
 
 | Campo | Detalle |
 |---|---|
@@ -65,7 +82,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | El sistema crea el documento y lo asocia al experimento |
 | Medida de respuesta | 100% de los registros quedan con el documento vinculado en el primer intento |
 
-**Escenario 2 — entorno degradado (servicio externo no disponible)**
+**EC-05 · Escenario 2 — entorno degradado (servicio externo no disponible)**
 
 | Campo | Detalle |
 |---|---|
@@ -76,7 +93,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | El experimento queda guardado igual, con el documento de notas marcado como "no vinculado"; no se pierde ni se corrompe ningún dato ya guardado |
 | Medida de respuesta | 100% de los experimentos quedan en estado consistente (guardados, sin documento) aunque falle Google Docs; 0% de pérdida de datos del registro |
 
-**Escenario 3 — recuperación tras la degradación**
+**EC-06 · Escenario 3 — recuperación tras la degradación**
 
 | Campo | Detalle |
 |---|---|
@@ -91,7 +108,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 
 **Entornos:** 1 de 2 escenarios en condición degradada.
 
-**Escenario 1 — entorno normal (extensión planificada)**
+**EC-07 · Escenario 1 — entorno normal (extensión planificada)**
 
 | Campo | Contenido |
 |---|---|
@@ -102,7 +119,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | La nueva técnica se agrega definiendo sus parámetros como nuevas filas de ParametroExperimento, sin modificar el esquema de las tablas ya existentes (Experimento, Proyecto) |
 | Medida de respuesta | La extensión no requiere alterar ni una sola columna de las tablas existentes; se implementa en menos de una jornada de trabajo |
 
-**Escenario 2 — entorno degradado (sin el conocimiento del diseño original)**
+**EC-08 · Escenario 2 — entorno degradado (sin el conocimiento del diseño original)**
 
 | Campo | Contenido |
 |---|---|
@@ -117,7 +134,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 
 **Entornos:** los 2 escenarios en condición sobre-estimulada (mayoría degradada).
 
-**Escenario 1 — entorno sobre-estimulado (alto volumen de resultados de búsqueda)**
+**EC-09 · Escenario 1 — entorno sobre-estimulado (alto volumen de resultados de búsqueda)**
 
 | Campo | Detalle |
 |---|---|
@@ -129,7 +146,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 | Respuesta | El investigador/a accede a la pose de cualquier experimento del listado de resultados sin pasos de navegación adicionales a medida que crece la cantidad de resultados — no se le exige paginar, recargar la lista completa, ni salir de la pantalla de resultados para llegar a la pose |
 | Medida de respuesta | La cantidad de acciones del usuario para pasar de una fila del resultado a ver su pose se mantiene en 1, verificado sobre conjuntos de resultados de 20, 100 y 500 experimentos |
 
-**Escenario 2 — entorno sobre-estimulado (estudio de sensibilidad de parámetros)**
+**EC-10 · Escenario 2 — entorno sobre-estimulado (estudio de sensibilidad de parámetros)**
 
 | Campo | Detalle |
 |---|---|
@@ -145,7 +162,7 @@ El grupo eligió **Eficiencia de desempeño, Fiabilidad, Mantenibilidad, Adecuac
 
 **Entornos:** el único escenario en condición sobre-estimulada.
 
-**Escenario 1 — entorno sobre-estimulado (múltiples coincidencias detectadas)**
+**EC-11 · Escenario 1 — entorno sobre-estimulado (múltiples coincidencias detectadas)**
 
 | Campo | Detalle |
 |---|---|
