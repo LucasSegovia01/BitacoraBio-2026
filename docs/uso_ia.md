@@ -325,3 +325,47 @@
 relevante de la IA en esta sección; las correcciones fueron ajustes de
 alcance y consistencia interna del propio documento en evolución.
 
+## Uso de IA — Corrección de las capas del TP3 (arquitectura)
+
+**Herramienta:** Claude (asistente de IA conversacional).
+
+**Registro de intercambios:**
+
+1. **Consulta (10/11/26):** el docente indicó que la capa de servicios era
+   demasiado grande y mezclaba funciones de negocio y de servicio. Se
+   pidieron opciones de diseño antes de tocar nada.
+   **Generó:** tres opciones: cinco capas (presentación, servicios fina,
+   negocio, acceso a datos e integración externa), cuatro capas
+   (presentación, servicios fina, negocio y acceso a datos y servicios
+   externos) y un esquema de aplicación, dominio e infraestructura.
+   Recomendó cinco capas.
+   **Resultado:** se descartó la recomendación de la IA. Tras consultar de
+   nuevo al docente, este definió cuatro capas: servicios sin lógica
+   (Ejecutor de registro, Servicio de consulta y Gestión de capturas), una
+   capa de dominio con el resto del núcleo del microkernel (Registro de
+   técnicas, los pasos del registro y los plug-ins), y lo demás sin
+   cambios. Coincidía con la segunda opción propuesta.
+
+2. **Consulta (10/11/26):** se pidió aplicar el cambio en el documento
+   `arquitectura.md`, con el diagrama de componentes del grupo como guía.
+   **Generó:** los cambios en 5.2.2, 5.3 (tabla de capas y restricciones),
+   5.5, la sección 7 (diagrama y catálogo de componentes) y DA-01. Incluyó
+   dos saltos de capa justificados: las rutas de registro piden las
+   técnicas directamente al registro de técnicas para armar el formulario,
+   y el servicio de consulta y la gestión de capturas llaman directo al
+   acceso a datos, porque no ejecutan reglas de negocio. También agregó en
+   DA-01 la alternativa descartada de tres capas con las reglas dentro de
+   servicios.
+   **Resultado:** se aceptó y se incorporó al documento luego de revisión.
+
+**Qué se descartó y por qué:**
+- Se descartó la recomendación de cinco capas: el docente fijó cuatro, y
+  la integración con servicios externos quedó dentro de la capa de acceso
+  a datos.
+
+**Errores o imprecisiones detectadas:**
+- La IA dejó que el servicio de consulta y la gestión de capturas llamaran
+  al acceso a datos sin pasar por el dominio. Se declaró como salto
+  justificado, pero queda una pregunta abierta para el docente: si la
+  regla "solo el autor puede modificar las capturas" es una regla de
+  servicio o debe pasar a la capa de dominio.
