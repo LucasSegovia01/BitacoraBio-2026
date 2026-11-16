@@ -350,7 +350,7 @@ El registro de un experimento tiene una parte que no cambia con el tipo de ensay
 | Qué mejora | Modificabilidad: sumar una técnica no toca el núcleo ni las tablas existentes |
 | Qué sacrifica | Hay que definir y mantener la interfaz de técnica, y se diseña a partir de un solo ejemplo (docking): una técnica que necesite algo que la interfaz no prevé obliga a ampliarla, y eso toca el núcleo y los plug-ins existentes. Más indirección en la validación, la detección de duplicados y el detalle. El núcleo no puede contener reglas de una técnica concreta |
 | Dónde aplica | En el registro de experimentos (CU-01 con CU-00) y en el armado del detalle (CU-02), solo para las unidades y el orden de los parámetros. La búsqueda, el listado y el resto siguen el estilo base |
-| Cómo se conecta con el estilo base | La ruta de registro de la aplicación (zona cliente-servidor) invoca con una llamada interna a un componente de la capa de servicios, el ejecutor de registro. El núcleo y los plug-ins son componentes de un mismo contenedor, no procesos separados: por eso este estilo se ve en la vista de componentes (sección 7) y no en la de contenedores |
+| Cómo se conecta con el estilo base | La ruta de registro de la aplicación (zona cliente-servidor) invoca con una llamada interna al ejecutor de registro (capa de servicios), que no tiene reglas propias y solo ejecuta los pasos del registro. El núcleo y los plug-ins viven en la capa de dominio y son componentes de un mismo contenedor, no procesos separados: por eso este estilo se ve en la vista de componentes (sección 7) y no en la de contenedores |
 
 **Comprobación de las restricciones del estilo (Tabla 4 de la consigna)**
 
@@ -386,7 +386,7 @@ No se tuvieron en cuenta, por saberse inadecuados para este sistema y sus driver
 
 | Contenedor | Patrón | Motivo |
 |---|---|---|
-| Aplicación del catálogo | Capas | Responde a EC-07: las reglas de cada técnica quedan en la capa de servicios y el acceso a parámetros, en la de acceso a datos |
+| Aplicación del catálogo | Capas | Responde a EC-07: las reglas de cada técnica quedan en la capa de dominio, separadas de la capa de servicios (que solo intermedia) y el acceso a parámetros, en la de acceso a datos |
 | Navegador | Ninguno | Muestra HTML generado por el servidor y el visor externo 3Dmol.js |
 | Base de datos de experimentos, Almacén de archivos de resultados | No aplica | Son almacenes de datos |
 
@@ -394,28 +394,29 @@ No se tuvieron en cuenta, por saberse inadecuados para este sistema y sus driver
 
 | Capa | Qué contiene | Qué hace | Qué puede usar | Qué no debe hacer |
 |---|---|---|---|---|
-| Presentación | Rutas de registro, Rutas de consulta y las plantillas HTML (que no se dibujan como componente porque no tienen lógica propia) | Recibe la solicitud HTTP del navegador, toma los datos del formulario o los filtros, llama a un servicio y arma la respuesta: una página, un archivo o un mensaje de error | La capa de servicios y Gestión de excepciones | Aplicar reglas del sistema, escribir SQL, abrir archivos o llamar a Google Docs |
-| Servicios | Núcleo de registro (Ejecutor de registro, Registro de técnicas y los cuatro pasos), plug-ins de técnica, Gestión de capturas y Servicio de consulta | Es la lógica del sistema: valida, decide qué es una coincidencia, controla que solo el autor modifique las capturas, ordena los pasos del registro y arma el detalle de un experimento | La capa de acceso a datos y servicios externos | Conocer las rutas o las plantillas, escribir SQL o conocer la ubicación física de los archivos |
-| Acceso a datos y servicios externos | Repositorio de experimentos, Acceso a archivos y Cliente de Google Docs | Traduce los pedidos de los servicios a consultas SQL, a lectura y escritura de archivos y a llamadas a Google Docs | La base de datos, el almacén de archivos y Google Docs | Decidir reglas (por ejemplo, qué es un duplicado) o usar a los servicios o a las rutas |
+| Presentación | Rutas de registro, Rutas de consulta y las plantillas HTML (que no se dibujan como componente porque no tienen lógica propia) | Recibe la solicitud HTTP del navegador, toma los datos del formulario o los filtros, llama a un servicio y arma la respuesta: una página, un archivo o un mensaje de error | La capa de servicios, Gestión de excepciones y, para armar el formulario, el Registro de técnicas (ver salto justificado) | Aplicar reglas del sistema, escribir SQL, abrir archivos o llamar a Google Docs |
+| Servicios | Ejecutor de registro, Servicio de consulta y Gestión de capturas | Es una capa intermediaria y fina: recibe el pedido de las rutas y consulta o ejecuta las reglas de servicio (qué pasos del registro correr y en qué orden, quién puede modificar las capturas, qué pedir para armar una consulta). No tiene reglas del negocio ni de ninguna técnica | La capa de dominio y, en consultas y capturas, la de acceso a datos (ver salto justificado) | Conocer las rutas o las plantillas, decidir qué es válido o qué es una coincidencia, escribir SQL o conocer la ubicación física de los archivos |
+| Dominio | Registro de técnicas, los cuatro pasos del registro (Validar datos, Detectar duplicados, Guardar experimento y Vincular documento) y los plug-ins de técnica (Técnica Docking y, en el futuro, Técnica Dinámica molecular) | Es la lógica del negocio: valida los datos, decide qué es una coincidencia, guarda el experimento, vincula el documento y define, por cada técnica, sus parámetros, validaciones y clave de coincidencia. Es el núcleo y los plug-ins del microkernel | La capa de acceso a datos y servicios externos | Conocer los servicios, las rutas o las plantillas, escribir SQL o conocer la ubicación física de los archivos |
+| Acceso a datos y servicios externos | Repositorio de experimentos, Acceso a archivos y Cliente de Google Docs | Traduce los pedidos de las capas superiores a consultas SQL, a lectura y escritura de archivos y a llamadas a Google Docs | La base de datos, el almacén de archivos y Google Docs | Decidir reglas (por ejemplo, qué es un duplicado) o usar los pasos y los plug-ins del dominio, los servicios o las rutas (solo conoce las entidades, porque guarda y devuelve esos datos) |
 
-Gestión de excepciones no pertenece a ninguna capa: es un aspecto transversal (5.4) que usan las rutas para traducir los errores en respuestas y que Vincular documento usa para señalar la falla de Google Docs.
+Gestión de excepciones no pertenece a ninguna capa: es un aspecto transversal (5.4) que usan las rutas para traducir los errores en respuestas y que Vincular documento (dominio) usa para señalar la falla de Google Docs.
 
-**Cómo atraviesa las capas un registro.** El navegador envía el formulario a *Rutas de registro* (presentación); estas se lo pasan al *Ejecutor de registro* (servicios), que obtiene del *Registro de técnicas* la técnica del experimento y corre los cuatro pasos; los pasos usan las definiciones de la técnica y piden datos o los guardan a través del *Repositorio de experimentos* y de *Acceso a archivos* (acceso a datos), que son los únicos que tocan la base y el almacén. La respuesta vuelve por el mismo camino.
+**Cómo atraviesa las capas un registro.** El navegador envía el formulario a *Rutas de registro* (presentación); estas se lo pasan al *Ejecutor de registro* (servicios), que obtiene del *Registro de técnicas* (dominio) la técnica del experimento y corre los cuatro pasos (dominio); los pasos usan las definiciones de la técnica y piden datos o los guardan a través del *Repositorio de experimentos* y de *Acceso a archivos* (acceso a datos), que son los únicos que tocan la base y el almacén. La respuesta vuelve por el mismo camino.
 
 | Aspecto | Detalle |
 |---|---|
-| Qué escenario responde | EC-07 (las reglas de cada técnica viven en la capa de servicios y el acceso a parámetros queda encapsulado en la capa de acceso a datos) |
-| Qué mejora | Modificabilidad: un cambio en una capa afecta poco a las demás |
-| Qué sacrifica | Indirección y algo de rendimiento (despreciable frente a los márgenes de EC-03) |
-| Relación con el microkernel | El núcleo y los plug-ins viven dentro de la capa de servicios |
+| Qué escenario responde | EC-07 (las reglas de cada técnica viven en la capa de dominio y el acceso a parámetros queda encapsulado en la capa de acceso a datos) |
+| Qué mejora | Modificabilidad: un cambio en una capa afecta poco a las demás; agregar una técnica toca solo la capa de dominio, y cambiar el orden o el modo de ejecutar el registro toca solo la de servicios |
+| Qué sacrifica | Indirección (una capa más por cruzar) y algo de rendimiento, despreciable frente a los márgenes de EC-03; además, hay que cuidar que la capa de servicios no vuelva a acumular reglas |
+| Relación con el microkernel | El núcleo (Registro de técnicas y los cuatro pasos) y los plug-ins viven en la capa de dominio. El Ejecutor de registro, que ordena los pasos, está en la capa de servicios |
 
-**Comprobación de las restricciones del patrón (Tabla 6 de la consigna).** Se adopta la variante de capas estrictas: cada capa usa solo a la inmediatamente inferior.
+**Comprobación de las restricciones del patrón (Tabla 6 de la consigna).** Se adopta la variante de capas relajadas: cada capa usa a la inmediatamente inferior, con dos saltos que se justifican abajo.
 
 | Restricción o regla | Cómo se cumple |
 |---|---|
-| Una capa no depende de las superiores | Los servicios no conocen las rutas, y el acceso a datos no conoce a los servicios |
-| No se saltean capas sin justificarlo | Las rutas llaman a los servicios, y los servicios llaman al acceso a datos |
-| Cada capa tiene una responsabilidad | Ver la tabla de capas |
+| Una capa no depende de las superiores | Los servicios no conocen las rutas, el dominio no conoce a los servicios y el acceso a datos no conoce a los pasos ni a los plug-ins del dominio (solo sus entidades) |
+| No se saltean capas sin justificarlo | Las rutas llaman a los servicios, los servicios llaman al dominio y el dominio llama al acceso a datos. Hay dos saltos, justificados: (1) *Rutas de registro* llama directo a *Registro de técnicas* para armar el formulario con los campos de la técnica elegida; es una lectura del catálogo de técnicas y un servicio intermedio solo repetiría la llamada. (2) *Servicio de consulta* y *Gestión de capturas* llaman directo al acceso a datos, porque buscar, filtrar y guardar capturas no ejecutan ninguna regla del negocio; pasar por el dominio sería una capa que solo delega |
+| Cada capa tiene una responsabilidad | Ver la tabla de capas: presentación arma páginas, servicios intermedian, dominio decide y acceso a datos persiste y se integra |
 | Todas las flechas entre capas van hacia abajo | Se verifica en el diagrama de componentes (sección 7) |
 
 **Patrones descartados**
@@ -536,16 +537,16 @@ C4Component
         Component(rreg, "Rutas de registro", "Flask", "Capa de presentación: arma el formulario con los campos de la técnica elegida, recibe el formulario de registro, el reintento de vinculación y las capturas de un experimento ya registrado")
         Component(rcon, "Rutas de consulta", "Flask", "Capa de presentación: recibe filtros y pedidos de detalle, PDB y capturas")
         Component(exc, "Gestión de excepciones", "Python", "Aspecto transversal: traduce los errores previstos en respuestas al usuario")
-        Component(reg, "Ejecutor de registro", "Python", "Núcleo, capa de servicios: ordena y ejecuta los pasos del registro")
-        Component(rtec, "Registro de técnicas", "Python", "Núcleo: conoce los plug-ins de técnica y entrega el de cada experimento")
-        Component(val, "Validar datos", "Python", "Paso 1 del núcleo: verifica obligatoriedad y formato")
-        Component(dup, "Detectar duplicados", "Python", "Paso 2 del núcleo: busca coincidencias y corta el registro si no fueron confirmadas")
-        Component(gua, "Guardar experimento", "Python", "Paso 3 del núcleo: registra autor y fecha y guarda datos y archivos")
-        Component(vin, "Vincular documento", "Python", "Paso 4 del núcleo: crea el documento de notas y guarda el enlace")
-        Component(tdoc, "Técnica Docking", "Python", "Plug-in: parámetros, validaciones, clave de coincidencia y resumen del docking")
-        Component(tmd, "Técnica Dinámica molecular (futura)", "Python", "Plug-in a incorporar en un incremento futuro (EC-07); no se construye en este TP")
-        Component(gcap, "Gestión de capturas", "Python", "Capa de servicios: agrega o reemplaza capturas si quien lo pide es el autor")
-        Component(con, "Servicio de consulta", "Python", "Capa de servicios: busca, filtra, arma el detalle y entrega los archivos")
+        Component(reg, "Ejecutor de registro", "Python", "Capa de servicios: intermedia, ordena y ejecuta los pasos del registro, sin reglas propias")
+        Component(rtec, "Registro de técnicas", "Python", "Capa de dominio (núcleo): conoce los plug-ins de técnica y entrega el de cada experimento")
+        Component(val, "Validar datos", "Python", "Capa de dominio (núcleo), paso 1: verifica obligatoriedad y formato")
+        Component(dup, "Detectar duplicados", "Python", "Capa de dominio (núcleo), paso 2: busca coincidencias y corta el registro si no fueron confirmadas")
+        Component(gua, "Guardar experimento", "Python", "Capa de dominio (núcleo), paso 3: registra autor y fecha y guarda datos y archivos")
+        Component(vin, "Vincular documento", "Python", "Capa de dominio (núcleo), paso 4: crea el documento de notas y guarda el enlace")
+        Component(tdoc, "Técnica Docking", "Python", "Capa de dominio (plug-in): parámetros, validaciones, clave de coincidencia y resumen del docking")
+        Component(tmd, "Técnica Dinámica molecular (futura)", "Python", "Capa de dominio (plug-in) a incorporar en un incremento futuro (EC-07); no se construye en este TP")
+        Component(gcap, "Gestión de capturas", "Python", "Capa de servicios: pide agregar o reemplazar capturas y controla que quien lo pide sea el autor")
+        Component(con, "Servicio de consulta", "Python", "Capa de servicios: pide la búsqueda, el filtrado, el detalle y los archivos")
         Component(rep, "Repositorio de experimentos", "Python", "Capa de acceso a datos: consultas y escrituras en la base")
         Component(arc, "Acceso a archivos", "Python", "Capa de acceso a datos: lee y escribe PDB y capturas")
         Component(gdc, "Cliente de Google Docs", "Python", "Capa de acceso a servicios externos: crea documentos de notas")
@@ -564,6 +565,7 @@ C4Component
     Rel(rreg, reg, "Invoca")
     Rel(rreg, gcap, "Invoca")
     Rel(rreg, rtec, "Pide las técnicas y sus campos para armar el formulario")
+    Rel(rreg, con, "Pide proyectos y experimentos para armar el formulario")
     Rel(rreg, exc, "Delega el manejo de errores")
     Rel(rcon, con, "Invoca")
     Rel(rcon, exc, "Delega el manejo de errores")
@@ -572,6 +574,7 @@ C4Component
     Rel(reg, dup, "Ejecuta el paso 2")
     Rel(reg, gua, "Ejecuta el paso 3")
     Rel(reg, vin, "Ejecuta el paso 4")
+    Rel(val, rep, "Consulta si existen el proyecto y los experimentos de Similar a")
     Rel(rtec, tdoc, "Registra y entrega")
     Rel(rtec, tmd, "Registraría y entregaría")
     Rel(dup, rep, "Consulta coincidencias")
@@ -597,14 +600,14 @@ C4Component
 |---|---|---|---|---|
 | Rutas de registro | Presentación | Flask | Arma el formulario con los campos de la técnica elegida; recibe el formulario de registro, el pedido de reintentar la vinculación y las capturas que se agregan a un experimento ya registrado; invoca al ejecutor de registro o a la gestión de capturas y arma la respuesta (errores, coincidencias o confirmación) | CU-01; RF-11; HU-01.B1.1, B1.2, A1, E3, E1 |
 | Rutas de consulta | Presentación | Flask | Recibe los filtros y los pedidos de detalle, PDB y capturas, y arma las páginas | CU-02; HU-02.B1, B2, A1; RF-10, RF-11 |
-| Ejecutor de registro | Servicios (núcleo) | Python | Ordena el registro: pide al Registro de técnicas la técnica del experimento, la agrega a la solicitud de registro y ejecuta los cuatro pasos. Para el reintento de vinculación ejecuta solo Vincular documento | CU-01; RF-09; EC-07 |
-| Registro de técnicas | Servicios (núcleo) | Python | Conoce los plug-ins de técnica (se registran al arrancar la aplicación), entrega el de un tipo de ensayo, lista las técnicas disponibles para el formulario y define la interfaz de técnica | RA-04; RF-01, RF-12; EC-07 |
-| Validar datos | Servicios (núcleo, paso 1) | Python | Verifica los campos comunes y los parámetros que la técnica del experimento define como obligatorios o con un formato | RF-01, RF-08; CU-01 paso 2; EC-07 |
-| Detectar duplicados | Servicios (núcleo, paso 2) | Python | Busca experimentos que coincidan según la clave de coincidencia de la técnica (en docking, mismo tipo y mismos parámetros molécula/proteína y ligando), excluye los inválidos y los ya declarados en "Similar a", y corta el registro si hay coincidencias sin confirmar | RF-03, RF-04; CU-00; HU-01.A1, E3; EC-07 |
-| Guardar experimento | Servicios (núcleo, paso 3) | Python | Registra autor y fecha, guarda los datos en la base y los archivos PDB y capturas en el almacén, y revierte si algo falla | RF-01, RF-02, RF-11; CU-01 pasos 5-6; HU-01.B1.1 |
-| Vincular documento | Servicios (núcleo, paso 4) | Python | Pide el documento de notas y guarda el enlace; si falla, señala el error a Gestión de excepciones y deja el experimento "no vinculado" | RF-05, RF-09; CU-01 paso 7, E1; HU-01.B1.2, E1 |
-| Técnica Docking | Servicios (plug-in) | Python | Define los parámetros del docking (nombre, unidad, obligatorio, formato), sus validaciones propias (por ejemplo, la notación de molécula y ligando, E6), su clave de coincidencia (los parámetros molécula/proteína y ligando) y sus parámetros de resumen para el listado | RF-01, RF-03, RF-08, RF-12; EC-07 |
-| Técnica Dinámica molecular (futura) | Servicios (plug-in) | Python | No se construye en este TP: es el caso que ejercita el escenario EC-07 | RA-04; EC-07 |
+| Ejecutor de registro | Servicios | Python | Ordena el registro: pide al Registro de técnicas la técnica del experimento, la agrega a la solicitud de registro y ejecuta los cuatro pasos. Para el reintento de vinculación ejecuta solo Vincular documento | CU-01; RF-09; EC-07 |
+| Registro de técnicas | Dominio (núcleo) | Python | Conoce los plug-ins de técnica (se registran al arrancar la aplicación), entrega el de un tipo de ensayo, lista las técnicas disponibles para el formulario y define la interfaz de técnica | RA-04; RF-01, RF-12; EC-07 |
+| Validar datos | Dominio (núcleo, paso 1) | Python | Verifica los campos comunes y los parámetros que la técnica del experimento define como obligatorios o con un formato | RF-01, RF-08; CU-01 paso 2; EC-07 |
+| Detectar duplicados | Dominio (núcleo, paso 2) | Python | Busca experimentos que coincidan según la clave de coincidencia de la técnica (en docking, mismo tipo y mismos parámetros molécula/proteína y ligando), excluye los inválidos y los ya declarados en "Similar a", y corta el registro si hay coincidencias sin confirmar | RF-03, RF-04; CU-00; HU-01.A1, E3; EC-07 |
+| Guardar experimento | Dominio (núcleo, paso 3) | Python | Registra autor y fecha, guarda los datos en la base y los archivos PDB y capturas en el almacén, y revierte si algo falla | RF-01, RF-02, RF-11; CU-01 pasos 5-6; HU-01.B1.1 |
+| Vincular documento | Dominio (núcleo, paso 4) | Python | Pide el documento de notas y guarda el enlace; si falla, señala el error a Gestión de excepciones y deja el experimento "no vinculado" | RF-05, RF-09; CU-01 paso 7, E1; HU-01.B1.2, E1 |
+| Técnica Docking | Dominio (plug-in) | Python | Define los parámetros del docking (nombre, unidad, obligatorio, formato), sus validaciones propias (por ejemplo, la notación de molécula y ligando, E6), su clave de coincidencia (los parámetros molécula/proteína y ligando) y sus parámetros de resumen para el listado | RF-01, RF-03, RF-08, RF-12; EC-07 |
+| Técnica Dinámica molecular (futura) | Dominio (plug-in) | Python | No se construye en este TP: es el caso que ejercita el escenario EC-07 | RA-04; EC-07 |
 | Gestión de capturas | Servicios | Python | Agrega o reemplaza las capturas de un experimento ya registrado, solo si el usuario actual es su autor (el usuario identificado es la precondición RA-01) | RF-11; EC-03 |
 | Servicio de consulta | Servicios | Python | Busca y filtra experimentos, arma el listado (con los parámetros de resumen de cada técnica), arma el detalle (con las unidades y el orden de los parámetros que define la técnica, y los estados) y entrega los archivos PDB y las capturas | RF-06, RF-07, RF-10, RF-11, RF-12; CU-02; EC-07 |
 | Repositorio de experimentos | Acceso a datos | Python | Consulta y escribe proyectos, experimentos y parámetros (nombre, valor, unidad) en la base; busca por columnas y por parámetros (filtro por proteína, coincidencias de duplicados) | RF-01, RF-03, RF-06, RF-07; EC-07, EC-03 |
@@ -624,6 +627,7 @@ C4Component
 | Rutas de consulta | Servicio de consulta | Filtros y pedidos de detalle o de archivos | Llamada interna | — |
 | Rutas de consulta | Gestión de excepciones | Errores previstos para traducir en respuesta | Llamada interna | — |
 | Rutas de registro | Registro de técnicas | Pedido de las técnicas disponibles y de sus campos, para armar el formulario | Llamada interna | — |
+| Rutas de registro | Servicio de consulta | Pedido de los proyectos y de los experimentos, para armar el formulario (lista de proyectos y campo "Similar a") | Llamada interna | — |
 | Ejecutor de registro | Registro de técnicas | Pedido de la técnica del experimento, que se agrega a la solicitud de registro | Llamada interna | — |
 | Ejecutor de registro | Validar datos | Solicitud de registro (paso 1) | Llamada interna | — |
 | Ejecutor de registro | Detectar duplicados | Solicitud de registro (paso 2) | Llamada interna | — |
@@ -632,6 +636,7 @@ C4Component
 | Registro de técnicas | Técnica Docking | Registro del plug-in y entrega a quien lo pide | Llamada interna | — |
 | Registro de técnicas | Técnica Dinámica molecular (futura) | Ídem, cuando se incorpore | Llamada interna | — |
 | Servicio de consulta | Registro de técnicas | Pedido de los parámetros de resumen para el listado y de unidades y orden para el detalle | Llamada interna | — |
+| Validar datos | Repositorio de experimentos | Consulta de existencia del proyecto y de los experimentos declarados en "Similar a" | Llamada interna | — |
 | Detectar duplicados | Repositorio de experimentos | Consulta de coincidencias | Llamada interna | — |
 | Guardar experimento | Repositorio de experimentos | Datos y parámetros del experimento | Llamada interna | — |
 | Guardar experimento | Acceso a archivos | Archivo PDB y capturas | Llamada interna | — |
@@ -656,6 +661,8 @@ Notas sobre el diagrama:
 ### 7.4 Relación con la estrategia de solución
 
 - **EC-07:** lo propio de cada técnica vive en un plug-in (hoy "Técnica Docking") que el "Registro de técnicas" entrega al núcleo: el formulario, la validación, la detección de duplicados y el detalle no nombran ninguna técnica. Los parámetros nombre-valor-unidad (en docking, también la molécula/proteína y el ligando) se leen, se escriben y se buscan solo a través del "Repositorio de experimentos". Agregar dinámica molecular es sumar un plug-in y registrarlo.
+- **Entidades y puertos:** las entidades del modelo de dominio (Experimento y ParametroExperimento) no son un componente propio: son los datos que manejan los pasos y que el Repositorio guarda y devuelve. Al implementar (TP4), las interfaces del Repositorio y de Acceso a archivos las define el dominio y las implementa el acceso a datos.
+- **Capas:** la capa de servicios (Ejecutor de registro, Servicio de consulta y Gestión de capturas) solo intermedia; las reglas del negocio y de cada técnica están en la capa de dominio (Registro de técnicas, los cuatro pasos y los plug-ins). Los dos saltos entre capas están justificados en 5.3.
 - **EC-03:** el "Acceso a archivos" es un componente separado del "Repositorio de experimentos", porque la base guarda solo la ruta y los archivos viven en el almacén.
 
 *Nota sobre el diagrama:* la sintaxis C4 de Mermaid es experimental y tiene limitaciones de disposición. Se prioriza la claridad del contenido por sobre el formato visual.
@@ -732,7 +739,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 | Historia de usuario | Criterio de aceptación | Contenedores | Componentes |
 |---|---|---|---|
 | `HU-01.B1.1` Registrar experimento | *Given* un proyecto existente, campos válidos y sin coincidencias; *When* confirma; *Then* se registran autor y fecha y se guarda el experimento | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de registro → Ejecutor de registro (obtiene la técnica del Registro de técnicas) → Validar datos → Detectar duplicados → Guardar experimento → Repositorio de experimentos y Acceso a archivos. Los pasos usan el plug-in de la técnica (Técnica Docking) |
-| `HU-01.B1.1` (criterio de exclusión) | *Given* un experimento previo con la misma molécula/ligando pero inválido; *Then* no se reporta como coincidencia | Aplicación del catálogo → Base de datos de experimentos | Detectar duplicados → Repositorio de experimentos (excluye el estado inválido y los declarados "Similar a") |
+| `HU-01.B1.1` (criterio de exclusión) | *Given* un experimento previo con la misma molécula/ligando pero inválido; *Then* no se reporta como coincidencia | Aplicación del catálogo → Base de datos de experimentos | Detectar duplicados → Repositorio de experimentos (trae los del mismo tipo y clave; el paso excluye los inválidos y los declarados "Similar a") |
 | `HU-01.B1.2` Vincular documento | *Given* un experimento recién guardado; *When* se crea el documento; *Then* se asocia el enlace y se muestra el resumen | Aplicación del catálogo → Google Docs y Base de datos de experimentos | Guardar experimento → Vincular documento → Cliente de Google Docs → (Google Docs); Vincular documento → Repositorio de experimentos |
 | `HU-01.A1` Continuar pese a coincidencia | *Given* una coincidencia mostrada; *When* elige continuar; *Then* se registra como experimento nuevo | Navegador → Aplicación del catálogo (dos solicitudes) → Base de datos de experimentos y Almacén de archivos de resultados | 1.ª solicitud: Rutas de registro → Ejecutor de registro → Validar datos → Detectar duplicados; el registro se corta y Rutas de registro pide a Gestión de excepciones la respuesta con la lista de coincidencias. 2.ª solicitud, con la confirmación: los cuatro pasos hasta Vincular documento |
 | `HU-01.E3` Cancelar por coincidencia | *Given* una coincidencia mostrada; *When* cancela; *Then* no se guarda nada ni se crea documento | Navegador → Aplicación del catálogo | El registro se cortó en Detectar duplicados: Guardar experimento y Vincular documento nunca se ejecutan. Para ver el existente: Rutas de consulta → Servicio de consulta |
@@ -755,18 +762,19 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 - **Decisión:**
   - Tácticas: restringir dependencias y encapsular (Modificabilidad).
   - Estilo: cliente-servidor como base, para todo el sistema.
-  - Patrón: capas (presentación, servicios, acceso a datos y servicios externos) en la Aplicación del catálogo.
+  - Patrón: capas (presentación, servicios, dominio, acceso a datos y servicios externos) en la Aplicación del catálogo. La capa de servicios solo intermedia y las reglas viven en la de dominio.
 - **Alternativas consideradas:**
   - Orientada a eventos como base — descartada: el flujo principal necesita respuesta inmediata (`RA-03`) y la ejecución es más difícil de seguir.
   - Microservicios — descartada: complejidad operativa desproporcionada para dos personas.
   - Tuberías y filtros como estilo base — descartada: la mayor parte del sistema es consulta, no transformación.
+  - Tres capas, con las reglas dentro de la capa de servicios — descartada: esa capa concentraba la orquestación y las reglas de cada técnica, quedaba demasiado grande y mezclaba funciones de naturaleza distinta; separar el dominio deja la capa de servicios fina.
   - MVC como único patrón — descartada: no separa una capa de lógica propia, que es donde viven las reglas de cada técnica (`EC-07`).
   - Hexagonal — descartada: sobreingeniería para este tamaño y dificulta comprobar la Tabla 6.
 - **Consecuencias:**
-  - A favor: pocas piezas que operar; las reglas de cada técnica quedan en la capa de servicios, separadas de las rutas y del SQL.
-  - En contra: el servidor es punto único de falla; algo de indirección entre capas.
+  - A favor: pocas piezas que operar; las reglas de cada técnica quedan en la capa de dominio, separadas de las rutas, de la capa de servicios y del SQL.
+  - En contra: el servidor es punto único de falla; algo de indirección entre capas (una más que en tres capas) y el cuidado de que la capa de servicios no acumule reglas.
 - **Elementos afectados:** contenedores Navegador, Aplicación del catálogo y Base de datos de experimentos; capas de la aplicación.
-- **Cómo se verifica:** las medidas de los dos drivers se verifican en `DA-02` a `DA-05`. Además, revisar en cada pull request que los servicios no importen a las rutas y que el acceso a datos no importe a los servicios, que es lo que exigen las capas (Tabla 6).
+- **Cómo se verifica:** las medidas de los dos drivers se verifican en `DA-02` a `DA-05`. Además, revisar en cada pull request que los servicios no importen a las rutas, que el dominio no importe a los servicios y que el acceso a datos no importe los pasos ni los plug-ins del dominio, que es lo que exigen las capas (Tabla 6); y que la capa de servicios no tenga ningún `if` sobre reglas del negocio o de una técnica.
 
 ### DA-02 — Microkernel en la zona de registro: un núcleo y un plug-in por técnica de ensayo
 
@@ -892,7 +900,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 
 | Escenario (TP2) | Atributo | Tácticas | Estilo o patrón | Decisión | Elemento C4 |
 |---|---|---|---|---|---|
-| `EC-07` | Modificabilidad | Plug-ins; parametrización; usar un intermediario; restringir dependencias; encapsular | Cliente-servidor + capas; microkernel en el registro | `DA-01`, `DA-02`, `DA-03` | Componentes Ejecutor de registro, Registro de técnicas, Técnica Docking, Validar datos, Detectar duplicados, Servicio de consulta, Rutas de registro y Repositorio de experimentos; contenedor Base de datos de experimentos |
+| `EC-07` | Modificabilidad | Plug-ins; parametrización; usar un intermediario; restringir dependencias; encapsular | Cliente-servidor + capas; microkernel en el registro | `DA-01`, `DA-02`, `DA-03` | Componentes Ejecutor de registro (servicios), Registro de técnicas, Técnica Docking, Validar datos y Detectar duplicados (dominio), Servicio de consulta, Rutas de registro y Repositorio de experimentos; contenedor Base de datos de experimentos |
 | `EC-03` | Desempeño | Reducir sobrecarga | Cliente-servidor | `DA-04`, `DA-05`, `DA-07` | Contenedor Almacén de archivos de resultados; nodos Servidor web y Servidor de archivos del laboratorio; componentes Acceso a archivos, Gestión de capturas, Servicio de consulta, Repositorio de experimentos |
 | `EC-05`, `EC-06` (no drivers) | Disponibilidad | Detección de excepciones; manejo de excepciones; degradación controlada; reintento; acotar tiempos de ejecución; adaptar la interfaz | Ninguno adicional | `DA-06` | Componentes Vincular documento, Cliente de Google Docs, Gestión de excepciones |
 
