@@ -83,7 +83,7 @@ Ver 1.2. Los criterios de aceptación de B1.1 y de A1 son la fuente de los casos
 | **B.** Con coincidencia, sin confirmar | La parte "mostrada" de A1 | El registro se corta y se muestra la lista de coincidencias |
 | **C.** Con coincidencia, confirmada | A1 | Se guarda como experimento nuevo, con su propio documento de notas |
 
-Además: **D** (datos faltantes o inválidos) y **E** (falla al guardar los archivos), que son rechazos de B1.1. Los caminos A, B y C (con la cancelación) se muestran en la **secuencia normal** y los rechazos D y E, en la **secuencia de excepciones** (3.5).
+Además: **D** (datos faltantes o inválidos) y **E** (falla al guardar los archivos), que son rechazos de B1.1. Los caminos A y B se muestran en la **secuencia 1**, el C (con la cancelación) en la **secuencia 2** y los rechazos D y E en la **secuencia 3** (3.5).
 
 ### 3.2 Entidades del modelo de dominio que intervienen
 
@@ -113,14 +113,14 @@ Se marcaron los sustantivos de los criterios (proyecto, campos obligatorios, mol
 
 | Dimensión | Elemento | Detalle |
 |---|---|---|
-| Funcionalidad | B1.1 c1 | Con proyecto existente, campos válidos y sin coincidencias, registrar autor y fecha/hora y guardar el experimento |
+| Funcionalidad | B1.1 c1 | Con proyecto existente, campos válidos y sin coincidencias, registrar autor y fecha/hora y guardar el experimento (secuencia 1) |
 | Funcionalidad | B1.1 c2 | Un experimento previo inválido no se reporta como coincidencia |
 | Funcionalidad | B1.1 c3 | Los campos opcionales vacíos no impiden guardar |
-| Funcionalidad | A1 (parte "mostrada") | Con coincidencia y sin confirmación, no guardar nada y mostrar los experimentos coincidentes |
-| Funcionalidad | A1 | Con coincidencia y confirmación, guardar como nuevo, con su propio documento de notas, sin tocar el existente |
-| Funcionalidad | Rechazos | Datos faltantes o inválidos: informar y no guardar. Falla al guardar archivos: revertir y no dejar un experimento a medias |
+| Funcionalidad | A1 (parte "mostrada") | Con coincidencia y sin confirmación, no guardar nada y mostrar los experimentos coincidentes (secuencia 2) |
+| Funcionalidad | A1 | Con coincidencia y confirmación, guardar como nuevo, con su propio documento de notas, sin tocar el existente (secuencia 2) |
+| Funcionalidad | Rechazos | Datos faltantes o inválidos: informar y no guardar. Falla al guardar archivos: revertir y no dejar un experimento a medias (secuencia 3) |
 | Estructura | Frontera | `PantallaRegistro` (formulario), `PantallaCoincidencias` (tabla con "Continuar" y "Cancelar") y `ClienteGoogleDocs` (interfaz hacia el servicio externo, simulado) |
-| Estructura | Control | `CargaDeExperimentos`, `GestionDeExcepciones`, `EjecutorDeRegistro` (coordina y ejecuta los cuatro pasos), `RegistroDeTecnicas` (con el plug-in Docking) y `RepositorioDeExperimentos` (experimentos, estructuras y capturas) |
+| Estructura | Control | Los cinco controllers de la robustez: `CargaDeExperimentos`, `GestionDeExcepciones`, `EjecutorDeRegistro` (coordina el proceso; cada paso conserva su responsabilidad), `RegistroDeTecnicas` (con el plug-in Docking) y `RepositorioDeExperimentos` (experimentos, estructuras y capturas) |
 | Estructura | Dominio | `Experimento`, `ParametroExperimento`, las estructuras (PDB), las capturas y el documento de notas |
 | Calidad | `EC-07` | La clave de coincidencia, las validaciones y los parámetros los define el plug-in: una técnica nueva no cambia el núcleo ni la entidad |
 | Calidad | `EC-11` | Al continuar de todos modos no hay que volver a cargar ningún dato: se reenvía lo mismo con la confirmación |
@@ -183,11 +183,11 @@ flowchart LR
 | `RegistroDeTecnicas` | Entregar la técnica del tipo elegido | `RegistroDeTecnicas`, que administra al plug-in `TecnicaDocking` (el plug-in no es controller ni participante propio) | Dominio (microkernel) | Variaciones protegidas (`EC-07`) |
 | `RepositorioDeExperimentos` | Guardar y recuperar lo que produce el registro | Dos interfaces separadas: `RepositorioExperimentos` (`existe_proyecto`, `existe_experimento`, `con_parametros`, `guardar`, `actualizar_rutas`, `eliminar`) y `AccesoACapturasYEstructuras` (`guardar_estructura`, `guardar_captura`, `eliminar_archivos`) | Acceso a datos | Bajo acoplamiento: los pasos no saben cómo se guarda. Alta cohesión: solo guarda y recupera |
 
-**Cómo se delega dentro de un controller agrupado.** En las secuencias, `EjecutorDeRegistro` figura como el participante que representa al proceso: los mensajes que salen de él los envía el paso que corresponde, y esto se indica con una nota de paso ("Paso 3 · GuardarExperimento") antes de cada bloque de mensajes. De la misma manera, los mensajes hacia `RepositorioDeExperimentos` llevan el nombre de la interfaz que los atiende (`RepositorioExperimentos.guardar(...)` o `AccesoACapturasYEstructuras.guardar_estructura(...)`), y los mensajes hacia `RegistroDeTecnicas`, el del plug-in (`TecnicaDocking.validar(...)`). No se agregan participantes nuevos.
+**Cómo se delega dentro de un controller agrupado.** En las secuencias, `EjecutorDeRegistro` figura como el participante que representa al proceso, y el mensaje que corresponde a un paso lleva su etiqueta entre corchetes (por ejemplo `[GuardarExperimento]`). Los mensajes hacia `RepositorioDeExperimentos` agrupan las operaciones de las interfaces que lo componen. No se agregan participantes nuevos, y las llamadas internas de cada paso (técnica, consultas, detalle de archivos) no se dibujan: están en el modelo de clases.
 
 **Qué pasó con los controllers de la versión anterior.** `ValidarDatos`, `DetectarDuplicados`, `GuardarExperimento` y `VincularDocumento` dejaron de ser participantes independientes, y también `TecnicaDocking`, `RepositorioExperimentos` y `AccesoACapturasYEstructuras`. `ClienteGoogleDocs` se reclasifica como boundary porque es la interfaz hacia un sistema externo.
 
-**Riesgo a tener en cuenta.** La referencia dice que "lo que no aparece en la secuencia no aparece en las clases". Las clases de los pasos, la técnica y las dos interfaces de acceso aparecen en las secuencias **como notas y prefijos de mensaje**, no como participantes. Está registrado como diferencia en la validación del modelo de clases (sección 4) y queda a confirmar con el docente.
+**Riesgo a tener en cuenta.** La referencia dice que "lo que no aparece en la secuencia no aparece en las clases". Las clases de los pasos, la técnica y las dos interfaces de acceso aparecen en las secuencias **solo como etiquetas de los mensajes** (los pasos) o no aparecen (la técnica y el detalle de las interfaces), no como participantes. Está registrado como diferencia en la validación del modelo de clases (sección 4) y queda a confirmar con el docente.
 
 **Dónde vive cada regla de negocio.**
 
@@ -219,11 +219,46 @@ flowchart LR
 
 ### 3.5 Diagramas de secuencia
 
-Se dibujan dos secuencias: la **normal** (el registro exitoso, sin coincidencias o continuando pese a una, y la cancelación) y la de **excepciones** (rechazos de validación y falla de almacenamiento). Los participantes son los elementos del diagrama de robustez más el actor, y el actor solo interactúa con las pantallas. `SolicitudRegistro` no es participante: es el objeto de datos que viaja por los pasos y lleva los datos del formulario, el autor, la técnica, la bandera `confirmada` y lo que van sumando los pasos. Los errores previstos (`CoincidenciasSinConfirmar`, `ErrorValidacion`, `ErrorAlmacenamiento`) son excepciones que cortan el registro: los pasos siguientes no se ejecutan.
+Se dibujan **tres secuencias cortas**, una por situación: (1) registro sin coincidencias, (2) registro con coincidencias, con la cancelación y la continuación (HU-01.A1) y (3) excepciones. Los participantes son los elementos del diagrama de robustez más el actor, y el actor solo interactúa con las pantallas. Los diagramas muestran **los mensajes clave entre participantes**, no el detalle interno de cada paso. Los errores previstos (`CoincidenciasSinConfirmar`, `ErrorValidacion`, `ErrorAlmacenamiento`) son excepciones que cortan el registro: los pasos siguientes no se ejecutan.
 
-**Convención.** `EjecutorDeRegistro` representa al proceso de registro: coordina y los pasos hacen el trabajo. Una nota "Paso N · Clase" indica qué paso envía los mensajes que siguen. Los mensajes hacia un controller agrupado llevan el prefijo de la clase o interfaz que los atiende (por ejemplo `RepositorioExperimentos.guardar` o `TecnicaDocking.validar`). Se omiten las respuestas que no aportan.
+**Convención.** `EjecutorDeRegistro` coordina el proceso y cada paso hace su trabajo. Los pasos no son participantes: un mensaje que sale de `EjecutorDeRegistro` o de un paso se marca con la etiqueta del paso entre corchetes (por ejemplo `[GuardarExperimento]`) para que se vea qué paso es responsable, sin agregar participantes. Los mensajes hacia `RepositorioDeExperimentos` agrupan operaciones del mismo momento (por ejemplo, guardar el experimento y su estructura).
 
-**Secuencia normal: registro exitoso (B1.1 y A1) y cancelación**
+**Qué se omite en los diagramas** (existe en el código y en el modelo de clases, sección 4):
+- La creación de `SolicitudRegistro` (el objeto de datos que viaja entre los pasos, ver 3.4).
+- El pedido de la técnica a `RegistroDeTecnicas` y las operaciones de la técnica (`definiciones`, `validar`, `clave_de_coincidencia`).
+- Las consultas de `ValidarDatos` al repositorio (`existe_proyecto`, `existe_experimento`).
+- El detalle del guardado de archivos (`guardar_estructura`, `guardar_captura`) y de la actualización de rutas (`actualizar_rutas`): se resumen en un mensaje de guardado.
+- La creación del `Experimento` como mensaje aparte y las respuestas intermedias que no aportan.
+
+Por eso `RegistroDeTecnicas` no aparece en las secuencias: su participación (entregar la técnica del tipo elegido) es interna al ejecutor y se ve en el modelo de clases.
+
+**Secuencia 1. Registro sin coincidencias (HU-01.B1.1)**
+
+```mermaid
+sequenceDiagram
+    actor Inv as Investigador/a
+    participant PR as PantallaRegistro
+    participant CE as CargaDeExperimentos
+    participant E as EjecutorDeRegistro
+    participant RX as RepositorioDeExperimentos
+    participant CG as ClienteGoogleDocs
+    Inv->>PR: confirmar()
+    PR->>CE: registrar_experimento(formulario, pdb)
+    CE->>E: registrar(datos, autor)
+    E->>E: [ValidarDatos] datos válidos
+    E->>RX: [DetectarDuplicados] con_parametros(tipo, clave)
+    RX-->>E: sin coincidencias
+    E->>RX: [GuardarExperimento] guardar(experimento) y guardar_estructura(pdb)
+    RX-->>E: experimento guardado
+    E->>CG: [VincularDocumento] crear_documento()
+    CG-->>E: enlace
+    E->>RX: [VincularDocumento] guardar el enlace
+    E-->>CE: Resultado(registrado, experimento)
+    CE-->>PR: mostrar(resultado)
+    PR-->>Inv: experimento registrado con su documento de notas
+```
+
+**Secuencia 2. Registro con coincidencias (HU-01.A1)**
 
 ```mermaid
 sequenceDiagram
@@ -233,73 +268,37 @@ sequenceDiagram
     participant CE as CargaDeExperimentos
     participant GX as GestionDeExcepciones
     participant E as EjecutorDeRegistro
-    participant RT as RegistroDeTecnicas
     participant RX as RepositorioDeExperimentos
     participant CG as ClienteGoogleDocs
-    participant X as Experimento
     Inv->>PR: confirmar()
     PR->>CE: registrar_experimento(formulario, pdb)
-    CE->>E: registrar(datos, autor, confirmada = falso)
-    E->>RT: RegistroDeTecnicas.tecnica(tipo)
-    RT-->>E: plug-in TecnicaDocking
-    Note over E: crea la SolicitudRegistro con los datos, el autor, la técnica y la bandera
-    Note over E,RT: Paso 1 · ValidarDatos
-    E->>RT: TecnicaDocking.definiciones()
-    E->>RX: RepositorioExperimentos.existe_proyecto(proyecto_id)
-    E->>RX: RepositorioExperimentos.existe_experimento(id) por cada Similar a
-    E->>RT: TecnicaDocking.validar(parametros)
-    Note over E,RT: sin errores (los rechazos están en la secuencia de excepciones)
-    Note over E,RX: Paso 2 · DetectarDuplicados
-    E->>RT: TecnicaDocking.clave_de_coincidencia(parametros)
-    RT-->>E: clave
-    E->>RX: RepositorioExperimentos.con_parametros(tipo, clave)
-    RX-->>E: candidatos
-    Note over E: descarta los inválidos y los declarados en Similar a, quedan las coincidencias
-    alt sin coincidencias
-        Note over E,CG: Paso 3 · GuardarExperimento
-        E->>X: crear(autor, fecha_de_carga, parametros)
-        E->>RX: RepositorioExperimentos.guardar(experimento)
-        RX-->>E: id
-        E->>RX: AccesoACapturasYEstructuras.guardar_estructura(id, pdb)
-        RX-->>E: ruta
-        opt el investigador adjuntó capturas
-            E->>RX: AccesoACapturasYEstructuras.guardar_captura(id, nombre, contenido)
-        end
-        E->>RX: RepositorioExperimentos.actualizar_rutas(experimento)
-        Note over E,CG: Paso 4 · VincularDocumento
-        E->>CG: ClienteGoogleDocs.crear_documento(titulo)
-        CG-->>E: enlace
-        E->>RX: RepositorioExperimentos.actualizar_rutas(experimento)
-        E-->>CE: Resultado(registrado, experimento)
+    CE->>E: registrar(datos, autor)
+    E->>RX: [DetectarDuplicados] con_parametros(tipo, clave)
+    RX-->>E: coincidencias
+    E--xCE: CoincidenciasSinConfirmar(coincidencias)
+    CE->>GX: respuesta_para(error)
+    GX-->>CE: pantalla de coincidencias
+    CE-->>PC: mostrar(coincidencias)
+    PC-->>Inv: Cancelar o Continuar de todos modos
+    alt el investigador cancela
+        Inv->>PC: cancelar()
+        PC->>CE: cancelar_registro()
+        CE-->>PR: mostrar(registro cancelado)
+        PR-->>Inv: no se guardó ningún dato
+    else el investigador continúa
+        Inv->>PC: continuar()
+        PC->>CE: continuar_pese_a_coincidencia(formulario, pdb)
+        CE->>E: registrar(datos, autor, confirmada = verdadero)
+        Note over E,RX: se repiten la validación y la búsqueda y, con la confirmación, la detección deja pasar
+        E->>RX: [GuardarExperimento] guardar(experimento nuevo) y guardar_estructura(pdb)
+        E->>CG: [VincularDocumento] crear_documento() propio y guardar su enlace
+        E-->>CE: Resultado(registrado, experimento nuevo)
         CE-->>PR: mostrar(resultado)
-        PR-->>Inv: muestra el experimento registrado y su documento de notas
-    else coincidencias y confirmada = falso
-        E--xCE: CoincidenciasSinConfirmar(coincidencias, clave)
-        Note over E: los pasos 3 y 4 no se ejecutan y no se guarda nada
-        CE->>GX: respuesta_para(error)
-        GX-->>CE: pantalla de coincidencias
-        CE-->>PC: mostrar(coincidencias)
-        PC-->>Inv: Cancelar registro / Continuar de todos modos
-        alt el investigador cancela
-            Inv->>PC: cancelar()
-            PC->>CE: cancelar_registro()
-            CE-->>PR: mostrar(registro cancelado)
-            PR-->>Inv: no se guardó ningún dato
-        else el investigador continúa de todos modos (HU-01.A1)
-            Inv->>PC: continuar()
-            PC->>CE: continuar_pese_a_coincidencia(formulario, pdb)
-            CE->>E: registrar(datos, autor, confirmada = verdadero)
-            Note over E,RX: segunda solicitud: repite los pasos 1 y 2 y, como confirmada = verdadero, la detección deja pasar
-            E->>X: crear(autor, fecha_de_carga, parametros)
-            Note over E,CG: pasos 3 y 4 como en la rama sin coincidencias: guardan el experimento nuevo y crean su propio documento de notas. El existente no se modifica ni se vincula
-            E-->>CE: Resultado(registrado, experimento nuevo)
-            CE-->>PR: mostrar(resultado)
-            PR-->>Inv: muestra el experimento nuevo con su documento de notas
-        end
+        PR-->>Inv: experimento nuevo con su documento, el existente no se toca
     end
 ```
 
-**Secuencia de excepciones: rechazo por datos inválidos y falla de almacenamiento**
+**Secuencia 3. Excepciones**
 
 ```mermaid
 sequenceDiagram
@@ -308,41 +307,31 @@ sequenceDiagram
     participant CE as CargaDeExperimentos
     participant GX as GestionDeExcepciones
     participant E as EjecutorDeRegistro
-    participant RT as RegistroDeTecnicas
     participant RX as RepositorioDeExperimentos
     Inv->>PR: confirmar()
     PR->>CE: registrar_experimento(formulario, pdb)
-    CE->>E: registrar(datos, autor, confirmada = falso)
-    E->>RT: RegistroDeTecnicas.tecnica(tipo)
-    Note over E,RX: Paso 1 · ValidarDatos
-    E->>RT: TecnicaDocking.definiciones()
-    E->>RX: RepositorioExperimentos.existe_proyecto(proyecto_id)
-    E->>RT: TecnicaDocking.validar(parametros)
+    CE->>E: registrar(datos, autor)
     alt datos faltantes o inválidos
-        E--xCE: ErrorValidacion(errores)
-        Note over E: los pasos 2, 3 y 4 no se ejecutan
+        E--xCE: [ValidarDatos] ErrorValidacion(errores)
         CE->>GX: respuesta_para(error)
         GX-->>CE: mensajes de validación
         CE-->>PR: mostrar(formulario con errores)
-        PR-->>Inv: formulario con los errores y sin nada guardado
-    else datos válidos y falla el almacenamiento de archivos
-        Note over E,RX: Paso 2 sin coincidencias. Paso 3 · GuardarExperimento
-        E->>RX: RepositorioExperimentos.guardar(experimento)
-        E->>RX: AccesoACapturasYEstructuras.guardar_estructura(id, pdb)
-        RX--xE: falla el almacenamiento
-        E->>RX: RepositorioExperimentos.eliminar(id)
-        E->>RX: AccesoACapturasYEstructuras.eliminar_archivos(id)
+        PR-->>Inv: errores informados, nada se guardó
+    else falla el almacenamiento
+        E->>RX: [GuardarExperimento] guardar(experimento) y guardar_estructura(pdb)
+        RX--xE: falla el guardado
+        E->>RX: [GuardarExperimento] eliminar(experimento) y eliminar_archivos()
         E--xCE: ErrorAlmacenamiento
         CE->>GX: respuesta_para(error)
         GX-->>CE: mensaje de falla
         CE-->>PR: mostrar(aviso)
-        PR-->>Inv: avisa que no se guardó y no queda un experimento a medias
+        PR-->>Inv: el registro no pudo completarse, no queda nada a medias
     end
 ```
 
-La reversión se resuelve con la compensación que muestra el diagrama (eliminar el experimento y sus archivos). Cómo se cubre que falle la propia compensación queda como sacrificio ya declarado en el TP3 (5.6).
+En la rama de falla de almacenamiento se asume que la validación y la detección ya pasaron (no se repiten en el diagrama). La reversión se resuelve con la compensación del diagrama (eliminar el experimento y sus archivos). Cómo se cubre que falle la propia compensación queda como sacrificio ya declarado en el TP3 (5.6).
 
-**Qué hace cada entidad en las secuencias.** `Experimento` se crea de la misma manera en las dos ramas que guardan (`crear`) y se actualiza con las rutas y el enlace. Las entidades `Estructura` y `CapturaResultado` no son participantes: el repositorio las guarda y devuelve su ruta, que el `Experimento` conserva. `DocumentoNotas` tampoco es participante: lo representa el enlace que devuelve `ClienteGoogleDocs.crear_documento` y que se guarda en el experimento. Ninguna tiene reglas propias en esta HU (ver 4).
+**Entidades.** Ninguna entidad es participante de las secuencias: `Experimento` se crea y se completa dentro de los pasos, y `Estructura`, `CapturaResultado` y `DocumentoNotas` se representan por la ruta o el enlace que el repositorio y `ClienteGoogleDocs` devuelven. Ninguna tiene reglas propias en esta HU (ver 4). Es una diferencia con la referencia, registrada en 4.1 y a confirmar con el docente.
 
 **Asignación de responsabilidades (GRASP).** Se detalla por clase del diseño. Las clases de los cuatro pasos pertenecen al controller `EjecutorDeRegistro`; `TecnicaDocking`, a `RegistroDeTecnicas`; y `RepositorioExperimentos` y `AccesoACapturasYEstructuras`, a `RepositorioDeExperimentos`.
 
@@ -555,9 +544,9 @@ La consigna pide contrastar el diagrama con el diseño y anotar cada diferencia 
 
 | Diferencia encontrada | Qué estaba mal | Qué se hizo |
 |---|---|---|
-| `ValidarDatos`, `DetectarDuplicados`, `GuardarExperimento`, `VincularDocumento` y `TecnicaDocking` son clases y no participantes de las secuencias (aparecen como notas de paso y prefijos de mensaje) | El diseño agrupa los pasos en `EjecutorDeRegistro` y el plug-in en `RegistroDeTecnicas` para no tener un controller por paso | Se mantienen como clases separadas (una responsabilidad cada una y `EC-07`). **A confirmar con el docente** si lo acepta o si exige participantes |
-| `RepositorioExperimentos` y `AccesoACapturasYEstructuras` son interfaces separadas pero un solo controller en robustez | Solo la agrupación del robustez | Cada mensaje de las secuencias lleva el prefijo de la interfaz que lo atiende. Las operaciones de archivos (`guardar_estructura`, `guardar_captura`, `eliminar_archivos`) son de `AccesoACapturasYEstructuras` y las de experimentos (incluidas `actualizar_rutas` y `eliminar`) son de `RepositorioExperimentos` |
-| `guardar_captura` y `existe_experimento` estaban en el código y en las clases, pero no en las secuencias | Faltaban en el diseño | Se agregaron a la secuencia normal (la primera, dentro de un `opt`) |
+| `ValidarDatos`, `DetectarDuplicados`, `GuardarExperimento`, `VincularDocumento` y `TecnicaDocking` son clases y no participantes de las secuencias (los pasos aparecen como etiquetas entre corchetes en los mensajes y `TecnicaDocking`, solo en el modelo de clases) | El diseño agrupa los pasos en `EjecutorDeRegistro` y el plug-in en `RegistroDeTecnicas` para no tener un controller por paso | Se mantienen como clases separadas (una responsabilidad cada una y `EC-07`). **A confirmar con el docente** si lo acepta o si exige participantes |
+| `RepositorioExperimentos` y `AccesoACapturasYEstructuras` son interfaces separadas pero un solo controller en robustez | Solo la agrupación del robustez | Las secuencias agrupan sus mensajes hacia el controller. Las operaciones de archivos (`guardar_estructura`, `guardar_captura`, `eliminar_archivos`) son de `AccesoACapturasYEstructuras` y las de experimentos (incluidas `actualizar_rutas` y `eliminar`) son de `RepositorioExperimentos` |
+| `guardar_captura` y `existe_experimento` estaban en el código y en las clases, pero no en las secuencias | No es un error: son detalle interno | Son operaciones internas de los pasos y del repositorio: están en el modelo de clases y se omiten de las secuencias, que muestran solo los mensajes clave (3.5) |
 | `Estructura`, `CapturaResultado` y `DocumentoNotas` son entidades en la robustez y no son clases del código | No tienen reglas ni comportamiento en esta HU: son una ruta o un enlace dentro de `Experimento` | Se dejan como atributos. **A confirmar con el grupo:** mantenerlas en la robustez (modelo del TP1) o sacarlas |
 | Los atributos opcionales de `Experimento` y de `DatosRegistro` (`hardware`, `objetivo`, `hipotesis`, `notas`, etc.) no estaban en el diagrama | Se había simplificado | Se agregaron al diagrama |
 | Las operaciones de las pantallas (`confirmar`, `mostrar`, `continuar`, `cancelar`) no son métodos del código | Son formularios y plantillas HTML | Se mantienen como mensajes de la frontera. Las rutas del código se llaman como en las secuencias (`registrar_experimento`, `continuar_pese_a_coincidencia`, `cancelar_registro`) |
@@ -678,7 +667,7 @@ Ver `docs/design/cobertura.md`. Esa medición es de la versión anterior del có
 | Cada participante de las secuencias pertenece a un componente de la ficha | Sí | Tabla "Elemento → componente del TP3 → capa" (3.4) |
 | Cada mensaje entre componentes está en el catálogo de relaciones del TP3 | Sí, con las diferencias de 8.2 | `CE → E` y `CE → GX` están tal cual. Los mensajes de `E` a `RT`, `RX` y `CG` corresponden a las relaciones de los pasos del catálogo (Validar datos, Detectar duplicados, Guardar experimento y Vincular documento → Repositorio, Acceso a archivos y Cliente de Google Docs; Ejecutor → Registro de técnicas), porque el controller `EjecutorDeRegistro` representa al proceso y sus pasos. Las llamadas a la técnica no se dibujan en el TP3 a propósito |
 | El diseño respeta las restricciones del estilo y del patrón | Sí | 2.2 y la tabla de "cómo se agrupó en la robustez" (3.4). Las dependencias del código van hacia abajo; el ejecutor no tiene lógica |
-| La táctica del escenario de calidad aparece como operación o mensaje | Sí | `RegistroDeTecnicas.tecnica(tipo)`, `TecnicaDocking.definiciones()` y `validar()` y `TecnicaDocking.clave_de_coincidencia()` en la secuencia normal. Es "diferir el enlace" y "parametrización" de `EC-07` |
+| La táctica del escenario de calidad aparece como operación o mensaje | Sí | Operaciones `RegistroDeTecnicas.tecnica(tipo)`, `Tecnica.definiciones()`, `validar()` y `clave_de_coincidencia()` del modelo de clases (4), no mensajes de las secuencias, y la prueba CP-11. Es "diferir el enlace" y "parametrización" de `EC-07` |
 | Cada entidad del diagrama de robustez está en el modelo de dominio del TP1 | Sí | Tabla 3.2 |
 | Cada entidad que interviene según 3.2 aparece en el diseño, o se explica por qué no | Sí | `Usuario` y `Proyecto` se explican en 3.2 (viajan como identificadores); las demás están en la robustez |
 | La medida del escenario tiene una prueba que la verifica | Sí | `CP-11` (`EC-07`) y `CP-06` (`EC-11`) |
@@ -713,7 +702,7 @@ La consigna pide decir qué cambió al bajar al detalle. Hay cambios ya aplicado
 | EC-07 | Registro de técnicas, Técnica Docking | `RegistroDeTecnicas`, `Tecnica`, `TecnicaDocking` | `src/dominio/registro_tecnicas.py`, `src/dominio/tecnica.py`, `src/dominio/tecnica_docking.py` | CP-10, CP-11, CP-17 |
 | EC-11 | Carga de experimentos | `CargaDeExperimentos` | `src/presentacion/carga_experimentos.py`, plantilla `coincidencias.html` | CP-06 |
 
-Todo criterio de aceptación llega al menos a una prueba. Las clases del diagrama aparecen en las secuencias como participantes o, las que están agrupadas en un controller (los pasos, el plug-in y las dos interfaces de acceso), como notas y prefijos de mensaje (4.1).
+Todo criterio de aceptación llega al menos a una prueba. Las clases del diagrama aparecen en las secuencias como participantes o, las que están agrupadas en un controller (los pasos, el plug-in y las dos interfaces de acceso), solo como etiquetas de mensaje o en el modelo de clases (4.1).
 
 ---
 
