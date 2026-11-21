@@ -369,3 +369,37 @@ alcance y consistencia interna del propio documento en evolución.
   justificado, pero queda una pregunta abierta para el docente: si la
   regla "solo el autor puede modificar las capturas" es una regla de
   servicio o debe pasar a la capa de dominio.
+
+  ## Uso de IA — Revisión del Diseño Detallado y Casos de Prueba (TP4)
+
+**Herramienta:** ChatGPT (asistente de IA conversacional).
+
+**Registro de intercambios:**
+
+1. **Consulta:** se compartió la versión actualizada del diseño detallado de HU-01.A1 para revisar su coherencia con los requisitos, las decisiones previas del grupo y la arquitectura definida. Se pidió analizar los diagramas de robustez, las secuencias, el modelo de clases, las responsabilidades de los componentes y la correspondencia con los casos de prueba.
+   **Generó:** observaciones sobre el flujo de registro con y sin coincidencias, la confirmación y cancelación de solicitudes pendientes, las responsabilidades de `EjecutorDeRegistro` y `GestorDeRegistro`, el manejo de excepciones, el almacenamiento de archivos y la integración con Google Docs.
+   **Resultado:** se utilizaron las observaciones como puntos de revisión, sin aceptar automáticamente las propuestas. Se mantuvieron como referencia las decisiones ya establecidas por el grupo y las restricciones indicadas por el docente.
+
+2. **Consulta:** se compartieron los archivos de pruebas correspondientes a los distintos módulos para revisar su correspondencia con los criterios de prueba y con el diseño actualizado.
+   **Generó:** una revisión de las pruebas de carga de experimentos, detección de duplicados, entidades, gestión de excepciones, repositorio, servicio de consulta, ejecutor, gestor y técnicas. Se señalaron algunos aspectos cuya cobertura convenía comprobar con mayor precisión.
+   **Resultado:** se identificaron puntos para revisar, entre ellos la comprobación de que los datos inválidos no lleguen a provocar una búsqueda de duplicados y la cobertura del manejo de errores. No se modificaron los tests en esta etapa.
+
+3. **Consulta:** se volvió a proporcionar el contenido de los archivos `test_gestion_de_excepciones.py` y `test_entidades.py` para precisar qué verificaba cada uno.
+   **Generó:** una nueva revisión de ambos archivos a partir del contenido compartido.
+   **Resultado:** se confirmó que son archivos diferentes y que cubren responsabilidades distintas: `test_entidades.py` verifica la comparación de parámetros, el rechazo de estados de validez desconocidos y la búsqueda de parámetros; `test_gestion_de_excepciones.py` verifica la traducción de errores de validación, solicitudes no pendientes, errores de almacenamiento y errores previstos genéricos mediante `respuesta_para`.
+
+4. **Consulta:** se pidió realizar una revisión integral del diseño antes de modificar código o pruebas, prestando especial atención a las contradicciones entre diagramas y responsabilidades.
+   **Generó:** una lista de cuestiones para contrastar, entre ellas la relación entre el gestor y Google Docs, el guardado del enlace del documento, la compensación ante fallos de almacenamiento, la representación de los componentes en robustez y secuencias, la semántica de `similar_a`, los estados de preparación y las solicitudes pendientes.
+   **Resultado:** se preparó una consigna para consolidar primero las decisiones de diseño y corregir la documentación. Se estableció que no debían introducirse abstracciones innecesarias ni darse por implementadas funcionalidades que todavía no se hubieran comprobado en el código.
+
+**Qué se descartó y por qué:**
+- Se descartaron las propuestas de agregar controladores para cada paso u operación del registro. La usuaria ya había aclarado reiteradamente que el diseño debía simplificarse y que el docente había cuestionado la cantidad de controladores de la propuesta anterior.
+- Se descartaron las modificaciones que suponían agregar clases, interfaces o componentes sin una responsabilidad concreta que las justificara.
+- No se aceptaron automáticamente las interpretaciones de la IA sobre decisiones que el grupo ya había definido o que la usuaria había corregido expresamente. Las propuestas debían respetar los requisitos, las decisiones previas y las observaciones del docente.
+- No se modificaron el código ni los tests durante esta revisión. Se decidió priorizar la consolidación del diseño detallado antes de pasar a la implementación.
+- No se consideró que una funcionalidad estuviera implementada por aparecer en un diagrama, en la documentación o en un caso de prueba. Era necesario comprobarlo en el código y, cuando correspondiera, ejecutar las pruebas.
+
+**Errores o imprecisiones detectadas:**
+- ChatGPT insistió en propuestas que no respetaban las restricciones de diseño indicadas por la usuaria. En más de una ocasión fue necesario reiterar que no debía crearse un controlador por cada operación, que la arquitectura debía simplificarse y que no se quería volver a una estructura con una cantidad excesiva de controladores.
+- ChatGPT volvió a plantear supuestos sobre responsabilidades y componentes que la usuaria ya había aclarado o rechazado. La usuaria tuvo que corregir esas interpretaciones y señalar que debían tomarse en cuenta las decisiones establecidas en intercambios anteriores, en lugar de volver a proponer soluciones incompatibles con ellas.
+- ChatGPT no siempre distinguió entre decisiones de diseño, funcionalidades proyectadas e implementación comprobada. Fue necesario insistir en que no se afirmara que algo estaba implementado sin haber revisado el código correspondiente.
