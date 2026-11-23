@@ -8,6 +8,8 @@ from src.dominio.gestor_registro import GestorDeRegistro
 from src.transversal.gestion_excepciones import ErrorAlmacenamiento
 from tests.conftest import AHORA, solicitud_de
 
+TECNICA = solicitud_de().tecnica
+
 
 class ArchivosQueFallan(AlmacenamientoArchivosEnMemoria):
     """Doble de prueba: guarda el PDB y falla con la captura (se interrumpe el guardado, CU-01 E2)."""
@@ -54,13 +56,24 @@ def test_vincular_crea_un_documento_propio_y_guarda_el_enlace(repo, archivos):
     cliente = ClienteGoogleDocsSimulado()
     gestor = GestorDeRegistro(repo, archivos, cliente, DetectorDeDuplicados(repo))
     e = gestor.guardar_experimento(solicitud_de())
-    gestor.vincular_documento(e)
+    gestor.vincular_documento(e, TECNICA)
     assert e.documento_notas in cliente.documentos
     assert repo.todos()[0].documento_notas == e.documento_notas
 
 
 def test_cada_experimento_recibe_un_documento_distinto(gestor):
     e1, e2 = gestor.guardar_experimento(solicitud_de()), gestor.guardar_experimento(solicitud_de())
-    gestor.vincular_documento(e1)
-    gestor.vincular_documento(e2)
+    gestor.vincular_documento(e1, TECNICA)
+    gestor.vincular_documento(e2, TECNICA)
     assert e1.documento_notas != e2.documento_notas
+
+
+def test_el_documento_se_crea_con_apartados_y_etiquetas_legibles(repo, archivos):
+    cliente = ClienteGoogleDocsSimulado()
+    gestor = GestorDeRegistro(repo, archivos, cliente, DetectorDeDuplicados(repo))
+    e = gestor.guardar_experimento(solicitud_de())
+    gestor.vincular_documento(e, TECNICA)
+    apartados = dict(cliente.apartados[e.documento_notas])
+    assert [n for n in apartados][:3] == ["Fecha de realización", "Autor", "Técnica"]
+    assert apartados["Autor"] == "ana" and "Notas" in apartados
+    assert "Proteína: Proteasa HIV-1" in apartados["Parámetros"]

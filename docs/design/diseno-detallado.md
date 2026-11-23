@@ -29,7 +29,7 @@ Criterio de aceptación:
 2. Un experimento previo con la misma molécula/ligando pero "inválido" no se reporta como coincidencia.
 3. Con los campos opcionales vacíos, el experimento se guarda sin exigirlos.
 
-**Google Docs, simulado por defecto.** El criterio de A1 pide un *documento de notas propio*, así que la operación de vincular el documento (`GestorDeRegistro.vincular_documento`) **sí se diseña y se ejecuta**, usando una interfaz `ClienteGoogleDocs` con una implementación simulada (`ClienteGoogleDocsSimulado`: no se conecta a ningún servicio, devuelve un enlace ficticio y recuerda lo creado) y otra real y opcional (`ClienteGoogleDocsReal`, que crea un documento vacío en una carpeta de Drive y solo se usa si se definen las variables de entorno; se prueba a mano). Con eso el criterio de A1 se cumple completo. Quedan **fuera de alcance**: el reintento cuando falla el vínculo (`HU-01.E1`) y el resto de `HU-01.B1.2`.
+**Google Docs, simulado por defecto.** El criterio de A1 pide un *documento de notas propio*, así que la operación de vincular el documento (`GestorDeRegistro.vincular_documento`) **sí se diseña y se ejecuta**, usando una interfaz `ClienteGoogleDocs` con una implementación simulada (`ClienteGoogleDocsSimulado`: no se conecta a ningún servicio, devuelve un enlace ficticio y recuerda lo creado) y otra real y opcional (`ClienteGoogleDocsReal`, que crea en una carpeta de Drive un documento con formato —título y apartados predefinidos— y solo se usa si se definen las variables de entorno; se prueba a mano). Con eso el criterio de A1 se cumple completo. Quedan **fuera de alcance**: el reintento cuando falla el vínculo (`HU-01.E1`) y el resto de `HU-01.B1.2`.
 
 ### 1.3 Por qué esta HU
 
@@ -205,7 +205,7 @@ flowchart LR
 | La solicitud validada se conserva hasta confirmar o cancelar, y al confirmar no se repite nada | `EjecutorDeRegistro` | Es estado del proceso, no una regla del negocio; la solicitud es inmutable, así los datos no cambian entre la detección y la confirmación |
 | Siempre se crea un experimento nuevo; nunca se toca el existente | `GestorDeRegistro.guardar_experimento` | No recibe ni modifica los experimentos de las coincidencias |
 | Autor y fecha de carga se asignan solos | `GestorDeRegistro.guardar_experimento` | Construye el experimento (`RF-02`) |
-| Cada experimento tiene su propio documento de notas | `GestorDeRegistro.vincular_documento` | Crea un documento por experimento y nunca reutiliza el de otro |
+| Cada experimento tiene su propio documento de notas | `GestorDeRegistro.vincular_documento` | Crea un documento por experimento, con apartados predefinidos, y nunca reutiliza el de otro |
 | Si falla el guardado de archivos se revierte el experimento | `GestorDeRegistro.guardar_experimento` | Cierra la consistencia entre los dos almacenes (TP3, 5.6) |
 | Qué operación sigue y en qué orden | `EjecutorDeRegistro` | Es una regla de servicio, no del negocio |
 
@@ -279,8 +279,8 @@ sequenceDiagram
     GR->>RX: guardar el experimento y sus archivos
     RX-->>GR: experimento guardado
     GR-->>E: experimento
-    E->>GR: vincular_documento(experimento)
-    GR->>CG: crear_documento()
+    E->>GR: vincular_documento(experimento, tecnica)
+    GR->>CG: crear_documento(titulo, apartados)
     CG-->>GR: enlace
     GR->>RX: guardar el enlace
     E-->>CE: Resultado(registrado)
@@ -333,8 +333,8 @@ sequenceDiagram
         E->>GR: guardar_experimento(solicitud)
         GR->>EX: crear (experimento nuevo, el existente no se toca)
         GR->>RX: guardar el experimento y sus archivos
-        E->>GR: vincular_documento(experimento)
-        GR->>CG: crear_documento() propio
+        E->>GR: vincular_documento(experimento, tecnica)
+        GR->>CG: crear_documento(titulo, apartados) propio
         GR->>RX: guardar el enlace
         E-->>CE: Resultado(registrado)
         CE-->>PR: mostrar(resultado)
@@ -380,7 +380,7 @@ sequenceDiagram
 
 En la rama de falla de almacenamiento se asume que la validación y la detección ya pasaron (no se repiten en el diagrama); la misma falla puede ocurrir al confirmar una solicitud pendiente, con el mismo tratamiento (la solicitud pendiente se consume al confirmar, de modo que hay que cargar el formulario de nuevo). Confirmar una solicitud que ya no está pendiente (ya procesada, cancelada o inexistente) lanza `SolicitudNoPendiente`, que `GestionDeExcepciones` traduce igual que los demás errores. La reversión se resuelve con la compensación del diagrama (el gestor elimina el experimento y sus archivos). Cómo se cubre que falle la propia compensación queda como sacrificio ya declarado en el TP3 (5.6).
 
-**Entidades.** `Experimento` es participante: lo crea el gestor y responde `coincide_con` y `es_candidato_a_duplicado`, que son reglas propias (no es una entidad anémica). `ParametroExperimento` forma parte del experimento y no tiene mensajes propios. `Estructura`, `CapturaResultado` y `DocumentoNotas` se representan por la ruta o el enlace que el almacenamiento y `ClienteGoogleDocs` devuelven: no tienen reglas en esta HU (ver 4). Es una diferencia con la referencia, registrada en 4.1.
+**Entidades.** `Experimento` es participante: lo crea el gestor y responde `coincide_con`, `es_candidato_a_duplicado` y `apartados_de_notas` (el contenido de su documento), que son reglas propias (no es una entidad anémica). `ParametroExperimento` forma parte del experimento y no tiene mensajes propios. `Estructura`, `CapturaResultado` y `DocumentoNotas` se representan por la ruta o el enlace que el almacenamiento y `ClienteGoogleDocs` devuelven: no tienen reglas en esta HU (ver 4). Es una diferencia con la referencia, registrada en 4.1.
 
 **Asignación de responsabilidades (GRASP).** Se detalla por clase del diseño. `GestorDeRegistro` y `DetectorDeDuplicados` pertenecen al controller `EjecutorDeRegistro`; `TecnicaDocking`, a `RegistroDeTecnicas`; y `RepositorioExperimentos` y `AlmacenamientoArchivos`, a `RepositorioDeExperimentos`.
 
@@ -444,7 +444,7 @@ classDiagram
         class GestorDeRegistro {
             +preparar(solicitud) ResultadoPreparacion
             +guardar_experimento(solicitud) Experimento
-            +vincular_documento(experimento)
+            +vincular_documento(experimento, tecnica)
         }
         class ResultadoPreparacion {
             +estado: EstadoPreparacion
@@ -519,6 +519,7 @@ classDiagram
             +valor_de(nombre) str
             +coincide_con(tipo, clave) bool
             +es_candidato_a_duplicado() bool
+            +apartados_de_notas(etiquetas) list
             +es_replica_de_alguno(otros) bool
         }
         class ParametroExperimento {
@@ -545,7 +546,7 @@ classDiagram
         }
         class ClienteGoogleDocs {
             <<interface>>
-            +crear_documento(titulo) str
+            +crear_documento(titulo, apartados) str
         }
     }
     namespace AccesoADatos {
@@ -722,7 +723,7 @@ Las instrucciones completas están en el `README.md`: instalar con `pip install 
 
 - **Persistencia:** por defecto, `RepositorioExperimentosEnMemoria`. Con `python run.py --db bitacorabio.db`, `arranque.py` usa `RepositorioExperimentosSQLite` (módulo estándar `sqlite3`, sin dependencias nuevas): es la única línea que cambia; ni el gestor, ni el detector, ni el ejecutor, ni la presentación se modifican (se verifica con `CP-24`, que corre el núcleo real sobre SQLite). El archivo y las tablas se crean solos la primera vez; el esquema sigue el modelo del TP3 (una fila por experimento y una por parámetro nombre-valor-unidad, con un índice sobre nombre y valor normalizado). Para PostgreSQL se escribiría otra clase que cumpla el mismo puerto. Los archivos PDB siguen en el almacén simulado en memoria, y la solicitud pendiente de una confirmación sigue en memoria del ejecutor: si se reinicia el servidor, se pierde la que esté esperando, pero no los experimentos guardados.
 - **Archivos:** `AlmacenamientoArchivosEnMemoria` simula el almacén. Para guardar en el sistema de archivos se escribe `AlmacenamientoArchivosLocal` (proyectada) con la misma interfaz.
-- **Google Docs:** `ClienteGoogleDocsSimulado` y `ClienteGoogleDocsReal` cumplen `ClienteGoogleDocs`. `arranque.crear_cliente_docs` elige el real solo si está definida `BITACORABIO_GOOGLE_CREDENCIALES` (con `BITACORABIO_GOOGLE_CARPETA` y, opcional, `BITACORABIO_GOOGLE_TOKEN`); `GestorDeRegistro` no cambia. Si Google falla, el error no se captura (queda dentro de lo que dejamos fuera con `HU-01.E1`): el experimento queda guardado sin documento y la pantalla muestra un error interno.
+- **Google Docs:** `ClienteGoogleDocsSimulado` y `ClienteGoogleDocsReal` cumplen `ClienteGoogleDocs`. `arranque.crear_cliente_docs` elige el real solo si está definida `BITACORABIO_GOOGLE_CREDENCIALES` (con `BITACORABIO_GOOGLE_CARPETA` y, opcional, `BITACORABIO_GOOGLE_TOKEN`); `GestorDeRegistro` no cambia. El documento se crea con apartados predefinidos (fecha de realización, autor, técnica, hipótesis, objetivo, parámetros, hardware, tiempo de procesamiento y un apartado «Notas» para completar): el experimento los arma (`apartados_de_notas`, con las etiquetas que da la técnica) y el cliente real los sube como HTML para que Drive lo convierta en un Google Doc, con la misma librería y el mismo alcance. Si Google falla, el error no se captura (queda dentro de lo que dejamos fuera con `HU-01.E1`): el experimento queda guardado sin documento y la pantalla muestra un error interno.
 - **Autenticación:** fuera del desarrollo (TP3): el autor se toma de un usuario identificado fijo (`investigadora.demo`).
 
 ---
@@ -764,14 +765,14 @@ Pruebas unitarias con pytest sobre el dominio y la capa de servicios, **sin pasa
 | CP-23 | Caja negra | Persistencia (puerto `RepositorioExperimentos`) | Las mismas situaciones que `CP-20` sobre la base SQLite, más: ida y vuelta de todos los campos, orden de los parámetros, ids desde el 101, borrado en cascada y datos que sobreviven a cerrar y abrir la base | Mismo contrato que el repositorio en memoria | `test_repositorio_sqlite.py` (16) |
 | CP-25 | Caja negra | Réplicas en las coincidencias (`RF-03`) | Original más réplica: se informa solo el original; réplica de réplica; declarar el original cubre a sus réplicas; original inválido: la réplica válida sí se informa | El usuario ve una sola coincidencia por familia de réplicas | `test_detector_de_duplicados.py` (4), `test_entidades.py` (1) |
 | CP-26 | Caja negra y blanca | Parámetros opcionales del docking | Centro y tamaño de la caja ("x, y, z"), exhaustividad, número de poses y mejor afinidad: bien formados, vacíos (no se guardan) y mal formados (casilla incompleta, texto, cero, negativo); se guardan como un parámetro nombre-valor-unidad y no entran en la clave de coincidencia | Valores válidos se aceptan; inválidos dan un mensaje por campo y no guardan | `test_tecnicas.py` (10), `test_carga_experimentos.py` (3) |
-| CP-27 | Caja negra | Google Docs real (con un servicio de Drive falso) | Crea el documento dentro de la carpeta y devuelve el enlace; sin carpeta no envía `parents`; sin `webViewLink` arma el enlace con el id; `arranque` elige el simulado sin variable de entorno y el real con ella | No se conecta a Google; la autorización con OAuth (`desde_credenciales`) se prueba a mano | `test_google_docs_real.py` (5) |
+| CP-27 | Caja negra | Google Docs real (con un servicio de Drive falso) | Sube el HTML con título y apartados (escapados), crea el documento dentro de la carpeta y devuelve el enlace; sin carpeta no envía `parents`; sin `webViewLink` arma el enlace con el id; `arranque` elige el simulado sin variable de entorno y el real con ella | No se conecta a Google; la autorización con OAuth (`desde_credenciales`) se prueba a mano | `test_google_docs_real.py` (7), `test_entidades.py`, `test_gestor_guardado.py` |
 | CP-24 | Caja negra | Cambio de repositorio | El núcleo real registra, detecta una coincidencia y continúa pese a ella, y respeta "Similar a", sobre SQLite | Sin modificar ninguna otra clase | `test_repositorio_sqlite.py` (2) |
 
-En total hay **141 pruebas** (también hay seis casos de `ServicioConsulta` y las de las pantallas, de apoyo). La numeración salta de `CP-18` a `CP-20` porque `CP-19` se retiró al unir casos; `CP-22` se agregó con la tabla de complejidad y `CP-23` y `CP-24`, con el repositorio SQLite. La prueba de calidad de `EC-07` es `CP-11`; la del criterio de A1 es `CP-05` junto con `CP-05b`, `CP-06` y `CP-06c`.
+En total hay **145 pruebas** (también hay seis casos de `ServicioConsulta` y las de las pantallas, de apoyo). La numeración salta de `CP-18` a `CP-20` porque `CP-19` se retiró al unir casos; `CP-22` se agregó con la tabla de complejidad y `CP-23` y `CP-24`, con el repositorio SQLite. La prueba de calidad de `EC-07` es `CP-11`; la del criterio de A1 es `CP-05` junto con `CP-05b`, `CP-06` y `CP-06c`.
 
 ### 7.3 Resultados y cobertura
 
-141 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **516 sentencias, 0 sin cubrir; 80 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
+145 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **532 sentencias, 0 sin cubrir; 82 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
 
 ### 7.4 Complejidad ciclomática y caminos independientes
 
@@ -785,6 +786,8 @@ Complejidad = decisiones + 1, medida con `radon cc src -s` (cuenta cada `if`, `f
 | `GestorDeRegistro.guardar_experimento` | 3 | `except`; comprensión de capturas | (1) éxito sin capturas → `CP-15`; (2) éxito con capturas → `CP-15`; (3) falla y revierte → `CP-15` (captura) y `CP-22` (PDB, y al confirmar) |
 | `GestorDeRegistro._errores_de` | 14 | proyecto; fecha vacía; fecha futura; PDB; `for` definiciones; obligatorio **y** vacío (2); largo; `for` extras; extra sin nombre; `for` similar; similar inexistente; sin errores previos → regla de la técnica | 14 caminos → `CP-13` (proyecto, fecha vacía, fecha futura, PDB, obligatorio vacío, largo 100/101, extra sin nombre, similar inexistente y existente, regla de la técnica, varios errores juntos) y `CP-22` (extra con nombre) |
 | `DetectorDeDuplicados.buscar` | 6 | comprensión y `if` de candidatos válidos; comprensión y `if` que excluye; `and` | (1) sin candidatos; (2) coincide; (3) inválido excluido; (4) en "Similar a" excluido → `CP-14`; (5) réplica de otro candidato excluida; (6) réplica de un original inválido sí se informa → `CP-25` |
+| `Experimento.apartados_de_notas` | 3 | comprensión de parámetros; `if` unidad | sin parámetros; con parámetro sin unidad; con unidad → `CP-27` |
+| `armar_html` | 3 | `for`; `or` del texto vacío | sin apartados; con texto; texto vacío → `CP-27` |
 | `Experimento.es_replica_de_alguno` | 2 | `any` con condición | es réplica; no lo es (incluye lista vacía) → `CP-25` |
 | `SolicitudRegistro.parametros` | 4 | `for`; `if` valor no vacío; comprensión de extras | (1) con valor → `CP-01`; (2) opcional vacío → `CP-22`; (3) con extras → `CP-22`; (4) sin extras → `CP-01` |
 | `TecnicaDocking.validar` | 8 | comprensión; `and` proteína; `and` ligando; `==`; `for` de opcionales; `if` del opcional que viene `and` no tiene el formato | (1) iguales → `CP-17`; (2) distintos → `CP-17`; (3) sin proteína → `CP-22`; (4) sin ligando → `CP-22`; (5) sin parámetros → `CP-22`; (6) opcional ausente, no se valida → `CP-26`; (7) opcional bien formado → `CP-26`; (8) opcional mal formado (cada uno de los cinco) → `CP-26` |

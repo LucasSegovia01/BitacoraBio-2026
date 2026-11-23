@@ -144,7 +144,7 @@ def test_cp10_el_ejecutor_no_guarda_si_el_gestor_pide_confirmacion_y_guarda_si_e
             llamadas.append("guardar_experimento")
             return object()
 
-        def vincular_documento(self, experimento):
+        def vincular_documento(self, experimento, tecnica):
             llamadas.append("vincular_documento")
 
     registro = RegistroDeTecnicas()

@@ -41,8 +41,8 @@ class ClienteGoogleDocs(ABC):
     """Servicio externo (Google Docs). El dominio lo conoce solo por esta interfaz; en el TP4 hay una versión simulada."""
 
     @abstractmethod
-    def crear_documento(self, titulo: str) -> str:
-        """Crea un documento de notas vacío y devuelve su enlace."""
+    def crear_documento(self, titulo: str, apartados: list[tuple[str, str]]) -> str:
+        """Crea un documento con esos apartados (título del apartado, texto) y devuelve su enlace."""
 
 
 class AlmacenamientoArchivos(ABC):

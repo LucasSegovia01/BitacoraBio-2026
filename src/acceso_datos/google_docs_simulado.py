@@ -8,8 +8,10 @@ class ClienteGoogleDocsSimulado(ClienteGoogleDocs):
 
     def __init__(self) -> None:
         self.documentos: dict[str, str] = {}
+        self.apartados: dict[str, list[tuple[str, str]]] = {}
 
-    def crear_documento(self, titulo: str) -> str:
+    def crear_documento(self, titulo: str, apartados: list[tuple[str, str]]) -> str:
         enlace = f"https://docs.google.com/document/simulado/{len(self.documentos) + 1}"
         self.documentos[enlace] = titulo
+        self.apartados[enlace] = list(apartados)
         return enlace

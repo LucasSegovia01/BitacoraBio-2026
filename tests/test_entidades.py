@@ -1,6 +1,6 @@
 import pytest
 
-from src.dominio.entidades import ParametroExperimento
+from src.dominio.entidades import Experimento, ParametroExperimento
 from tests.conftest import experimento_existente
 
 
@@ -50,3 +50,16 @@ def test_es_replica_de_alguno_mira_su_similar_a():
     assert replica.es_replica_de_alguno([original, replica])
     assert not original.es_replica_de_alguno([original, replica])
     assert not replica.es_replica_de_alguno([])
+
+
+
+def test_los_apartados_de_notas_usan_etiquetas_unidades_y_texto_propio():
+    from datetime import date, datetime
+    e = Experimento(proyecto_id="1", tipo="docking", autor="ana", fecha_de_carga=datetime(2026, 1, 1),
+                    fecha_realizacion=date(2026, 3, 4), hipotesis="H",
+                    parametros=[ParametroExperimento("proteina", "P"), ParametroExperimento("caja", "20", "Å"),
+                                ParametroExperimento("otro", "x")])
+    apartados = dict(e.apartados_de_notas({"proteina": "Proteína", "caja": "Caja"}))
+    assert apartados["Fecha de realización"] == "2026-03-04" and apartados["Hipótesis"] == "H"
+    assert apartados["Parámetros"] == "Proteína: P\nCaja: 20 Å\notro: x"
+    assert apartados["Notas"] == ""

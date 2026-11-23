@@ -10,6 +10,7 @@ from .detector_de_duplicados import DetectorDeDuplicados
 from .entidades import Experimento
 from .puertos import AlmacenamientoArchivos, ClienteGoogleDocs, RepositorioExperimentos
 from .solicitud import SolicitudRegistro
+from .tecnica import Tecnica
 
 NOMBRE_PDB = "estructura.pdb"
 
@@ -87,9 +88,12 @@ class GestorDeRegistro:
             raise ErrorAlmacenamiento(str(causa)) from causa
         return experimento
 
-    def vincular_documento(self, experimento: Experimento) -> None:
-        """Crea el documento de notas propio del experimento y guarda su enlace (HU-01.B1.2). El reintento queda fuera de alcance."""
-        experimento.documento_notas = self._docs.crear_documento(f"Notas del experimento {experimento.id}")
+    def vincular_documento(self, experimento: Experimento, tecnica: Tecnica) -> None:
+        """Crea el documento de notas propio del experimento, con apartados predefinidos, y guarda su enlace
+        (HU-01.B1.2). El reintento queda fuera de alcance."""
+        etiquetas = {d.nombre: d.etiqueta for d in tecnica.definiciones()}
+        experimento.documento_notas = self._docs.crear_documento(
+            f"Notas del experimento {experimento.id}", experimento.apartados_de_notas(etiquetas))
         self._repo.actualizar_rutas(experimento)
 
     def _errores_de(self, solicitud: SolicitudRegistro) -> list[str]:

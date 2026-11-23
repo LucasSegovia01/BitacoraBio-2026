@@ -58,5 +58,5 @@ class EjecutorDeRegistro:
 
     def _completar(self, solicitud: SolicitudRegistro) -> Resultado:
         experimento = self._gestor.guardar_experimento(solicitud)
-        self._gestor.vincular_documento(experimento)
+        self._gestor.vincular_documento(experimento, solicitud.tecnica)
         return Resultado(registrado=True, experimento=experimento)

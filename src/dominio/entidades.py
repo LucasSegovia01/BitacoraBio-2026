@@ -70,6 +70,26 @@ class Experimento:
                 return False
         return True
 
+    def apartados_de_notas(self, etiquetas: dict[str, str]) -> list[tuple[str, str]]:
+        """Apartados del documento de notas: datos del experimento y un apartado "Notas" para completar.
+
+        ``etiquetas`` traduce el nombre interno de cada parámetro a su etiqueta legible (la da la técnica).
+        """
+        parametros = "\n".join(
+            f"{etiquetas.get(p.nombre, p.nombre)}: {p.valor}" + (f" {p.unidad}" if p.unidad else "")
+            for p in self.parametros)
+        return [
+            ("Fecha de realización", self.fecha_realizacion.isoformat()),
+            ("Autor", self.autor),
+            ("Técnica", self.tipo),
+            ("Hipótesis", self.hipotesis),
+            ("Objetivo", self.objetivo),
+            ("Parámetros", parametros),
+            ("Hardware", self.hardware),
+            ("Tiempo de procesamiento", self.tiempo_procesamiento),
+            ("Notas", self.notas),
+        ]
+
     def es_replica_de_alguno(self, otros: list["Experimento"]) -> bool:
         """Este experimento se registró como "Similar a" de alguno de los otros: es una réplica, no un caso aparte."""
         return any(otro.id in self.similar_a for otro in otros)

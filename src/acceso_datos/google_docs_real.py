@@ -1,4 +1,4 @@
-"""Cliente real de Google Docs (vía Google Drive). Crea un documento de notas vacío dentro de una carpeta.
+"""Cliente real de Google Docs (vía Google Drive). Crea un documento de notas con formato (título y apartados) dentro de una carpeta.
 
 No se usa por defecto: ``arranque.py`` lo elige solo si está definida la variable de entorno
 ``BITACORABIO_GOOGLE_CREDENCIALES``. Las librerías de Google se importan recién al autorizar, así que el
@@ -6,6 +6,7 @@ resto de la aplicación y las pruebas funcionan sin instalarlas.
 """
 from __future__ import annotations
 
+from html import escape
 from pathlib import Path
 
 from ..dominio.puertos import ClienteGoogleDocs
@@ -15,11 +16,29 @@ ALCANCES = ["https://www.googleapis.com/auth/drive"]
 TIPO_DOCUMENTO = "application/vnd.google-apps.document"
 
 
+def armar_html(titulo: str, apartados: list[tuple[str, str]]) -> str:
+    """HTML del documento: un título y, por cada apartado, un subtítulo y su texto (los saltos de línea se conservan).
+    Drive lo convierte en un Google Doc con esos estilos."""
+    partes = [f"<h1>{escape(titulo)}</h1>"]
+    for nombre, texto in apartados:
+        cuerpo = escape(texto).replace("\n", "<br>") or "&nbsp;"
+        partes.append(f"<h2>{escape(nombre)}</h2><p>{cuerpo}</p>")
+    return f'<html><head><meta charset="utf-8"></head><body>{"".join(partes)}</body></html>'
+
+
+def _media_html(contenido: bytes):  # pragma: no cover
+    from googleapiclient.http import MediaInMemoryUpload
+
+    return MediaInMemoryUpload(contenido, mimetype="text/html")
+
+
 class ClienteGoogleDocsReal(ClienteGoogleDocs):
-    def __init__(self, servicio_drive, carpeta_id: str | None = None) -> None:
-        """``servicio_drive`` es el objeto de la API de Drive (``build("drive", "v3", ...)``); se inyecta para poder probar."""
+    def __init__(self, servicio_drive, carpeta_id: str | None = None, fabrica_media=None) -> None:
+        """``servicio_drive`` es el objeto de la API de Drive (``build("drive", "v3", ...)``); se inyecta para poder probar.
+        ``fabrica_media`` arma el contenido a subir a partir de bytes HTML (por defecto, el de la librería de Google)."""
         self._drive = servicio_drive
         self._carpeta_id = carpeta_id
+        self._fabrica_media = fabrica_media or _media_html
 
     @classmethod
     def desde_credenciales(cls, ruta_credenciales: str, ruta_token: str, carpeta_id: str | None = None):  # pragma: no cover
@@ -42,9 +61,11 @@ class ClienteGoogleDocsReal(ClienteGoogleDocs):
         servicio = build("drive", "v3", credentials=credenciales)
         return cls(servicio, carpeta_id)
 
-    def crear_documento(self, titulo: str) -> str:
+    def crear_documento(self, titulo: str, apartados: list[tuple[str, str]]) -> str:
+        """Sube el contenido como HTML y pide a Drive que lo convierta en Google Doc (título y apartados con formato)."""
         cuerpo = {"name": titulo, "mimeType": TIPO_DOCUMENTO}
         if self._carpeta_id:
             cuerpo["parents"] = [self._carpeta_id]
-        creado = self._drive.files().create(body=cuerpo, fields="id,webViewLink").execute()
+        contenido = self._fabrica_media(armar_html(titulo, apartados).encode("utf-8"))
+        creado = self._drive.files().create(body=cuerpo, media_body=contenido, fields="id,webViewLink").execute()
         return creado.get("webViewLink") or f"https://docs.google.com/document/d/{creado['id']}/edit"
