@@ -193,7 +193,7 @@ EC-07 es el driver principal porque responde a RA-04, el riesgo principal del pr
 **Por qué condiciona la estructura.** Es el driver principal porque responde a RA-04, el riesgo principal del proyecto: que entre un tipo de ensayo distinto del docking. Condiciona la estructura en dos lugares:
 
 - **Los datos.** Para sumar una técnica sin cambiar las tablas, los datos propios de cada técnica se guardan como pares nombre-valor (con su unidad, si la tienen) y no como columnas. En docking eso incluye la molécula/proteína y el ligando: una técnica sin ligando, o con otras entidades clave, no obliga a agregar ni a dejar vacía ninguna columna. Eso define cómo es la base de datos y cómo la usan todas las partes que leen o escriben parámetros (`DA-03`).
-- **El comportamiento del registro y del detalle.** Lo que cambia entre técnicas no son solo los datos: también qué parámetros se piden y cuáles son obligatorios (formulario y validación), qué se considera un duplicado y cómo se muestra el detalle con sus unidades. Si esas reglas estuvieran escritas para docking dentro de los pasos del registro, cada técnica nueva obligaría a modificar varios componentes. Por eso la estructura necesita un punto de extensión por técnica (`DA-02`).
+- **El comportamiento del registro y del detalle.** Lo que cambia entre técnicas no son solo los datos: también qué parámetros se piden y cuáles son obligatorios (formulario y validación), qué se considera un duplicado y cómo se muestra el detalle con sus unidades. Si esas reglas estuvieran escritas para docking dentro del gestor y del detector del registro, cada técnica nueva obligaría a modificar varios componentes. Por eso la estructura necesita un punto de extensión por técnica (`DA-02`).
 
 La medida del TP2 se refiere al esquema de la base. La arquitectura agrega una medida propia para el punto de extensión: agregar la técnica no modifica ningún componente existente del núcleo del registro, solo suma un componente nuevo. Esa medida no figura en el TP2 y se verifica en `DA-02`.
 **Se relaciona con:** RA-04, RF-01, RF-03, RF-04, RF-08, RF-12, modelo de dominio (ParametroExperimento), HU-01.B1.1, HU-01.A1, HU-02.B2.
@@ -255,7 +255,7 @@ Atributo del libro: Modificabilidad.
 |---|---|---|
 | Plug-ins (dentro de diferir el enlace) | Modificabilidad: diferir el enlace | Lo propio de cada técnica (parámetros obligatorios y su formato, validaciones, criterio de coincidencia, unidades en el detalle) vive en un plug-in. El núcleo del registro no conoce las técnicas concretas: una técnica nueva es un plug-in nuevo que se registra, sin modificar el núcleo |
 | Parametrización (dentro de diferir el enlace) | Modificabilidad: diferir el enlace | Los parámetros de cada técnica se definen como datos (filas nombre-valor-unidad en ParametroExperimento) y no como columnas ni como código. Una técnica nueva se agrega sin tocar el esquema |
-| Usar un intermediario | Modificabilidad: reducir acoplamiento | El Registro de técnicas es el único que sabe qué plug-ins existen. Los pasos del registro y el Servicio de consulta reciben la técnica del experimento en lugar de nombrarla |
+| Usar un intermediario | Modificabilidad: reducir acoplamiento | El Registro de técnicas es el único que sabe qué plug-ins existen. El Gestor de registro, el Detector de duplicados y el Servicio de consulta reciben la técnica del experimento en lugar de nombrarla |
 | Restringir dependencias | Modificabilidad: reducir acoplamiento | Los plug-ins solo dependen de la interfaz de técnica que define el núcleo: no usan el repositorio, los archivos ni Google Docs, ni se usan entre sí |
 | Encapsular | Modificabilidad: reducir acoplamiento | El acceso a los parámetros queda detrás del repositorio de experimentos. Los demás componentes no dependen de cómo se guardan |
 
@@ -319,16 +319,16 @@ El registro de un experimento tiene una parte que no cambia con el tipo de ensay
 
 | Parte | Componentes | Responsabilidad |
 |---|---|---|
-| Núcleo de registro | Ejecutor de registro, Registro de técnicas y los cuatro pasos comunes: Validar datos, Detectar duplicados, Guardar experimento y Vincular documento | Ordena el registro y decide cuándo cortarlo; guarda el experimento y sus archivos; vincula el documento; define la interfaz de técnica y ofrece el mecanismo para registrar plug-ins |
+| Núcleo de registro | Ejecutor de registro, Registro de técnicas, Gestor de registro y Detector de duplicados | El ejecutor ordena el registro y decide cómo sigue; el gestor valida los datos, guarda el experimento y sus archivos y vincula el documento; el detector busca las coincidencias; el Registro de técnicas define la interfaz de técnica y ofrece el mecanismo para registrar plug-ins |
 | Plug-in de técnica | Técnica Docking (primera versión). Técnica Dinámica molecular: futura, no se construye en este TP | Declara lo propio de una técnica a través de la interfaz de técnica |
 
 **Qué ofrece un plug-in (interfaz de técnica)**
 
 | Qué entrega el plug-in | Quién lo usa | Origen en el SRS |
 |---|---|---|
-| Definición de parámetros: nombre, unidad, si es obligatorio y formato válido | Rutas de registro (arma el formulario), Validar datos (obligatoriedad y formato) y Servicio de consulta (unidad y orden en el detalle) | RF-01, RF-08, RF-12 |
-| Validaciones propias de la técnica (por ejemplo, reglas entre parámetros) | Validar datos | RF-08 |
-| Clave de coincidencia: qué parámetros de un experimento nuevo definen que otro ya registrado es un duplicado (en docking, la molécula/proteína y el ligando). El tipo de ensayo se compara siempre | Detectar duplicados | RF-03, RF-04, CU-00 |
+| Definición de parámetros: nombre, unidad, si es obligatorio y formato válido | Carga de experimentos (arma el formulario), Gestor de registro (obligatoriedad y formato) y Servicio de consulta (unidad y orden en el detalle) | RF-01, RF-08, RF-12 |
+| Validaciones propias de la técnica (por ejemplo, reglas entre parámetros) | Gestor de registro | RF-08 |
+| Clave de coincidencia: qué parámetros de un experimento nuevo definen que otro ya registrado es un duplicado (en docking, la molécula/proteína y el ligando). El tipo de ensayo se compara siempre | Detector de duplicados | RF-03, RF-04, CU-00 |
 | Parámetros de resumen: cuáles se muestran junto a cada experimento en el listado (en docking, la molécula/proteína y el ligando) | Servicio de consulta | CU-02 paso 3 |
 
 **Cómo funciona en este sistema**
@@ -336,12 +336,12 @@ El registro de un experimento tiene una parte que no cambia con el tipo de ensay
 | Pregunta | Respuesta |
 |---|---|
 | ¿Cómo se agrega una técnica nueva? | Se escribe un plug-in que cumple la interfaz de técnica y se lo registra en el Registro de técnicas al arrancar la aplicación. El núcleo no se modifica; los parámetros de la técnica se guardan como filas de ParametroExperimento (`DA-03`) |
-| ¿Quién conoce qué técnicas existen? | Solo el Registro de técnicas. Los pasos no nombran ninguna técnica: usan la que el Ejecutor de registro agrega a la solicitud |
-| ¿Qué viaja por el registro? | Un único objeto en memoria, la **solicitud de registro**: lleva los datos del formulario, el archivo PDB, las capturas y la técnica elegida, y cada paso le agrega su resultado (por ejemplo, el experimento ya guardado o el enlace del documento) |
-| ¿Quién hace avanzar el registro? | El **ejecutor de registro**: crea la solicitud, le pide al Registro de técnicas la técnica del experimento y corre los cuatro pasos en orden. Los pasos no se llaman entre sí |
+| ¿Quién conoce qué técnicas existen? | Solo el Registro de técnicas. El Gestor y el Detector no nombran ninguna técnica: usan la que el Ejecutor de registro agrega a la solicitud |
+| ¿Qué viaja por el registro? | Un objeto inmutable, la **solicitud de registro**: lleva los datos del formulario, el archivo PDB, las capturas, el autor y la técnica elegida. No guarda resultados: los devuelve cada operación (el resultado de la preparación, el experimento guardado, el enlace del documento) |
+| ¿Quién hace avanzar el registro? | El **ejecutor de registro**: crea la solicitud, le pide al Registro de técnicas la técnica del experimento y le pide al Gestor de registro, en orden, preparar el registro (validar y buscar coincidencias), guardar el experimento y vincular el documento. Las operaciones del gestor no se llaman entre sí: el ejecutor decide cuál sigue |
 | ¿Los plug-ins acceden a la base, a los archivos o a Google Docs? | No. Solo declaran definiciones y reglas sobre los datos que el núcleo les pasa. Quien consulta la base es el núcleo, a través del Repositorio de experimentos |
-| ¿Es síncrono? ¿Se guarda algo entre pasos? | Es síncrono: todo ocurre durante la misma solicitud HTTP, sin trabajo diferido. Validar datos y Detectar duplicados no escriben nada; solo Guardar experimento escribe (en la base y en el almacén de archivos) |
-| ¿Cómo corta el registro un paso? | Avisa con un error previsto (por ejemplo, "faltan datos" o "hay coincidencias sin confirmar") que el ejecutor no sigue propagando a los pasos siguientes; las rutas lo traducen en la respuesta al usuario (ver "Qué pasa cuando un paso falla") |
+| ¿Es síncrono? ¿Se guarda algo entre pasos? | Es síncrono, sin trabajo diferido. Preparar el registro (validar y buscar) no escribe nada; solo guardar el experimento escribe (en la base y en el almacén de archivos). La única excepción es la solicitud pendiente: si hay coincidencias, el ejecutor conserva la solicitud validada en memoria hasta que el usuario confirme o cancele (otra solicitud HTTP) |
+| ¿Cómo se corta el registro? | Los datos inválidos se rechazan con un error previsto (`ErrorValidacion`) que las rutas traducen en la respuesta. Encontrar coincidencias no es un error: es un resultado normal de la preparación (`REQUIERE_CONFIRMACION`) y el ejecutor decide esperar la confirmación (ver "Qué pasa cuando una operación falla o encuentra coincidencias") |
 | ¿Por qué no una cola ni procesos separados? | Porque el flujo necesita la respuesta en el momento (CU-00, RA-03) y ningún escenario pide trabajo diferido (ver 5.2.3) |
 
 | Aspecto | Detalle |
@@ -362,14 +362,14 @@ El registro de un experimento tiene una parte que no cambia con el tipo de ensay
 | El núcleo ofrece puntos de extensión y un contrato común | El Registro de técnicas (punto de extensión) y la interfaz de técnica (contrato común) |
 | Cómo comprobarlo en el diagrama | Las flechas hacia los plug-ins salen solo del Registro de técnicas; ningún plug-in tiene flechas hacia otro plug-in ni hacia el acceso a datos (sección 7) |
 
-**Qué pasa cuando un paso falla**
+**Qué pasa cuando una operación falla o encuentra coincidencias**
 
 | Situación | Qué ocurre | Caso del SRS |
 |---|---|---|
-| Campo obligatorio vacío o formato inválido | Validar datos corta el registro e indica el campo | E5, E6 |
-| Coincidencia detectada | Detectar duplicados corta el registro y devuelve la lista; el usuario decide continuar o cancelar. Si continúa, vuelve a enviar el registro con la confirmación y el ejecutor corre los pasos otra vez desde el principio | A1, E3 |
-| Se interrumpe la conexión durante el guardado | Guardar experimento revierte lo guardado; no queda un experimento a medias | E2 |
-| Google Docs no responde | Vincular documento captura el error y deja el experimento "no vinculado"; el reintento se hace desde el detalle del experimento | E1, RF-09 |
+| Campo obligatorio vacío o formato inválido | El gestor rechaza el registro con `ErrorValidacion` e indica los campos; no se busca ni se guarda nada | E5, E6 |
+| Coincidencia detectada | El detector devuelve las coincidencias y el ejecutor no guarda: conserva la solicitud validada con un identificador y devuelve la lista; el usuario decide continuar o cancelar. Si continúa, el ejecutor recupera la solicitud y sigue con el guardado sin repetir la validación ni la búsqueda; si cancela, la descarta | A1, E3 |
+| Se interrumpe la conexión durante el guardado | El gestor, al guardar el experimento, revierte lo guardado; no queda un experimento a medias | E2 |
+| Google Docs no responde | El gestor, al vincular el documento, captura el error y deja el experimento "no vinculado"; el reintento se hace desde el detalle del experimento | E1, RF-09 |
 
 #### 5.2.3 Estilos descartados
 
@@ -394,28 +394,28 @@ No se tuvieron en cuenta, por saberse inadecuados para este sistema y sus driver
 
 | Capa | Qué contiene | Qué hace | Qué puede usar | Qué no debe hacer |
 |---|---|---|---|---|
-| Presentación | Rutas de registro, Rutas de consulta y las plantillas HTML (que no se dibujan como componente porque no tienen lógica propia) | Recibe la solicitud HTTP del navegador, toma los datos del formulario o los filtros, llama a un servicio y arma la respuesta: una página, un archivo o un mensaje de error | La capa de servicios, Gestión de excepciones y, para armar el formulario, el Registro de técnicas (ver salto justificado) | Aplicar reglas del sistema, escribir SQL, abrir archivos o llamar a Google Docs |
-| Servicios | Ejecutor de registro, Servicio de consulta y Gestión de capturas | Es una capa intermediaria y fina: recibe el pedido de las rutas y consulta o ejecuta las reglas de servicio (qué pasos del registro correr y en qué orden, quién puede modificar las capturas, qué pedir para armar una consulta). No tiene reglas del negocio ni de ninguna técnica | La capa de dominio y, en consultas y capturas, la de acceso a datos (ver salto justificado) | Conocer las rutas o las plantillas, decidir qué es válido o qué es una coincidencia, escribir SQL o conocer la ubicación física de los archivos |
-| Dominio | Registro de técnicas, los cuatro pasos del registro (Validar datos, Detectar duplicados, Guardar experimento y Vincular documento) y los plug-ins de técnica (Técnica Docking y, en el futuro, Técnica Dinámica molecular) | Es la lógica del negocio: valida los datos, decide qué es una coincidencia, guarda el experimento, vincula el documento y define, por cada técnica, sus parámetros, validaciones y clave de coincidencia. Es el núcleo y los plug-ins del microkernel | La capa de acceso a datos y servicios externos | Conocer los servicios, las rutas o las plantillas, escribir SQL o conocer la ubicación física de los archivos |
-| Acceso a datos y servicios externos | Repositorio de experimentos, Acceso a archivos y Cliente de Google Docs | Traduce los pedidos de las capas superiores a consultas SQL, a lectura y escritura de archivos y a llamadas a Google Docs | La base de datos, el almacén de archivos y Google Docs | Decidir reglas (por ejemplo, qué es un duplicado) o usar los pasos y los plug-ins del dominio, los servicios o las rutas (solo conoce las entidades, porque guarda y devuelve esos datos) |
+| Presentación | Carga de experimentos, Rutas de consulta y las plantillas HTML (que no se dibujan como componente porque no tienen lógica propia) | Recibe la solicitud HTTP del navegador, toma los datos del formulario o los filtros, llama a un servicio y arma la respuesta: una página, un archivo o un mensaje de error | La capa de servicios, Gestión de excepciones y, para armar el formulario, el Registro de técnicas (ver salto justificado) | Aplicar reglas del sistema, escribir SQL, abrir archivos o llamar a Google Docs |
+| Servicios | Ejecutor de registro, Servicio de consulta y Gestión de capturas | Es una capa intermediaria y fina: recibe el pedido de las rutas y consulta o ejecuta las reglas de servicio (qué operaciones del registro correr, en qué orden y si hay que esperar una confirmación, quién puede modificar las capturas, qué pedir para armar una consulta). No tiene reglas del negocio ni de ninguna técnica | La capa de dominio y, en consultas y capturas, la de acceso a datos (ver salto justificado) | Conocer las rutas o las plantillas, decidir qué es válido o qué es una coincidencia, escribir SQL o conocer la ubicación física de los archivos |
+| Dominio | Registro de técnicas, Gestor de registro, Detector de duplicados y los plug-ins de técnica (Técnica Docking y, en el futuro, Técnica Dinámica molecular) | Es la lógica del negocio: valida los datos, decide qué es una coincidencia, guarda el experimento, vincula el documento y define, por cada técnica, sus parámetros, validaciones y clave de coincidencia. Es el núcleo y los plug-ins del microkernel | La capa de acceso a datos y servicios externos | Conocer los servicios, las rutas o las plantillas, escribir SQL o conocer la ubicación física de los archivos |
+| Acceso a datos y servicios externos | Repositorio de experimentos, Almacenamiento de archivos y Cliente de Google Docs | Traduce los pedidos de las capas superiores a consultas SQL, a lectura y escritura de archivos y a llamadas a Google Docs | La base de datos, el almacén de archivos y Google Docs | Decidir reglas (por ejemplo, qué es un duplicado) o usar el gestor, el detector y los plug-ins del dominio, los servicios o las rutas (solo conoce las entidades, porque guarda y devuelve esos datos) |
 
-Gestión de excepciones no pertenece a ninguna capa: es un aspecto transversal (5.4) que usan las rutas para traducir los errores en respuestas y que Vincular documento (dominio) usa para señalar la falla de Google Docs.
+Gestión de excepciones no pertenece a ninguna capa: es un aspecto transversal (5.4) que usan las rutas para traducir los errores en respuestas y que el Gestor de registro (dominio) usa para señalar la falla de Google Docs.
 
-**Cómo atraviesa las capas un registro.** El navegador envía el formulario a *Rutas de registro* (presentación); estas se lo pasan al *Ejecutor de registro* (servicios), que obtiene del *Registro de técnicas* (dominio) la técnica del experimento y corre los cuatro pasos (dominio); los pasos usan las definiciones de la técnica y piden datos o los guardan a través del *Repositorio de experimentos* y de *Acceso a archivos* (acceso a datos), que son los únicos que tocan la base y el almacén. La respuesta vuelve por el mismo camino.
+**Cómo atraviesa las capas un registro.** El navegador envía el formulario a *Carga de experimentos* (presentación); estas se lo pasan al *Ejecutor de registro* (servicios), que obtiene del *Registro de técnicas* (dominio) la técnica del experimento y le pide al *Gestor de registro* (dominio) que prepare el registro, lo guarde y vincule el documento; el gestor y el *Detector de duplicados* usan las definiciones de la técnica y piden datos o los guardan a través del *Repositorio de experimentos* y de *Almacenamiento de archivos* (acceso a datos), que son los únicos que tocan la base y el almacén. La respuesta vuelve por el mismo camino.
 
 | Aspecto | Detalle |
 |---|---|
 | Qué escenario responde | EC-07 (las reglas de cada técnica viven en la capa de dominio y el acceso a parámetros queda encapsulado en la capa de acceso a datos) |
 | Qué mejora | Modificabilidad: un cambio en una capa afecta poco a las demás; agregar una técnica toca solo la capa de dominio, y cambiar el orden o el modo de ejecutar el registro toca solo la de servicios |
 | Qué sacrifica | Indirección (una capa más por cruzar) y algo de rendimiento, despreciable frente a los márgenes de EC-03; además, hay que cuidar que la capa de servicios no vuelva a acumular reglas |
-| Relación con el microkernel | El núcleo (Registro de técnicas y los cuatro pasos) y los plug-ins viven en la capa de dominio. El Ejecutor de registro, que ordena los pasos, está en la capa de servicios |
+| Relación con el microkernel | El núcleo (Registro de técnicas, Gestor de registro y Detector de duplicados) y los plug-ins viven en la capa de dominio. El Ejecutor de registro, que ordena las operaciones, está en la capa de servicios |
 
 **Comprobación de las restricciones del patrón (Tabla 6 de la consigna).** Se adopta la variante de capas relajadas: cada capa usa a la inmediatamente inferior, con dos saltos que se justifican abajo.
 
 | Restricción o regla | Cómo se cumple |
 |---|---|
-| Una capa no depende de las superiores | Los servicios no conocen las rutas, el dominio no conoce a los servicios y el acceso a datos no conoce a los pasos ni a los plug-ins del dominio (solo sus entidades) |
-| No se saltean capas sin justificarlo | Las rutas llaman a los servicios, los servicios llaman al dominio y el dominio llama al acceso a datos. Hay dos saltos, justificados: (1) *Rutas de registro* llama directo a *Registro de técnicas* para armar el formulario con los campos de la técnica elegida; es una lectura del catálogo de técnicas y un servicio intermedio solo repetiría la llamada. (2) *Servicio de consulta* y *Gestión de capturas* llaman directo al acceso a datos, porque buscar, filtrar y guardar capturas no ejecutan ninguna regla del negocio; pasar por el dominio sería una capa que solo delega |
+| Una capa no depende de las superiores | Los servicios no conocen las rutas, el dominio no conoce a los servicios y el acceso a datos no conoce al gestor, al detector ni a los plug-ins del dominio (solo sus entidades; el dominio define las interfaces que el acceso a datos implementa) |
+| No se saltean capas sin justificarlo | Las rutas llaman a los servicios, los servicios llaman al dominio y el dominio llama al acceso a datos. Hay dos saltos, justificados: (1) *Carga de experimentos* llama directo a *Registro de técnicas* para armar el formulario con los campos de la técnica elegida; es una lectura del catálogo de técnicas y un servicio intermedio solo repetiría la llamada. (2) *Servicio de consulta* y *Gestión de capturas* llaman directo al acceso a datos, porque buscar, filtrar y guardar capturas no ejecutan ninguna regla del negocio; pasar por el dominio sería una capa que solo delega |
 | Cada capa tiene una responsabilidad | Ver la tabla de capas: presentación arma páginas, servicios intermedian, dominio decide y acceso a datos persiste y se integra |
 | Todas las flechas entre capas van hacia abajo | Se verifica en el diagrama de componentes (sección 7) |
 
@@ -434,7 +434,7 @@ No se tuvieron en cuenta, por saberse inadecuados para este sistema y sus driver
 | Aspecto | Decisión | Motivo |
 |---|---|---|
 | Autenticación y autorización | **Descartado** | Se asume un usuario identificado como precondición (RA-01); la autenticación no demuestra el valor del sistema. En las pruebas se asume un usuario ya logueado |
-| Auditoría | **Descartado como componente propio** | El autor y la fecha y hora de cada experimento son datos del experimento (RF-02) y los guarda Guardar experimento. Un registro general de todas las acciones se descarta: ningún driver lo exige |
+| Auditoría | **Descartado como componente propio** | El autor y la fecha y hora de cada experimento son datos del experimento (RF-02) y los guarda el Gestor de registro. Un registro general de todas las acciones se descarta: ningún driver lo exige |
 | Gestión de excepciones | **Adoptado** | Los errores previstos (validación, coincidencias, falla de Google Docs, interrupción al guardar; ver 5.2.2) se tratan de forma común, en un componente propio |
 | Interoperabilidad | **Adoptado** | La integración con Google Docs queda encapsulada en un componente propio de la capa de acceso a datos y servicios externos (táctica: adaptar la interfaz), de modo que un cambio en el servicio externo afecta solo a ese componente |
 | Instrumentación (monitoreo) | **Descartado** | Ningún driver lo exige |
@@ -445,7 +445,7 @@ No se tuvieron en cuenta, por saberse inadecuados para este sistema y sus driver
 | Driver | Cómo lo cubre la arquitectura | Dónde se ve | Qué sacrifica |
 |---|---|---|---|
 | `EC-07` | Microkernel en el registro: un núcleo y un plug-in por técnica, sobre capas; los parámetros se guardan como filas nombre-valor-unidad detrás del repositorio de experimentos | Componentes Ejecutor de registro, Registro de técnicas y Técnica Docking; base de datos de experimentos (tabla ParametroExperimento) y componente Repositorio de experimentos (sección 7) | La interfaz de técnica se diseña con un solo ejemplo (docking) y puede tener que ampliarse con la segunda técnica; más indirección en validación, detección de duplicados y detalle; filtrar por parámetro (la proteína, la molécula, el ligando) es más costoso que por columna y se mide en EC-03; el valor se guarda como texto, sin validación de tipo a nivel de esquema |
-| `EC-03` | Archivos PDB y capturas fuera de la base; consultas con índices y listados livianos | Contenedores Base de datos de experimentos y Almacén de archivos de resultados; componente Acceso a archivos; nodos Servidor web y Servidor de archivos del laboratorio (sección 8) | Hay dos almacenes, en máquinas distintas, que mantener consistentes: se guarda primero el experimento y después el archivo, revirtiendo si falla, y los respaldos se coordinan para poder restaurar ambos al mismo momento |
+| `EC-03` | Archivos PDB y capturas fuera de la base; consultas con índices y listados livianos | Contenedores Base de datos de experimentos y Almacén de archivos de resultados; componente Almacenamiento de archivos; nodos Servidor web y Servidor de archivos del laboratorio (sección 8) | Hay dos almacenes, en máquinas distintas, que mantener consistentes: se guarda primero el experimento y después el archivo, revirtiendo si falla, y los respaldos se coordinan para poder restaurar ambos al mismo momento |
 
 ### 5.6 Conflictos entre tácticas
 
@@ -534,21 +534,19 @@ C4Component
         Container(nav, "Navegador", "HTML / JavaScript / 3Dmol.js", "Muestra las pantallas y el visor 3D")
     }
     Container_Boundary(app, "Aplicación del catálogo") {
-        Component(rreg, "Rutas de registro", "Flask", "Capa de presentación: arma el formulario con los campos de la técnica elegida, recibe el formulario de registro, el reintento de vinculación y las capturas de un experimento ya registrado")
+        Component(rreg, "Carga de experimentos", "Flask", "Capa de presentación: arma el formulario con los campos de la técnica elegida, recibe el formulario de registro, el reintento de vinculación y las capturas de un experimento ya registrado")
         Component(rcon, "Rutas de consulta", "Flask", "Capa de presentación: recibe filtros y pedidos de detalle, PDB y capturas")
         Component(exc, "Gestión de excepciones", "Python", "Aspecto transversal: traduce los errores previstos en respuestas al usuario")
-        Component(reg, "Ejecutor de registro", "Python", "Capa de servicios: intermedia, ordena y ejecuta los pasos del registro, sin reglas propias")
+        Component(reg, "Ejecutor de registro", "Python", "Capa de servicios: intermedia, ordena el registro, decide cómo sigue y conserva la solicitud pendiente, sin reglas propias")
         Component(rtec, "Registro de técnicas", "Python", "Capa de dominio (núcleo): conoce los plug-ins de técnica y entrega el de cada experimento")
-        Component(val, "Validar datos", "Python", "Capa de dominio (núcleo), paso 1: verifica obligatoriedad y formato")
-        Component(dup, "Detectar duplicados", "Python", "Capa de dominio (núcleo), paso 2: busca coincidencias y corta el registro si no fueron confirmadas")
-        Component(gua, "Guardar experimento", "Python", "Capa de dominio (núcleo), paso 3: registra autor y fecha y guarda datos y archivos")
-        Component(vin, "Vincular documento", "Python", "Capa de dominio (núcleo), paso 4: crea el documento de notas y guarda el enlace")
+        Component(gre, "Gestor de registro", "Python", "Capa de dominio (núcleo): valida los datos, guarda el experimento y sus archivos y vincula el documento de notas")
+        Component(dup, "Detector de duplicados", "Python", "Capa de dominio (núcleo): busca coincidencias y las devuelve, sin cortar el registro")
         Component(tdoc, "Técnica Docking", "Python", "Capa de dominio (plug-in): parámetros, validaciones, clave de coincidencia y resumen del docking")
         Component(tmd, "Técnica Dinámica molecular (futura)", "Python", "Capa de dominio (plug-in) a incorporar en un incremento futuro (EC-07); no se construye en este TP")
         Component(gcap, "Gestión de capturas", "Python", "Capa de servicios: pide agregar o reemplazar capturas y controla que quien lo pide sea el autor")
         Component(con, "Servicio de consulta", "Python", "Capa de servicios: pide la búsqueda, el filtrado, el detalle y los archivos")
         Component(rep, "Repositorio de experimentos", "Python", "Capa de acceso a datos: consultas y escrituras en la base")
-        Component(arc, "Acceso a archivos", "Python", "Capa de acceso a datos: lee y escribe PDB y capturas")
+        Component(arc, "Almacenamiento de archivos", "Python", "Capa de acceso a datos: lee y escribe PDB y capturas")
         Component(gdc, "Cliente de Google Docs", "Python", "Capa de acceso a servicios externos: crea documentos de notas")
     }
     Boundary(cbd, "Base de datos de experimentos", "Contenedor de datos") {
@@ -570,19 +568,15 @@ C4Component
     Rel(rcon, con, "Invoca")
     Rel(rcon, exc, "Delega el manejo de errores")
     Rel(reg, rtec, "Obtiene la técnica y la agrega a la solicitud")
-    Rel(reg, val, "Ejecuta el paso 1")
-    Rel(reg, dup, "Ejecuta el paso 2")
-    Rel(reg, gua, "Ejecuta el paso 3")
-    Rel(reg, vin, "Ejecuta el paso 4")
-    Rel(val, rep, "Consulta si existen el proyecto y los experimentos de Similar a")
+    Rel(reg, gre, "Pide preparar el registro, guardar el experimento y vincular el documento")
+    Rel(gre, rep, "Consulta si existen el proyecto y los experimentos de Similar a; guarda el experimento y el enlace")
+    Rel(gre, dup, "Pide las coincidencias")
+    Rel(gre, arc, "Guarda PDB y capturas")
+    Rel(gre, gdc, "Solicita el documento")
+    Rel(gre, exc, "Señala los errores previstos")
     Rel(rtec, tdoc, "Registra y entrega")
     Rel(rtec, tmd, "Registraría y entregaría")
     Rel(dup, rep, "Consulta coincidencias")
-    Rel(gua, rep, "Guarda el experimento")
-    Rel(gua, arc, "Guarda PDB y capturas")
-    Rel(vin, rep, "Guarda el enlace y el estado")
-    Rel(vin, gdc, "Solicita el documento")
-    Rel(vin, exc, "Señala la falla de Google Docs")
     Rel(gcap, rep, "Verifica autoría y guarda rutas")
     Rel(gcap, arc, "Guarda o reemplaza capturas")
     Rel(con, rep, "Consulta experimentos")
@@ -598,72 +592,66 @@ C4Component
 
 | Componente | Capa | Tecnología | Responsabilidad | Se rastrea a |
 |---|---|---|---|---|
-| Rutas de registro | Presentación | Flask | Arma el formulario con los campos de la técnica elegida; recibe el formulario de registro, el pedido de reintentar la vinculación y las capturas que se agregan a un experimento ya registrado; invoca al ejecutor de registro o a la gestión de capturas y arma la respuesta (errores, coincidencias o confirmación) | CU-01; RF-11; HU-01.B1.1, B1.2, A1, E3, E1 |
+| Carga de experimentos | Presentación | Flask | Arma el formulario con los campos de la técnica elegida; recibe el formulario de registro, el pedido de reintentar la vinculación y las capturas que se agregan a un experimento ya registrado; invoca al ejecutor de registro o a la gestión de capturas y arma la respuesta (errores, coincidencias o confirmación) | CU-01; RF-11; HU-01.B1.1, B1.2, A1, E3, E1 |
 | Rutas de consulta | Presentación | Flask | Recibe los filtros y los pedidos de detalle, PDB y capturas, y arma las páginas | CU-02; HU-02.B1, B2, A1; RF-10, RF-11 |
-| Ejecutor de registro | Servicios | Python | Ordena el registro: pide al Registro de técnicas la técnica del experimento, la agrega a la solicitud de registro y ejecuta los cuatro pasos. Para el reintento de vinculación ejecuta solo Vincular documento | CU-01; RF-09; EC-07 |
+| Ejecutor de registro | Servicios | Python | Ordena el registro: pide al Registro de técnicas la técnica del experimento, la agrega a la solicitud de registro y le pide al Gestor de registro que prepare el registro. Si no hay coincidencias sigue de inmediato con guardar y vincular; si las hay, conserva la solicitud validada (pendiente, en memoria) hasta que el usuario confirme o cancele. Para el reintento de vinculación pide solo vincular el documento | CU-01; RF-09; EC-07 |
 | Registro de técnicas | Dominio (núcleo) | Python | Conoce los plug-ins de técnica (se registran al arrancar la aplicación), entrega el de un tipo de ensayo, lista las técnicas disponibles para el formulario y define la interfaz de técnica | RA-04; RF-01, RF-12; EC-07 |
-| Validar datos | Dominio (núcleo, paso 1) | Python | Verifica los campos comunes y los parámetros que la técnica del experimento define como obligatorios o con un formato | RF-01, RF-08; CU-01 paso 2; EC-07 |
-| Detectar duplicados | Dominio (núcleo, paso 2) | Python | Busca experimentos que coincidan según la clave de coincidencia de la técnica (en docking, mismo tipo y mismos parámetros molécula/proteína y ligando), excluye los inválidos y los ya declarados en "Similar a", y corta el registro si hay coincidencias sin confirmar | RF-03, RF-04; CU-00; HU-01.A1, E3; EC-07 |
-| Guardar experimento | Dominio (núcleo, paso 3) | Python | Registra autor y fecha, guarda los datos en la base y los archivos PDB y capturas en el almacén, y revierte si algo falla | RF-01, RF-02, RF-11; CU-01 pasos 5-6; HU-01.B1.1 |
-| Vincular documento | Dominio (núcleo, paso 4) | Python | Pide el documento de notas y guarda el enlace; si falla, señala el error a Gestión de excepciones y deja el experimento "no vinculado" | RF-05, RF-09; CU-01 paso 7, E1; HU-01.B1.2, E1 |
+| Gestor de registro | Dominio (núcleo) | Python | Prepara el registro (valida los campos comunes y los parámetros que la técnica define como obligatorios o con un formato, y pide las coincidencias al Detector), guarda el experimento (autor, fecha, datos en la base y archivos PDB y capturas en el almacén, con reversión si algo falla) y vincula el documento de notas (si falla, señala el error a Gestión de excepciones y deja el experimento "no vinculado"). No decide el orden: lo decide el Ejecutor | RF-01, RF-02, RF-05, RF-08, RF-09, RF-11; CU-01; HU-01.B1.1, B1.2, E1; EC-07 |
+| Detector de duplicados | Dominio (núcleo) | Python | Busca experimentos que coincidan según la clave de coincidencia de la técnica (en docking, mismo tipo y mismos parámetros molécula/proteína y ligando), descarta los inválidos y los ya declarados en "Similar a" y devuelve las coincidencias; no corta el registro ni escribe | RF-03, RF-04; CU-00; HU-01.A1, E3; EC-07 |
 | Técnica Docking | Dominio (plug-in) | Python | Define los parámetros del docking (nombre, unidad, obligatorio, formato), sus validaciones propias (por ejemplo, la notación de molécula y ligando, E6), su clave de coincidencia (los parámetros molécula/proteína y ligando) y sus parámetros de resumen para el listado | RF-01, RF-03, RF-08, RF-12; EC-07 |
 | Técnica Dinámica molecular (futura) | Dominio (plug-in) | Python | No se construye en este TP: es el caso que ejercita el escenario EC-07 | RA-04; EC-07 |
 | Gestión de capturas | Servicios | Python | Agrega o reemplaza las capturas de un experimento ya registrado, solo si el usuario actual es su autor (el usuario identificado es la precondición RA-01) | RF-11; EC-03 |
 | Servicio de consulta | Servicios | Python | Busca y filtra experimentos, arma el listado (con los parámetros de resumen de cada técnica), arma el detalle (con las unidades y el orden de los parámetros que define la técnica, y los estados) y entrega los archivos PDB y las capturas | RF-06, RF-07, RF-10, RF-11, RF-12; CU-02; EC-07 |
 | Repositorio de experimentos | Acceso a datos | Python | Consulta y escribe proyectos, experimentos y parámetros (nombre, valor, unidad) en la base; busca por columnas y por parámetros (filtro por proteína, coincidencias de duplicados) | RF-01, RF-03, RF-06, RF-07; EC-07, EC-03 |
-| Acceso a archivos | Acceso a datos | Python | Lee y escribe los archivos PDB y las capturas en el almacén | RF-10, RF-11; EC-03 |
+| Almacenamiento de archivos | Acceso a datos | Python | Lee y escribe los archivos PDB y las capturas en el almacén, con una interfaz genérica (guardar y eliminar archivos) que no distingue tipos de archivo | RF-10, RF-11; EC-03 |
 | Cliente de Google Docs | Acceso a servicios externos | Python | Crea el documento de notas en Google Docs y devuelve su enlace | RF-05, RF-09; aspecto de interoperabilidad (5.4) |
-| Gestión de excepciones | Transversal | Python | Define los errores previstos (validación, coincidencias, falla de Google Docs, interrupción al guardar) y los traduce en respuestas al usuario | CU-01 E1 a E6; aspecto transversal (5.4) |
+| Gestión de excepciones | Transversal | Python | Define los errores previstos (validación, solicitud pendiente inexistente, falla de Google Docs, interrupción al guardar) y los traduce en respuestas al usuario | CU-01 E1 a E6; aspecto transversal (5.4) |
 
 ### 7.3 Catálogo de relaciones
 
 | Origen | Destino | Qué se comunica | Tipo | Protocolo |
 |---|---|---|---|---|
-| Navegador | Rutas de registro | Formulario de registro, pedido de reintento de vinculación y capturas | Síncrona, entre contenedores | HTTPS |
+| Navegador | Carga de experimentos | Formulario de registro, pedido de reintento de vinculación y capturas | Síncrona, entre contenedores | HTTPS |
 | Navegador | Rutas de consulta | Solicitudes de páginas, PDB y capturas | Síncrona, entre contenedores | HTTPS |
-| Rutas de registro | Ejecutor de registro | Datos del formulario | Llamada interna | — |
-| Rutas de registro | Gestión de capturas | Capturas a agregar y usuario actual | Llamada interna | — |
-| Rutas de registro | Gestión de excepciones | Errores previstos para traducir en respuesta | Llamada interna | — |
+| Carga de experimentos | Ejecutor de registro | Datos del formulario | Llamada interna | — |
+| Carga de experimentos | Gestión de capturas | Capturas a agregar y usuario actual | Llamada interna | — |
+| Carga de experimentos | Gestión de excepciones | Errores previstos para traducir en respuesta | Llamada interna | — |
 | Rutas de consulta | Servicio de consulta | Filtros y pedidos de detalle o de archivos | Llamada interna | — |
 | Rutas de consulta | Gestión de excepciones | Errores previstos para traducir en respuesta | Llamada interna | — |
-| Rutas de registro | Registro de técnicas | Pedido de las técnicas disponibles y de sus campos, para armar el formulario | Llamada interna | — |
-| Rutas de registro | Servicio de consulta | Pedido de los proyectos y de los experimentos, para armar el formulario (lista de proyectos y campo "Similar a") | Llamada interna | — |
+| Carga de experimentos | Registro de técnicas | Pedido de las técnicas disponibles y de sus campos, para armar el formulario | Llamada interna | — |
+| Carga de experimentos | Servicio de consulta | Pedido de los proyectos y de los experimentos, para armar el formulario (lista de proyectos y campo "Similar a") | Llamada interna | — |
 | Ejecutor de registro | Registro de técnicas | Pedido de la técnica del experimento, que se agrega a la solicitud de registro | Llamada interna | — |
-| Ejecutor de registro | Validar datos | Solicitud de registro (paso 1) | Llamada interna | — |
-| Ejecutor de registro | Detectar duplicados | Solicitud de registro (paso 2) | Llamada interna | — |
-| Ejecutor de registro | Guardar experimento | Solicitud de registro (paso 3) | Llamada interna | — |
-| Ejecutor de registro | Vincular documento | Solicitud de registro (paso 4) | Llamada interna | — |
+| Ejecutor de registro | Gestor de registro | Solicitud de registro: preparar el registro, guardar el experimento y vincular el documento | Llamada interna | — |
 | Registro de técnicas | Técnica Docking | Registro del plug-in y entrega a quien lo pide | Llamada interna | — |
 | Registro de técnicas | Técnica Dinámica molecular (futura) | Ídem, cuando se incorpore | Llamada interna | — |
 | Servicio de consulta | Registro de técnicas | Pedido de los parámetros de resumen para el listado y de unidades y orden para el detalle | Llamada interna | — |
-| Validar datos | Repositorio de experimentos | Consulta de existencia del proyecto y de los experimentos declarados en "Similar a" | Llamada interna | — |
-| Detectar duplicados | Repositorio de experimentos | Consulta de coincidencias | Llamada interna | — |
-| Guardar experimento | Repositorio de experimentos | Datos y parámetros del experimento | Llamada interna | — |
-| Guardar experimento | Acceso a archivos | Archivo PDB y capturas | Llamada interna | — |
-| Vincular documento | Repositorio de experimentos | Enlace y estado de vinculación | Llamada interna | — |
-| Vincular documento | Cliente de Google Docs | Pedido de creación del documento | Llamada interna | — |
-| Vincular documento | Gestión de excepciones | Falla de Google Docs | Llamada interna | — |
+| Gestor de registro | Repositorio de experimentos | Existencia del proyecto y de los experimentos de "Similar a"; datos y parámetros del experimento; enlace y estado de vinculación | Llamada interna | — |
+| Gestor de registro | Detector de duplicados | Solicitud de registro (búsqueda de coincidencias) | Llamada interna | — |
+| Detector de duplicados | Repositorio de experimentos | Consulta de candidatos (mismo tipo y clave de coincidencia) | Llamada interna | — |
+| Gestor de registro | Almacenamiento de archivos | Archivo PDB y capturas | Llamada interna | — |
+| Gestor de registro | Cliente de Google Docs | Pedido de creación del documento | Llamada interna | — |
+| Gestor de registro | Gestión de excepciones | Errores previstos (datos inválidos, falla de Google Docs, interrupción al guardar) | Llamada interna | — |
 | Gestión de capturas | Repositorio de experimentos | Verificación de autoría y rutas de las capturas | Llamada interna | — |
-| Gestión de capturas | Acceso a archivos | Capturas a guardar o reemplazar | Llamada interna | — |
+| Gestión de capturas | Almacenamiento de archivos | Capturas a guardar o reemplazar | Llamada interna | — |
 | Servicio de consulta | Repositorio de experimentos | Consultas de experimentos | Llamada interna | — |
-| Servicio de consulta | Acceso a archivos | Pedido de PDB y capturas | Llamada interna | — |
+| Servicio de consulta | Almacenamiento de archivos | Pedido de PDB y capturas | Llamada interna | — |
 | Repositorio de experimentos | Base de datos de experimentos | Lectura y escritura de datos | Acceso a datos, entre contenedores | SQL |
-| Acceso a archivos | Almacén de archivos de resultados | Lectura y escritura de archivos | Acceso a datos, entre contenedores | Sistema de archivos |
+| Almacenamiento de archivos | Almacén de archivos de resultados | Lectura y escritura de archivos | Acceso a datos, entre contenedores | Sistema de archivos |
 | Cliente de Google Docs | Google Docs | Creación del documento y recepción del enlace | Integración externa, entre contenedores | HTTPS |
 
 Notas sobre el diagrama:
 
 - Las plantillas de página no se dibujan: son parte de la capa de presentación, pero son HTML sin lógica propia.
-- Validar datos y Detectar duplicados informan el corte del registro a quien los ejecuta, y las rutas lo traducen con Gestión de excepciones; Vincular documento captura su propia falla y la señala directamente.
-- Los pasos usan el plug-in que trae la solicitud de registro. Esa llamada no se dibuja porque depende de la técnica elegida y no de un plug-in en particular; por eso las flechas hacia los plug-ins salen solo del Registro de técnicas.
+- El Gestor de registro rechaza los datos inválidos con un error previsto que las rutas traducen con Gestión de excepciones; encontrar coincidencias no es un error, es un resultado que el Ejecutor de registro interpreta (conserva la solicitud pendiente y devuelve la lista). El gestor captura la falla de Google Docs y la señala directamente.
+- El gestor y el detector usan el plug-in que trae la solicitud de registro. Esa llamada no se dibuja porque depende de la técnica elegida y no de un plug-in en particular; por eso las flechas hacia los plug-ins salen solo del Registro de técnicas.
 - Autenticación y autorización se descartaron (5.4).
 
 ### 7.4 Relación con la estrategia de solución
 
 - **EC-07:** lo propio de cada técnica vive en un plug-in (hoy "Técnica Docking") que el "Registro de técnicas" entrega al núcleo: el formulario, la validación, la detección de duplicados y el detalle no nombran ninguna técnica. Los parámetros nombre-valor-unidad (en docking, también la molécula/proteína y el ligando) se leen, se escriben y se buscan solo a través del "Repositorio de experimentos". Agregar dinámica molecular es sumar un plug-in y registrarlo.
-- **Entidades y puertos:** las entidades del modelo de dominio (Experimento y ParametroExperimento) no son un componente propio: son los datos que manejan los pasos y que el Repositorio guarda y devuelve. Al implementar (TP4), las interfaces del Repositorio y de Acceso a archivos las define el dominio y las implementa el acceso a datos.
-- **Capas:** la capa de servicios (Ejecutor de registro, Servicio de consulta y Gestión de capturas) solo intermedia; las reglas del negocio y de cada técnica están en la capa de dominio (Registro de técnicas, los cuatro pasos y los plug-ins). Los dos saltos entre capas están justificados en 5.3.
-- **EC-03:** el "Acceso a archivos" es un componente separado del "Repositorio de experimentos", porque la base guarda solo la ruta y los archivos viven en el almacén.
+- **Entidades y puertos:** las entidades del modelo de dominio (Experimento y ParametroExperimento) no son un componente propio: son los datos que manejan el gestor y el detector y que el Repositorio guarda y devuelve. `Experimento` conserva las reglas que dependen solo de sí mismo (si coincide con una clave y si cuenta como duplicado), para no ser una entidad anémica. Al implementar (TP4), las interfaces del Repositorio y de Almacenamiento de archivos las define el dominio y las implementa el acceso a datos.
+- **Capas:** la capa de servicios (Ejecutor de registro, Servicio de consulta y Gestión de capturas) solo intermedia; las reglas del negocio y de cada técnica están en la capa de dominio (Registro de técnicas, Gestor de registro, Detector de duplicados y los plug-ins). Los dos saltos entre capas están justificados en 5.3.
+- **EC-03:** el "Almacenamiento de archivos" es un componente separado del "Repositorio de experimentos", porque la base guarda solo la ruta y los archivos viven en el almacén.
 
 *Nota sobre el diagrama:* la sintaxis C4 de Mermaid es experimental y tiene limitaciones de disposición. Se prioriza la claridad del contenido por sobre el formato visual.
 
@@ -738,18 +726,18 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 
 | Historia de usuario | Criterio de aceptación | Contenedores | Componentes |
 |---|---|---|---|
-| `HU-01.B1.1` Registrar experimento | *Given* un proyecto existente, campos válidos y sin coincidencias; *When* confirma; *Then* se registran autor y fecha y se guarda el experimento | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de registro → Ejecutor de registro (obtiene la técnica del Registro de técnicas) → Validar datos → Detectar duplicados → Guardar experimento → Repositorio de experimentos y Acceso a archivos. Los pasos usan el plug-in de la técnica (Técnica Docking) |
-| `HU-01.B1.1` (criterio de exclusión) | *Given* un experimento previo con la misma molécula/ligando pero inválido; *Then* no se reporta como coincidencia | Aplicación del catálogo → Base de datos de experimentos | Detectar duplicados → Repositorio de experimentos (trae los del mismo tipo y clave; el paso excluye los inválidos y los declarados "Similar a") |
-| `HU-01.B1.2` Vincular documento | *Given* un experimento recién guardado; *When* se crea el documento; *Then* se asocia el enlace y se muestra el resumen | Aplicación del catálogo → Google Docs y Base de datos de experimentos | Guardar experimento → Vincular documento → Cliente de Google Docs → (Google Docs); Vincular documento → Repositorio de experimentos |
-| `HU-01.A1` Continuar pese a coincidencia | *Given* una coincidencia mostrada; *When* elige continuar; *Then* se registra como experimento nuevo | Navegador → Aplicación del catálogo (dos solicitudes) → Base de datos de experimentos y Almacén de archivos de resultados | 1.ª solicitud: Rutas de registro → Ejecutor de registro → Validar datos → Detectar duplicados; el registro se corta y Rutas de registro pide a Gestión de excepciones la respuesta con la lista de coincidencias. 2.ª solicitud, con la confirmación: los cuatro pasos hasta Vincular documento |
-| `HU-01.E3` Cancelar por coincidencia | *Given* una coincidencia mostrada; *When* cancela; *Then* no se guarda nada ni se crea documento | Navegador → Aplicación del catálogo | El registro se cortó en Detectar duplicados: Guardar experimento y Vincular documento nunca se ejecutan. Para ver el existente: Rutas de consulta → Servicio de consulta |
-| `HU-01.E1` Falla al crear el documento | *Given* un experimento guardado y una falla de Google Docs; *Then* queda guardado, "no vinculado", con aviso | Aplicación del catálogo → Google Docs (falla) → Base de datos de experimentos | Vincular documento → Cliente de Google Docs (falla); Vincular documento → Gestión de excepciones; Vincular documento → Repositorio de experimentos (estado "no vinculado") |
-| `HU-01.E1` (reintento) | *Given* un experimento "no vinculado"; *When* dispara el reintento; *Then* se crea el documento sin recargar datos | Navegador → Aplicación del catálogo → Google Docs y Base de datos de experimentos | Rutas de registro → Ejecutor de registro (ejecuta solo el paso Vincular documento) → Vincular documento → Cliente de Google Docs y Repositorio de experimentos |
+| `HU-01.B1.1` Registrar experimento | *Given* un proyecto existente, campos válidos y sin coincidencias; *When* confirma; *Then* se registran autor y fecha y se guarda el experimento | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Carga de experimentos → Ejecutor de registro (obtiene la técnica del Registro de técnicas) → Gestor de registro (valida) → Detector de duplicados → Gestor de registro (guarda) → Repositorio de experimentos y Almacenamiento de archivos. El gestor y el detector usan el plug-in de la técnica (Técnica Docking) |
+| `HU-01.B1.1` (criterio de exclusión) | *Given* un experimento previo con la misma molécula/ligando pero inválido; *Then* no se reporta como coincidencia | Aplicación del catálogo → Base de datos de experimentos | Detector de duplicados → Repositorio de experimentos (trae los del mismo tipo y clave; el detector excluye los inválidos y los declarados "Similar a") |
+| `HU-01.B1.2` Vincular documento | *Given* un experimento recién guardado; *When* se crea el documento; *Then* se asocia el enlace y se muestra el resumen | Aplicación del catálogo → Google Docs y Base de datos de experimentos | Gestor de registro (guardar) → Gestor de registro (vincular) → Cliente de Google Docs → (Google Docs); Gestor de registro → Repositorio de experimentos |
+| `HU-01.A1` Continuar pese a coincidencia | *Given* una coincidencia mostrada; *When* elige continuar; *Then* se registra como experimento nuevo | Navegador → Aplicación del catálogo (dos solicitudes) → Base de datos de experimentos y Almacén de archivos de resultados | 1.ª solicitud: Carga de experimentos → Ejecutor de registro → Gestor de registro (valida) → Detector de duplicados; el ejecutor no guarda: conserva la solicitud validada y devuelve la lista de coincidencias. 2.ª solicitud, con la confirmación: el ejecutor recupera la solicitud pendiente y el gestor guarda el experimento y vincula el documento, sin repetir la validación ni la búsqueda |
+| `HU-01.E3` Cancelar por coincidencia | *Given* una coincidencia mostrada; *When* cancela; *Then* no se guarda nada ni se crea documento | Navegador → Aplicación del catálogo | El ejecutor descarta la solicitud pendiente: el gestor nunca guarda ni vincula. Para ver el existente: Rutas de consulta → Servicio de consulta |
+| `HU-01.E1` Falla al crear el documento | *Given* un experimento guardado y una falla de Google Docs; *Then* queda guardado, "no vinculado", con aviso | Aplicación del catálogo → Google Docs (falla) → Base de datos de experimentos | Gestor de registro → Cliente de Google Docs (falla); Gestor de registro → Gestión de excepciones; Gestor de registro → Repositorio de experimentos (estado "no vinculado") |
+| `HU-01.E1` (reintento) | *Given* un experimento "no vinculado"; *When* dispara el reintento; *Then* se crea el documento sin recargar datos | Navegador → Aplicación del catálogo → Google Docs y Base de datos de experimentos | Carga de experimentos → Ejecutor de registro (pide solo vincular el documento) → Gestor de registro → Cliente de Google Docs y Repositorio de experimentos |
 | `HU-02.B1` Filtrar experimentos | *Given* experimentos cargados; *When* filtra por autor; *Then* ve solo los de ese autor | Navegador → Aplicación del catálogo → Base de datos de experimentos | Rutas de consulta → Servicio de consulta → Repositorio de experimentos |
-| `HU-02.B2` Ver detalle | *Given* un experimento seleccionado; *Then* se muestran sus campos, parámetros con unidad, estados, capturas y enlace | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de consulta → Servicio de consulta → Repositorio de experimentos y Acceso a archivos. El visor 3D pide el PDB a Rutas de consulta |
+| `HU-02.B2` Ver detalle | *Given* un experimento seleccionado; *Then* se muestran sus campos, parámetros con unidad, estados, capturas y enlace | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de consulta → Servicio de consulta → Repositorio de experimentos y Almacenamiento de archivos. El visor 3D pide el PDB a Rutas de consulta |
 | `HU-02.A1` Sin resultados | *Given* un filtro sin coincidencias; *Then* se muestra "sin resultados" | Navegador → Aplicación del catálogo → Base de datos de experimentos | Rutas de consulta → Servicio de consulta → Repositorio de experimentos |
-| RF-11 Adjuntar capturas (todavía sin historia de usuario en el SRS) | El autor agrega capturas a un experimento ya registrado; otro usuario no puede modificarlas | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de registro → Gestión de capturas → Repositorio de experimentos (verifica autoría) y Acceso a archivos |
-| `EC-07` Agregar una técnica nueva (escenario principal, no es una historia de usuario) | *Given* un experimento de dinámica molecular; *When* se registra; *Then* el formulario pide sus parámetros, se validan, se buscan duplicados con su clave de coincidencia y el detalle los muestra con unidad, sin modificar el núcleo ni las tablas existentes | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Rutas de registro → Registro de técnicas (entrega Técnica Dinámica molecular) → Ejecutor de registro → los cuatro pasos con el plug-in de la técnica → Repositorio de experimentos (filas de ParametroExperimento). Para el detalle: Rutas de consulta → Servicio de consulta → Registro de técnicas |
+| RF-11 Adjuntar capturas (todavía sin historia de usuario en el SRS) | El autor agrega capturas a un experimento ya registrado; otro usuario no puede modificarlas | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Carga de experimentos → Gestión de capturas → Repositorio de experimentos (verifica autoría) y Almacenamiento de archivos |
+| `EC-07` Agregar una técnica nueva (escenario principal, no es una historia de usuario) | *Given* un experimento de dinámica molecular; *When* se registra; *Then* el formulario pide sus parámetros, se validan, se buscan duplicados con su clave de coincidencia y el detalle los muestra con unidad, sin modificar el núcleo ni las tablas existentes | Navegador → Aplicación del catálogo → Base de datos de experimentos y Almacén de archivos de resultados | Carga de experimentos → Registro de técnicas (entrega Técnica Dinámica molecular) → Ejecutor de registro → Gestor de registro y Detector de duplicados con el plug-in de la técnica → Repositorio de experimentos (filas de ParametroExperimento). Para el detalle: Rutas de consulta → Servicio de consulta → Registro de técnicas |
 
 ---
 
@@ -774,7 +762,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
   - A favor: pocas piezas que operar; las reglas de cada técnica quedan en la capa de dominio, separadas de las rutas, de la capa de servicios y del SQL.
   - En contra: el servidor es punto único de falla; algo de indirección entre capas (una más que en tres capas) y el cuidado de que la capa de servicios no acumule reglas.
 - **Elementos afectados:** contenedores Navegador, Aplicación del catálogo y Base de datos de experimentos; capas de la aplicación.
-- **Cómo se verifica:** las medidas de los dos drivers se verifican en `DA-02` a `DA-05`. Además, revisar en cada pull request que los servicios no importen a las rutas, que el dominio no importe a los servicios y que el acceso a datos no importe los pasos ni los plug-ins del dominio, que es lo que exigen las capas (Tabla 6); y que la capa de servicios no tenga ningún `if` sobre reglas del negocio o de una técnica.
+- **Cómo se verifica:** las medidas de los dos drivers se verifican en `DA-02` a `DA-05`. Además, revisar en cada pull request que los servicios no importen a las rutas, que el dominio no importe a los servicios y que el acceso a datos no importe al gestor, al detector ni a los plug-ins del dominio, que es lo que exigen las capas (Tabla 6); y que la capa de servicios no tenga ningún `if` sobre reglas del negocio o de una técnica.
 
 ### DA-02 — Microkernel en la zona de registro: un núcleo y un plug-in por técnica de ensayo
 
@@ -785,17 +773,17 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
   - Estilo: microkernel, solo en la zona de registro, dentro de la Aplicación del catálogo. El resto sigue en capas.
   - Patrón: ninguno adicional.
   - Variante respecto de la Tabla 4 de la consigna: el núcleo no funciona sin al menos un plug-in (Técnica Docking es obligatorio), porque no puede validar ni buscar duplicados sin saber qué técnica es. Se justifica en 5.2.2.
-  - El **núcleo** (Ejecutor de registro, Registro de técnicas y los cuatro pasos: Validar datos, Detectar duplicados, Guardar experimento y Vincular documento) no contiene reglas de ninguna técnica. Cada **plug-in** (hoy, Técnica Docking) entrega por una interfaz de técnica la definición de sus parámetros (nombre, unidad, obligatorio, formato), sus validaciones propias, su clave de coincidencia y sus parámetros de resumen para el listado. Los plug-ins se registran al arrancar, no se conocen entre sí y no acceden a la base, a los archivos ni a Google Docs. El ejecutor pide la técnica al Registro de técnicas, la agrega a la solicitud de registro y corre los pasos; las rutas de registro y el Servicio de consulta también la piden para armar el formulario y el detalle.
+  - El **núcleo** (Ejecutor de registro, Registro de técnicas, Gestor de registro y Detector de duplicados) no contiene reglas de ninguna técnica. Cada **plug-in** (hoy, Técnica Docking) entrega por una interfaz de técnica la definición de sus parámetros (nombre, unidad, obligatorio, formato), sus validaciones propias, su clave de coincidencia y sus parámetros de resumen para el listado. Los plug-ins se registran al arrancar, no se conocen entre sí y no acceden a la base, a los archivos ni a Google Docs. El ejecutor pide la técnica al Registro de técnicas, la agrega a la solicitud de registro y le pide al gestor que prepare, guarde y vincule; Carga de experimentos y el Servicio de consulta también la piden para armar el formulario y el detalle.
 - **Alternativas consideradas:**
   - Técnicas definidas solo como datos, sin código — descartada por ahora: la definición de parámetros sí es dato (`DA-03`), pero todavía no se sabe qué reglas pedirá dinámica molecular; un plug-in las expresa sin tocar el núcleo. Se reevalúa si, al implementar la segunda técnica, ningún plug-in necesita código propio.
-  - Condicionales por técnica dentro de cada paso (si el tipo es X, hacer Y) — descartada: cada técnica nueva modifica Validar datos, Detectar duplicados, el Servicio de consulta y el formulario.
+  - Condicionales por técnica dentro de cada operación (si el tipo es X, hacer Y) — descartada: cada técnica nueva modifica el Gestor de registro, el Detector de duplicados, el Servicio de consulta y el formulario.
   - Un registro completo por técnica — descartada: duplicaría guardar y vincular, que no cambian con la técnica.
   - Tuberías y filtros en el registro — descartada: ordena los pasos pero no da un lugar donde enchufar lo propio de cada técnica.
   - Hexagonal — descartada: más interfaces y adaptadores para todo el sistema, cuando solo cambia un punto.
 - **Consecuencias:**
   - A favor: una técnica nueva es un plug-in más sus filas de parámetros; no se modifica el núcleo ni la base; la validación, la detección de duplicados y el detalle siguen siendo únicos para todas las técnicas.
   - En contra: hay una interfaz de técnica que mantener y se diseña a partir de un solo ejemplo (docking): si dinámica molecular necesita algo que no prevé, hay que ampliarla y eso toca el núcleo y los plug-ins existentes. Más indirección: la clave de coincidencia ya no está escrita en el Detector. Una regla que dependa de dos técnicas a la vez no encaja, porque los plug-ins no se comunican entre sí.
-- **Elementos afectados:** componentes Ejecutor de registro, Registro de técnicas, Validar datos, Detectar duplicados, Servicio de consulta, Rutas de registro y Técnica Docking.
+- **Elementos afectados:** componentes Ejecutor de registro, Registro de técnicas, Gestor de registro, Detector de duplicados, Servicio de consulta, Carga de experimentos y Técnica Docking.
 - **Cómo se verifica:** implementar dinámica molecular como plug-in (por ejemplo, con paso de tiempo y duración) y comprobar que (a) ninguna columna existente cambia (medida de `EC-07` del TP2); (b) ningún componente del núcleo se modifica: solo se agrega un módulo y se lo registra (medida propia de esta decisión); (c) el formulario, la validación, la detección de duplicados y el detalle funcionan con la técnica nueva; (d) se hace en menos de una jornada. Si falla (b), se amplía la interfaz de técnica y se repite la prueba también con docking.
 
 ### DA-03 — Parámetros del experimento como pares nombre-valor, con unidad
@@ -814,7 +802,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 - **Consecuencias:**
   - A favor: sumar una técnica es cargar filas; no se toca ninguna columna existente.
   - En contra: sin tipado fuerte en la base; filtrar por parámetro exige uniones y es más lento, y eso alcanza al filtro por proteína de `EC-03` y a la búsqueda de duplicados (ver `DA-05`).
-- **Elementos afectados:** componentes Repositorio de experimentos, Guardar experimento y Servicio de consulta; contenedor Base de datos de experimentos.
+- **Elementos afectados:** componentes Repositorio de experimentos, Gestor de registro y Servicio de consulta; contenedor Base de datos de experimentos.
 - **Cómo se verifica:** agregar dinámica molecular cargando solo filas de `ParametroExperimento` (por ejemplo paso de tiempo y duración) y comprobar, con el historial de migraciones, que ninguna columna existente cambió (medida de `EC-07`); cronometrar que se hace en menos de una jornada.
 
 ### DA-04 — Archivos PDB y capturas fuera de la base, en un Almacén de archivos de resultados
@@ -833,7 +821,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 - **Consecuencias:**
   - A favor: la base crece solo con metadatos y las consultas no leen archivos.
   - En contra: la coherencia entre base y archivos depende del orden de escritura (primero el experimento, después el archivo, revirtiendo si falla) y de coordinar los respaldos; además, la aplicación depende de la red y de un servidor que administra el laboratorio.
-- **Elementos afectados:** contenedor Almacén de archivos de resultados; componentes Acceso a archivos, Guardar experimento, Gestión de capturas y Servicio de consulta.
+- **Elementos afectados:** contenedor Almacén de archivos de resultados; componentes Almacenamiento de archivos, Gestor de registro, Gestión de capturas y Servicio de consulta.
 - **Cómo se verifica:** cargar 100.000 experimentos de prueba con PDB de unos 250 KB y comprobar que la base crece solo con metadatos y rutas, que el tamaño de los archivos queda en el servidor de archivos y que una consulta no lee archivos (`EC-03`).
 
 ### DA-05 — Consultas con índices y listados livianos, sin paginar
@@ -862,7 +850,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 - **Decisión:**
   - Tácticas: detección de excepciones, manejo de excepciones, degradación controlada y reintento manual iniciado por el usuario (Disponibilidad); acotar tiempos de ejecución, con un tiempo máximo de espera en la llamada (Desempeño); adaptar la interfaz, porque el Cliente de Google Docs oculta la API (Interoperabilidad).
   - Estilo y patrón: ninguno adicional.
-  - Vincular documento, último paso del registro, captura la falla, deja el experimento "no vinculado" y la pantalla lo avisa. La misma lógica corre desde el reintento.
+  - El Gestor de registro, al vincular el documento (último paso del registro), captura la falla, deja el experimento "no vinculado" y la pantalla lo avisa. La misma lógica corre desde el reintento.
 - **Alternativas consideradas:**
   - Cola con proceso de trabajo y reintento automático — descartada: ningún escenario exige reintentar sin intervención y suma un contenedor que operar.
   - Estilo orientado a eventos solo en esa zona — descartada: solo se justificaría si Fiabilidad fuera driver; cambiaría `HU-01.B1.2`.
@@ -870,7 +858,7 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 - **Consecuencias:**
   - A favor: simple de construir y explicar; el guardado nunca se revierte por Google Docs.
   - En contra: el reintento depende de que alguien lo dispare; si Google Docs está caído, quien registra espera hasta el tiempo máximo.
-- **Elementos afectados:** componentes Vincular documento, Cliente de Google Docs y Gestión de excepciones.
+- **Elementos afectados:** componentes Gestor de registro, Cliente de Google Docs y Gestión de excepciones.
 - **Cómo se verifica:** simular que Google Docs no responde y comprobar que el experimento queda guardado y "no vinculado", sin pérdida de datos (`EC-05`); restablecer el servicio y repetir 20 reintentos, de los que 19 o más deben resolverse bien (`EC-06`).
 
 ### DA-07 — Despliegue en un servidor web, con los archivos en el servidor del laboratorio
@@ -900,9 +888,9 @@ Cada historia se recorre sobre la vista de contenedores (sección 6) y la de com
 
 | Escenario (TP2) | Atributo | Tácticas | Estilo o patrón | Decisión | Elemento C4 |
 |---|---|---|---|---|---|
-| `EC-07` | Modificabilidad | Plug-ins; parametrización; usar un intermediario; restringir dependencias; encapsular | Cliente-servidor + capas; microkernel en el registro | `DA-01`, `DA-02`, `DA-03` | Componentes Ejecutor de registro (servicios), Registro de técnicas, Técnica Docking, Validar datos y Detectar duplicados (dominio), Servicio de consulta, Rutas de registro y Repositorio de experimentos; contenedor Base de datos de experimentos |
-| `EC-03` | Desempeño | Reducir sobrecarga | Cliente-servidor | `DA-04`, `DA-05`, `DA-07` | Contenedor Almacén de archivos de resultados; nodos Servidor web y Servidor de archivos del laboratorio; componentes Acceso a archivos, Gestión de capturas, Servicio de consulta, Repositorio de experimentos |
-| `EC-05`, `EC-06` (no drivers) | Disponibilidad | Detección de excepciones; manejo de excepciones; degradación controlada; reintento; acotar tiempos de ejecución; adaptar la interfaz | Ninguno adicional | `DA-06` | Componentes Vincular documento, Cliente de Google Docs, Gestión de excepciones |
+| `EC-07` | Modificabilidad | Plug-ins; parametrización; usar un intermediario; restringir dependencias; encapsular | Cliente-servidor + capas; microkernel en el registro | `DA-01`, `DA-02`, `DA-03` | Componentes Ejecutor de registro (servicios), Registro de técnicas, Técnica Docking, Gestor de registro y Detector de duplicados (dominio), Servicio de consulta, Carga de experimentos y Repositorio de experimentos; contenedor Base de datos de experimentos |
+| `EC-03` | Desempeño | Reducir sobrecarga | Cliente-servidor | `DA-04`, `DA-05`, `DA-07` | Contenedor Almacén de archivos de resultados; nodos Servidor web y Servidor de archivos del laboratorio; componentes Almacenamiento de archivos, Gestión de capturas, Servicio de consulta, Repositorio de experimentos |
+| `EC-05`, `EC-06` (no drivers) | Disponibilidad | Detección de excepciones; manejo de excepciones; degradación controlada; reintento; acotar tiempos de ejecución; adaptar la interfaz | Ninguno adicional | `DA-06` | Componentes Gestor de registro, Cliente de Google Docs, Gestión de excepciones |
 
 **Historia de usuario → elementos:** ver la sección 9.
 
@@ -927,11 +915,12 @@ Las siglas usadas están en la sección 1.6 (Anexo D de la consigna).
 | Nodo de despliegue | Infraestructura donde se ejecutan los contenedores: un servidor, la computadora del usuario (donde corre el navegador) o un servicio externo |
 | Entorno de producción | El entorno real en el que el sistema funcionaría para sus usuarios |
 | Microkernel | Estilo con un núcleo mínimo y plug-ins que agregan lo específico; el núcleo ofrece el mecanismo para registrarlos y es el único que se comunica con ellos |
-| Núcleo de registro | Parte del registro que no cambia con el tipo de ensayo: Ejecutor de registro, Registro de técnicas y los cuatro pasos |
+| Núcleo de registro | Parte del registro que no cambia con el tipo de ensayo: Ejecutor de registro, Registro de técnicas, Gestor de registro y Detector de duplicados |
 | Plug-in de técnica | Componente que declara lo propio de un tipo de ensayo (parámetros, validaciones, clave de coincidencia y parámetros de resumen) y se registra en el núcleo sin modificarlo |
 | Interfaz de técnica | Lo que el núcleo exige a todo plug-in de técnica (sección 5.2.2) |
 | Registro de técnicas | Componente del núcleo que conoce los plug-ins y entrega el de cada tipo de ensayo |
-| Paso | Cada una de las cuatro etapas del registro: validar datos, detectar duplicados, guardar experimento y vincular documento |
+| Operación del registro | Cada etapa del registro: preparar (validar y buscar coincidencias), guardar el experimento y vincular el documento. Son operaciones del Gestor de registro y las ordena el Ejecutor de registro |
+| Solicitud pendiente | Solicitud de registro ya validada, con coincidencias, que el Ejecutor de registro conserva en memoria con un identificador hasta que el usuario confirma o cancela |
 | Solicitud de registro | Objeto único que recorre los pasos del registro y que cada paso completa |
 | Ejecutor de registro | Componente del núcleo que conoce el orden de los pasos del registro y los ejecuta |
 | "No vinculado" | Estado de un experimento guardado cuyo documento de notas no pudo crearse todavía |
