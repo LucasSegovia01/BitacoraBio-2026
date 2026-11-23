@@ -1,0 +1,213 @@
+{% extends "base.html" %}{% block contenido %}
+<div class="content-header">
+  <div><h1>Registrar experimento</h1><p>Cargá un nuevo experimento en el catálogo de tu grupo. Si ya existe uno igual, el sistema te avisa antes de guardar.</p></div>
+</div>
+
+{% if mensajes %}<div class="toast toast-danger"><div><strong>No se pudo registrar:</strong><ul>{% for m in mensajes %}<li>{{ m }}</li>{% endfor %}</ul></div></div>{% endif %}
+{% if registrado %}<div class="toast toast-success"><div>{% if registrado.similar_a %}<strong>Registraste el experimento como similar a {% for s in registrado.similar_a %}<a class="id-link" href="/experimentos/{{ s }}">EXP-{{ '%04d'|format(s|int) }}</a>{{ ', ' if not loop.last }}{% endfor %}.</strong> Quedó guardado como un experimento nuevo y la relación quedó registrada.{% else %}<strong>No se encontraron coincidencias y el experimento se registró correctamente.</strong>{% endif %}<br>
+Experimento #{{ registrado.id }} · autor {{ registrado.autor }} · {{ registrado.fecha_de_carga.strftime('%d/%m/%Y %H:%M') }} · documento de notas: {{ registrado.documento_notas }} <span class="demo-note">(simulado)</span></div></div>{% endif %}
+
+<section class="card">
+  <div class="card-header"><h2>Cargar nuevo experimento</h2></div>
+  <div class="card-body">
+    <form method="get" action="/registro" class="field" style="max-width:320px">
+      <label>Tipo de experimento *</label>
+      <select name="tipo" onchange="this.form.submit()">{% for t in tecnicas %}<option value="{{ t.tipo }}" {{ 'selected' if t.tipo == tecnica.tipo }}>{{ t.etiqueta }}</option>{% endfor %}</select>
+    </form>
+
+    <form method="post" action="/registro" enctype="multipart/form-data" class="grid-2">
+      <input type="hidden" name="tipo" value="{{ tecnica.tipo }}">
+      <div>
+        <div class="fieldset-title">Información general</div>
+        <div class="field-row">
+          <div class="field"><label>Proyecto *</label>
+            <select name="proyecto_id">{% for id, nombre in proyectos %}<option value="{{ id }}" {{ 'selected' if form.get('proyecto_id') == id }}>{{ nombre }}</option>{% endfor %}</select></div>
+          <div class="field"><label>Fecha de realización *</label>
+            <input type="date" name="fecha_realizacion" value="{{ form.get('fecha_realizacion', '') }}"></div>
+        </div>
+
+        <div class="fieldset-title">Datos del {{ tecnica.etiqueta|lower }}</div>
+        <div class="field-row">
+        {% for d in tecnica.definiciones() if not d.grupo %}
+          <div class="field"><label>{{ d.etiqueta }}{{ ' *' if d.obligatorio }}{% if d.unidad %} <span class="opt">({{ d.unidad }})</span>{% endif %}</label>
+            <input name="v_{{ d.nombre }}" value="{{ form.get('v_' ~ d.nombre, '') }}"></div>
+        {% endfor %}
+        </div>
+
+        {% set opcionales = tecnica.definiciones()|selectattr('grupo')|list %}
+        {% if opcionales %}
+        {% set ns = namespace(abierto=false) %}
+        {% for d in opcionales %}{% for k, v in form.items() %}{% if v and (k == 'v_' ~ d.nombre or k.startswith('v_' ~ d.nombre ~ '__')) %}{% set ns.abierto = true %}{% endif %}{% endfor %}{% endfor %}
+        <details class="grupo-opcional" {{ 'open' if ns.abierto }}>
+          <summary class="fieldset-title">{{ opcionales[0].grupo }} <span class="opt">(opcional)</span></summary>
+          <div class="stack" style="gap:2px;">
+          {% for d in opcionales %}
+            <div class="field"><label>{{ d.etiqueta }}{% if d.unidad %} <span class="opt">({{ d.unidad }})</span>{% endif %}</label>
+              {% if d.componentes > 1 %}
+              <div class="terna">{% for i in range(1, d.componentes + 1) %}{% if not loop.first %}<span class="sep">,</span>{% endif %}<input name="v_{{ d.nombre }}__{{ i }}" inputmode="decimal" placeholder="{{ 'xyz'[i-1] }}" value="{{ form.get('v_' ~ d.nombre ~ '__' ~ i, '') }}">{% endfor %}</div>
+              {% else %}<input name="v_{{ d.nombre }}" inputmode="decimal" value="{{ form.get('v_' ~ d.nombre, '') }}">{% endif %}
+            </div>
+          {% endfor %}
+          </div>
+        </details>
+        {% endif %}
+
+        <div class="fieldset-title">Replicación <span class="opt">(opcional)</span></div>
+        <div class="field"><label>Similar a<span class="help-icon" title="Elegí uno o más experimentos existentes si esta carga es una repetición intencional. Así queda la relación registrada y el sistema no los marca como coincidencia. Ctrl + clic para elegir varios.">ⓘ</span></label>
+          <select name="similar_a" multiple>{% for e in experimentos %}<option value="{{ e.id }}">#{{ e.id }} · {{ e.valor_de('proteina') }} / {{ e.valor_de('ligando') }}</option>{% endfor %}</select></div>
+
+        <div class="fieldset-title">Hardware y tiempo <span class="opt">(opcional)</span></div>
+        <div class="field-row">
+          <div class="field"><label>Hardware utilizado</label><input name="hardware" placeholder="Ej. GPU RTX 3060, 16 GB RAM" value="{{ form.get('hardware', '') }}"></div>
+          <div class="field"><label>Tiempo de procesamiento</label><input name="tiempo_procesamiento" placeholder="Ej. 2h 15min" value="{{ form.get('tiempo_procesamiento', '') }}"></div>
+        </div>
+
+        <div class="fieldset-title">Parámetros adicionales<span class="help-icon" title="Se guardan como pares nombre-valor-unidad: agregá los que necesites para este ensayo, no hay una lista fija de columnas.">ⓘ</span></div>
+        <div class="stack" style="gap:10px; margin-bottom:16px;">
+          {% for i in extras %}<div class="param-row-unidad" style="grid-template-columns:1fr 1fr 1fr">
+            <input name="extra_nombre_{{ i }}" placeholder="Nombre (ej. Sitio activo)" class="field-input">
+            <input name="extra_valor_{{ i }}" placeholder="Valor">
+            <input name="extra_unidad_{{ i }}" placeholder="Unidad (ej. Å)">
+          </div>{% endfor %}
+        </div>
+
+        <div class="fieldset-title">Información adicional</div>
+        <div class="field"><label>Objetivo <span class="opt">(opcional)</span></label><input name="objetivo" placeholder="Para qué se corre este experimento" value="{{ form.get('objetivo', '') }}"></div>
+        <div class="field"><label>Hipótesis <span class="opt">(opcional)</span></label><textarea name="hipotesis" placeholder="Qué esperás encontrar...">{{ form.get('hipotesis', '') }}</textarea></div>
+        <div class="field"><label>Notas <span class="opt">(opcional)</span></label><textarea name="notas" placeholder="Notas relevantes...">{{ form.get('notas', '') }}</textarea></div>
+      </div>
+
+      <div>
+        <div class="fieldset-title">Archivo de resultado</div>
+        <div class="field"><label>Archivo PDB *</label>
+          <div class="dropzone"><input type="file" name="pdb" accept=".pdb"><div class="hint">Formato permitido: .pdb</div></div></div>
+
+        <div class="fieldset-title">Vista previa de la pose</div>
+
+        <div class="viewer small" id="visor-pdb">
+            <span class="viewer-lib-tag">3Dmol.js</span>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" id="vista-cintas">
+                Cintas
+            </button>
+            <button type="button" class="btn btn-secondary" id="vista-varillas">
+                Varillas
+            </button>
+            <button type="button" class="btn btn-secondary" id="vista-esferas">
+                Esferas
+            </button>
+        </div>
+
+        <p id="estado-visor" class="hint" style="margin-top:8px;">
+            Seleccioná un archivo PDB para visualizar su estructura.
+        </p>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:26px;">
+          <a href="/registro" class="btn btn-secondary">Limpiar</a>
+          <button type="submit" class="btn btn-primary">Registrar experimento</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const archivoPDB = document.querySelector('input[name="pdb"]');
+    const contenedor = document.getElementById("visor-pdb");
+    const estado = document.getElementById("estado-visor");
+
+    let visor = null;
+    let modeloCargado = false;
+
+    if (!archivoPDB || !contenedor) return;
+
+    visor = $3Dmol.createViewer(contenedor, {
+        backgroundColor: "#0E1A2B"
+    });
+
+    function cambiarVista(estilo) {
+        if (!modeloCargado) return;
+
+        visor.setStyle({}, estilo);
+        visor.render();
+    }
+
+    document.getElementById("vista-cintas").addEventListener("click", function () {
+        cambiarVista({
+            cartoon: { color: "spectrum" }
+        });
+    });
+
+    document.getElementById("vista-varillas").addEventListener("click", function () {
+        cambiarVista({
+            stick: { colorscheme: "Jmol" }
+        });
+    });
+
+    document.getElementById("vista-esferas").addEventListener("click", function () {
+        cambiarVista({
+            sphere: { colorscheme: "Jmol" }
+        });
+    });
+
+    archivoPDB.addEventListener("change", function () {
+
+        const archivo = this.files[0];
+
+        modeloCargado = false;
+        visor.removeAllModels();
+        visor.render();
+
+        if (!archivo) {
+            estado.textContent = "Seleccioná un archivo PDB para visualizar su estructura.";
+            return;
+        }
+
+        if (!archivo.name.toLowerCase().endsWith(".pdb")) {
+            estado.textContent = "El archivo debe tener formato PDB.";
+            return;
+        }
+
+        estado.textContent = "Cargando estructura...";
+
+        const lector = new FileReader();
+
+        lector.onload = function (evento) {
+            try {
+                const contenido = evento.target.result;
+
+                visor.addModel(contenido, "pdb");
+
+                visor.setStyle({}, {
+                    cartoon: { color: "spectrum" }
+                });
+
+                visor.zoomTo();
+                visor.render();
+
+                modeloCargado = true;
+                estado.textContent = "Estructura cargada correctamente.";
+            } catch (error) {
+                estado.textContent = "No se pudo interpretar el archivo PDB.";
+            }
+        };
+
+        lector.onerror = function () {
+            estado.textContent = "No se pudo leer el archivo.";
+        };
+
+        lector.readAsText(archivo);
+    });
+
+    window.addEventListener("resize", function () {
+        visor.resize();
+    });
+
+});
+</script>
+{% endblock %}

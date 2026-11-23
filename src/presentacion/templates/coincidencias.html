@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block titulo %}Posibles coincidencias{% endblock %}
+{% block pagina %}
+<div class="modal-wrap"><div class="modal">
+  <div class="modal-header"><h2>Posibles coincidencias</h2>
+    <p>Ya existe(n) experimento(s) del mismo tipo con los mismos datos. Revisá la lista antes de confirmar tu registro.</p></div>
+  <div class="modal-body">
+    <table>
+      <thead><tr><th>#</th><th>Autor</th><th>Fecha</th><th>Parámetros destacados</th><th>Estado</th></tr></thead>
+      <tbody>{% for e in coincidencias %}<tr>
+        <td><span class="id-link">#{{ e.id }}</span></td><td class="muted">{{ e.autor }}</td><td class="muted">{{ e.fecha_realizacion }}</td>
+        <td class="muted">{% for p in e.parametros %}{{ p.nombre }}: {{ p.valor }}{{ ' · ' if not loop.last }}{% endfor %}</td>
+        <td><span class="badge badge-neutral">{{ e.estado_validez }}</span></td></tr>{% endfor %}</tbody>
+    </table>
+    <p class="hint" style="margin-top:14px;">Esto no es necesariamente un error: podés estar repitiendo la corrida a propósito. Si seguís, se registra como un experimento nuevo y el existente no se toca. No hace falta volver a cargar nada.</p>
+  </div>
+  <div class="modal-footer">
+    <form method="post" action="/registro/cancelar"><input type="hidden" name="pendiente_id" value="{{ pendiente_id }}"><button type="submit" class="btn btn-danger-outline">Cancelar el registro</button></form>
+    <form method="post" action="/registro/confirmar"><input type="hidden" name="pendiente_id" value="{{ pendiente_id }}"><button type="submit" class="btn btn-primary">Realizar el registro de todas formas</button></form>
+  </div>
+</div></div>
+{% endblock %}

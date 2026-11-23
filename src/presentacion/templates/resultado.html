@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block titulo %}Experimento registrado{% endblock %}{% block miga %}Experimento registrado{% endblock %}
+{% block contenido %}
+<div class="content-header"><div><h1>Experimento registrado</h1><p>Se guardó como un experimento nuevo; el existente no se modificó.</p></div>
+  <div class="header-actions"><a href="/registro" class="btn btn-primary">Registrar otro</a></div></div>
+<div class="toast toast-success"><div><strong>Experimento registrado.</strong><br>{% if experimento.similar_a %}Declaraste que es similar a {% for s in experimento.similar_a %}<a class="id-link" href="/experimentos/{{ s }}">EXP-{{ '%04d'|format(s|int) }}</a>{{ ', ' if not loop.last }}{% endfor %}; la relación quedó registrada.<br>{% endif %}El documento de notas se creó y quedó vinculado <span class="demo-note">(simulado)</span>.</div></div>
+<section class="card"><div class="card-header"><h2>Experimento #{{ experimento.id }}</h2><span class="badge badge-neutral">{{ experimento.tipo }}</span></div>
+<div class="card-body"><table class="kv">
+<tr><th>Autor</th><td>{{ experimento.autor }}</td></tr>
+<tr><th>Fecha y hora de carga</th><td>{{ experimento.fecha_de_carga.strftime('%d/%m/%Y %H:%M') }}</td></tr>
+{% for p in experimento.parametros %}<tr><th>{{ p.nombre }}</th><td>{{ p.valor }}{% if p.unidad %}<span class="unit"> {{ p.unidad }}</span>{% endif %}</td></tr>{% endfor %}
+<tr><th>Archivo PDB</th><td>{{ experimento.ruta_pdb }}</td></tr>
+<tr><th>Documento de notas</th><td>{{ experimento.documento_notas }}</td></tr>
+</table></div></section>
+{% endblock %}

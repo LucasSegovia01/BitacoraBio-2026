@@ -1,0 +1,219 @@
+// Desplegable de usuario
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.user-btn');
+  const dropdown = document.querySelector('.user-dropdown');
+  if (!dropdown) return;
+  if (btn) {
+    dropdown.classList.toggle('open');
+  } else if (!e.target.closest('.user-dropdown')) {
+    dropdown.classList.remove('open');
+  }
+});
+
+// Pestañas (Resumen / Parámetros / Resultados / Notas)
+document.querySelectorAll('.tabs').forEach(function (tabGroup) {
+  tabGroup.addEventListener('click', function (e) {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    const panelId = tab.getAttribute('data-tab');
+    const container = tabGroup.closest('.tabs-container') || document;
+
+    tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    const panel = container.querySelector('#' + panelId);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// Agregar / quitar filas de parámetro dinámicas (carga con unidad, búsqueda sin unidad)
+document.querySelectorAll('.add-param-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    const list = document.querySelector(btn.getAttribute('data-target'));
+    if (!list) return;
+    const esCarga = btn.getAttribute('data-target') === '#params-list';
+    const row = document.createElement('div');
+    row.className = esCarga ? 'param-row-unidad' : 'param-row';
+    row.innerHTML = esCarga ? `
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Nombre del parámetro (ej. pH)">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Valor">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Unidad (ej. Å)">
+      </div>
+      <button type="button" class="remove" title="Quitar parámetro">✕ Quitar</button>
+    ` : `
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Parámetro (ej. pH)">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <input type="text" placeholder="Valor o rango">
+      </div>
+      <button type="button" class="remove" title="Quitar parámetro">✕</button>
+    `;
+    list.appendChild(row);
+  });
+});
+
+document.addEventListener('click', function (e) {
+  if (e.target.closest('.remove')) {
+    const row = e.target.closest('.param-row, .param-row-unidad');
+    if (row) row.remove();
+  }
+});
+
+// Dropzone: resaltar al arrastrar un archivo
+document.querySelectorAll('.dropzone').forEach(function (zone) {
+  ['dragover', 'dragenter'].forEach(evt =>
+    zone.addEventListener(evt, e => { e.preventDefault(); zone.style.borderColor = '#2F6FED'; })
+  );
+  ['dragleave', 'drop'].forEach(evt =>
+    zone.addEventListener(evt, e => { e.preventDefault(); zone.style.borderColor = ''; })
+  );
+});
+
+// Toast de confirmación de guardado (heurística 1 — Inicio)
+function showToast(id) {
+  document.querySelectorAll('.toast').forEach(t => t.classList.remove('show'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('show'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+}
+document.addEventListener('click', function (e) {
+  if (e.target.closest('.close-toast')) {
+    e.target.closest('.toast').classList.remove('show');
+  }
+});
+const saveForm = document.querySelector('#form-cargar');
+if (saveForm) {
+  // Dropzone: el archivo PDB ahora es un campo obligatorio real
+  const pdbInput = document.querySelector('#archivo-pdb');
+  const dropzone = document.querySelector('.dropzone');
+  const dropzoneLabel = document.querySelector('#dropzone-label');
+  function setPdbFile(name) {
+    if (!name) return;
+    dropzone.classList.add('has-file');
+    dropzoneLabel.innerHTML = name + '<br><span style="font-weight:400;">o <strong>elegí otro archivo</strong></span>';
+    dropzone.closest('.field').classList.remove('field-error');
+  }
+  if (pdbInput) {
+    pdbInput.addEventListener('change', () => { if (pdbInput.files[0]) setPdbFile(pdbInput.files[0].name); });
+  }
+  if (dropzone) {
+    dropzone.addEventListener('drop', e => {
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        try { if (pdbInput) pdbInput.files = e.dataTransfer.files; } catch (err) {}
+        setPdbFile(f.name);
+      }
+    });
+    dropzone.addEventListener('click', () => pdbInput && pdbInput.click());
+  }
+
+  // Capturas: varios archivos de imagen, con miniaturas y opción de quitar antes de guardar
+  const capturasInput = document.querySelector('#capturas-input');
+  const capturasDropzone = document.querySelector('#capturas-dropzone');
+  const capturasPreview = document.querySelector('#capturas-preview');
+  function agregarCapturas(files) {
+    Array.from(files).forEach(function (f) {
+      const thumb = document.createElement('div');
+      thumb.className = 'captura-thumb';
+      thumb.title = f.name;
+      thumb.innerHTML = '🖼️<button type="button" class="remove-captura" title="Quitar">✕</button>';
+      capturasPreview.appendChild(thumb);
+    });
+  }
+  if (capturasInput) {
+    capturasInput.addEventListener('change', () => { if (capturasInput.files.length) agregarCapturas(capturasInput.files); });
+  }
+  if (capturasDropzone) {
+    capturasDropzone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) agregarCapturas(e.dataTransfer.files);
+    });
+    capturasDropzone.addEventListener('click', () => capturasInput && capturasInput.click());
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.remove-captura')) {
+      e.target.closest('.captura-thumb').remove();
+    }
+  });
+
+  saveForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // Validación en vivo de campos obligatorios
+    let firstInvalid = null;
+    saveForm.querySelectorAll('[required]').forEach(el => {
+      const field = el.closest('.field');
+      if (!field) return;
+      const isFile = el.type === 'file';
+      const empty = isFile ? el.files.length === 0 : el.value.trim() === '';
+      field.classList.toggle('field-error', empty);
+      if (empty && !firstInvalid) firstInvalid = field;
+    });
+
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    showToast('toast-ok');
+  });
+}
+
+// Preselección de proyecto al llegar desde "Cargar experimento para este proyecto"
+document.addEventListener('DOMContentLoaded', function () {
+  const params = new URLSearchParams(location.search);
+  const proyecto = params.get('proyecto');
+  const select = document.querySelector('#campo-proyecto');
+  if (proyecto && select) select.value = proyecto;
+});
+
+// Búsqueda: habilitar "Hasta" solo si el filtro de fecha es por rango
+const tipoFecha = document.querySelector('#tipo-fecha');
+if (tipoFecha) {
+  const hasta = document.querySelector('#fecha-hasta');
+  function toggleHasta() {
+    const esRango = tipoFecha.value === 'Rango de fechas';
+    hasta.disabled = !esRango;
+    hasta.closest('.field').style.opacity = esRango ? '1' : '0.5';
+  }
+  tipoFecha.addEventListener('change', toggleHasta);
+  toggleHasta();
+}
+
+// Búsqueda: demo del estado "sin resultados"
+const toggleEmptyBtn = document.querySelector('#toggle-empty-demo');
+if (toggleEmptyBtn) {
+  toggleEmptyBtn.addEventListener('click', function () {
+    const results = document.querySelector('#results-table-wrap');
+    const empty = document.querySelector('#results-empty');
+    const showingEmpty = empty.style.display !== 'none';
+    empty.style.display = showingEmpty ? 'none' : 'block';
+    results.style.display = showingEmpty ? 'block' : 'none';
+    toggleEmptyBtn.textContent = showingEmpty ? 'Ver ejemplo: sin resultados' : 'Ver ejemplo: con resultados';
+  });
+}
+
+// Detalle: estado de la bitácora (vinculada / no vinculada) y reintento de vinculación
+const docReintentar = document.querySelector('#doc-reintentar');
+if (docReintentar) {
+  let fallaReintento = false;
+  function setDocVinculado(vinculado) {
+    document.querySelector('#doc-ver').style.display = vinculado ? '' : 'none';
+    document.querySelector('#doc-badge').style.display = vinculado ? 'none' : '';
+    docReintentar.style.display = vinculado ? 'none' : '';
+    document.querySelector('#notas-doc-btn').style.display = vinculado ? '' : 'none';
+    document.querySelector('#notas-doc-aviso').style.display = vinculado ? 'none' : '';
+  }
+  document.querySelector('#demo-no-vinculada').addEventListener('click', () => setDocVinculado(false));
+  document.querySelector('#demo-vinculada').addEventListener('click', () => setDocVinculado(true));
+  document.querySelector('#demo-fallo').addEventListener('click', () => { fallaReintento = true; setDocVinculado(false); });
+  docReintentar.addEventListener('click', function () {
+    if (fallaReintento) { fallaReintento = false; showToast('toast-reintento-fallido'); return; }
+    setDocVinculado(true);
+    showToast('toast-vinculado');
+  });
+}

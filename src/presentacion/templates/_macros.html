@@ -1,0 +1,4 @@
+{% macro codigo(e) %}EXP-{{ '%04d'|format(e.id|int) }}{% endmacro %}
+{% macro validez(e) %}{% if e.estado_validez == 'finalizado' %}<span class="badge badge-success">Finalizado</span>{% elif e.estado_validez == 'en_curso' %}<span class="badge badge-warning">En curso</span>{% else %}<span class="badge badge-neutral">Inválido</span>{% endif %}{% endmacro %}
+{% macro analisis(e) %}{% if e.estado_analisis == 'analizado' %}<span class="badge badge-success">Analizado</span>{% elif e.estado_analisis == 'en_analisis' %}<span class="badge badge-warning">En análisis</span>{% else %}<span class="badge badge-neutral">Pendiente</span>{% endif %}{% endmacro %}
+{% macro fecha(d) %}{{ d.strftime('%d/%m/%Y') if d else '—' }}{% endmacro %}
