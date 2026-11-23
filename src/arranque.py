@@ -1,6 +1,7 @@
 """Punto de arranque: el único lugar que arma los objetos concretos (inyección de dependencias)."""
 from __future__ import annotations
 
+import os
 from datetime import date, datetime
 
 from .acceso_datos.google_docs_simulado import ClienteGoogleDocsSimulado
@@ -17,13 +18,24 @@ from .servicios.servicio_consulta import ServicioConsulta
 
 
 def construir_nucleo(repositorio, archivos, registro_tecnicas=None, cliente_docs=None):
-    """Arma el núcleo del registro: Ejecutor, Gestor y Detector. Google Docs se simula (ClienteGoogleDocsSimulado)."""
+    """Arma el núcleo del registro: Ejecutor, Gestor y Detector. Si no se indica otro cliente, Google Docs se simula (ClienteGoogleDocsSimulado)."""
     registro = registro_tecnicas or RegistroDeTecnicas()
     if registro_tecnicas is None:
         registro.registrar(TecnicaDocking())
     cliente_docs = cliente_docs or ClienteGoogleDocsSimulado()
     gestor = GestorDeRegistro(repositorio, archivos, cliente_docs, DetectorDeDuplicados(repositorio))
     return registro, EjecutorDeRegistro(registro, gestor)
+
+
+def crear_cliente_docs():
+    """Google Docs real si está definida BITACORABIO_GOOGLE_CREDENCIALES; si no, el simulado."""
+    ruta = os.environ.get("BITACORABIO_GOOGLE_CREDENCIALES")
+    if not ruta:
+        return ClienteGoogleDocsSimulado()
+    from .acceso_datos.google_docs_real import ClienteGoogleDocsReal  # recién acá, para no exigir las librerías de Google
+
+    ruta_token = os.environ.get("BITACORABIO_GOOGLE_TOKEN", "token.json")
+    return ClienteGoogleDocsReal.desde_credenciales(ruta, ruta_token, os.environ.get("BITACORABIO_GOOGLE_CARPETA"))
 
 
 def cargar_datos_de_ejemplo(repositorio, archivos) -> None:
@@ -56,5 +68,5 @@ def crear_aplicacion(ruta_db: str | None = None):
     archivos = AlmacenamientoArchivosEnMemoria()
     if not repositorio.todos():  # una base que ya tiene datos no se vuelve a sembrar
         cargar_datos_de_ejemplo(repositorio, archivos)
-    registro, ejecutor = construir_nucleo(repositorio, archivos)
+    registro, ejecutor = construir_nucleo(repositorio, archivos, cliente_docs=crear_cliente_docs())
     return crear_app(ejecutor, registro, ServicioConsulta(repositorio, archivos), autor="investigadora.demo")

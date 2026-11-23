@@ -29,7 +29,7 @@ Criterio de aceptación:
 2. Un experimento previo con la misma molécula/ligando pero "inválido" no se reporta como coincidencia.
 3. Con los campos opcionales vacíos, el experimento se guarda sin exigirlos.
 
-**Google Docs, simulado.** La conexión real con Google Docs no se construye en este TP. Pero el criterio de A1 pide un *documento de notas propio*, así que la operación de vincular el documento (`GestorDeRegistro.vincular_documento`) **sí se diseña y se ejecuta**, usando una interfaz `ClienteGoogleDocs` con una implementación simulada (`ClienteGoogleDocsSimulado`: no se conecta a ningún servicio, devuelve un enlace ficticio y recuerda lo creado). Con eso el criterio de A1 se cumple completo. Quedan **fuera de alcance**: la conexión real, el reintento cuando falla el vínculo (`HU-01.E1`) y el resto de `HU-01.B1.2`.
+**Google Docs, simulado por defecto.** El criterio de A1 pide un *documento de notas propio*, así que la operación de vincular el documento (`GestorDeRegistro.vincular_documento`) **sí se diseña y se ejecuta**, usando una interfaz `ClienteGoogleDocs` con una implementación simulada (`ClienteGoogleDocsSimulado`: no se conecta a ningún servicio, devuelve un enlace ficticio y recuerda lo creado) y otra real y opcional (`ClienteGoogleDocsReal`, que crea un documento vacío en una carpeta de Drive y solo se usa si se definen las variables de entorno; se prueba a mano). Con eso el criterio de A1 se cumple completo. Quedan **fuera de alcance**: el reintento cuando falla el vínculo (`HU-01.E1`) y el resto de `HU-01.B1.2`.
 
 ### 1.3 Por qué esta HU
 
@@ -219,7 +219,7 @@ flowchart LR
 | `EjecutorDeRegistro` | Ejecutor de registro; Gestor de registro (reúne Validar datos, Guardar experimento y Vincular documento del TP3) y Detector de duplicados | Servicios y dominio (núcleo) |
 | `RegistroDeTecnicas` | Registro de técnicas y Técnica Docking | Dominio (microkernel) |
 | `RepositorioDeExperimentos` | Repositorio de experimentos y Almacenamiento de archivos (en el TP3, Acceso a archivos; ver 8.2) | Acceso a datos |
-| `ClienteGoogleDocs` (boundary) | Cliente de Google Docs (simulado) | Acceso a datos y servicios externos |
+| `ClienteGoogleDocs` (boundary) | Cliente de Google Docs (simulado, o real si se configura) | Acceso a datos y servicios externos |
 | `Experimento`, `ParametroExperimento`, estructuras, capturas, `DocumentoNotas` | Entidades del modelo de dominio (no son un componente del TP3) | Dominio |
 
 ### 3.5 Diagramas de secuencia
@@ -567,6 +567,9 @@ classDiagram
         class ClienteGoogleDocsSimulado {
             <<actual>>
         }
+        class ClienteGoogleDocsReal {
+            <<actual, opcional>>
+        }
     }
     namespace Transversal {
         class GestionDeExcepciones {
@@ -622,13 +625,14 @@ classDiagram
     AlmacenamientoArchivosEnMemoria ..|> AlmacenamientoArchivos
     AlmacenamientoArchivosLocal ..|> AlmacenamientoArchivos
     ClienteGoogleDocsSimulado ..|> ClienteGoogleDocs
+    ClienteGoogleDocsReal ..|> ClienteGoogleDocs
     ErrorValidacion --|> ErrorPrevisto
     ErrorAlmacenamiento --|> ErrorPrevisto
     SolicitudNoPendiente --|> ErrorPrevisto
     GestionDeExcepciones ..> ErrorPrevisto
 ```
 
-**Lo actual y lo proyectado.** Hoy existen `RepositorioExperimentosEnMemoria` (por defecto), `RepositorioExperimentosSQLite` (opcional, con `python run.py --db`), `AlmacenamientoArchivosEnMemoria` y `ClienteGoogleDocsSimulado`. `RepositorioExperimentosPostgreSQL` (metadatos y rutas, con las capturas en una tabla aparte relacionada por `experimento_id`) y `AlmacenamientoArchivosLocal` (archivos en el sistema de archivos) están previstas y **no están implementadas**; la integración real con Google Docs también queda para el futuro.
+**Lo actual y lo proyectado.** Hoy existen `RepositorioExperimentosEnMemoria` (por defecto), `RepositorioExperimentosSQLite` (opcional, con `python run.py --db`), `AlmacenamientoArchivosEnMemoria`, `ClienteGoogleDocsSimulado` (por defecto) y `ClienteGoogleDocsReal` (opcional, con `BITACORABIO_GOOGLE_CREDENCIALES`). `RepositorioExperimentosPostgreSQL` (metadatos y rutas, con las capturas en una tabla aparte relacionada por `experimento_id`) y `AlmacenamientoArchivosLocal` (archivos en el sistema de archivos) están previstas y **no están implementadas**.
 
 **Dónde están los puertos.** `RepositorioExperimentos`, `AlmacenamientoArchivos` y `ClienteGoogleDocs` son interfaces que define el dominio (`dominio/puertos.py`): el gestor y el detector dependen de ellas y el acceso a datos las implementa. Por eso están en el namespace `Dominio` del diagrama y sus implementaciones, en `AccesoADatos`. Es la inversión de dependencias de 2.2: el dominio no conoce al acceso a datos.
 
@@ -718,7 +722,7 @@ Las instrucciones completas están en el `README.md`: instalar con `pip install 
 
 - **Persistencia:** por defecto, `RepositorioExperimentosEnMemoria`. Con `python run.py --db bitacorabio.db`, `arranque.py` usa `RepositorioExperimentosSQLite` (módulo estándar `sqlite3`, sin dependencias nuevas): es la única línea que cambia; ni el gestor, ni el detector, ni el ejecutor, ni la presentación se modifican (se verifica con `CP-24`, que corre el núcleo real sobre SQLite). El archivo y las tablas se crean solos la primera vez; el esquema sigue el modelo del TP3 (una fila por experimento y una por parámetro nombre-valor-unidad, con un índice sobre nombre y valor normalizado). Para PostgreSQL se escribiría otra clase que cumpla el mismo puerto. Los archivos PDB siguen en el almacén simulado en memoria, y la solicitud pendiente de una confirmación sigue en memoria del ejecutor: si se reinicia el servidor, se pierde la que esté esperando, pero no los experimentos guardados.
 - **Archivos:** `AlmacenamientoArchivosEnMemoria` simula el almacén. Para guardar en el sistema de archivos se escribe `AlmacenamientoArchivosLocal` (proyectada) con la misma interfaz.
-- **Google Docs:** `ClienteGoogleDocsSimulado` cumple `ClienteGoogleDocs`. Para conectarlo de verdad se escribe otra clase con la misma interfaz y se la pasa en `arranque.py`; `GestorDeRegistro` no cambia.
+- **Google Docs:** `ClienteGoogleDocsSimulado` y `ClienteGoogleDocsReal` cumplen `ClienteGoogleDocs`. `arranque.crear_cliente_docs` elige el real solo si está definida `BITACORABIO_GOOGLE_CREDENCIALES` (con `BITACORABIO_GOOGLE_CARPETA` y, opcional, `BITACORABIO_GOOGLE_TOKEN`); `GestorDeRegistro` no cambia. Si Google falla, el error no se captura (queda dentro de lo que dejamos fuera con `HU-01.E1`): el experimento queda guardado sin documento y la pantalla muestra un error interno.
 - **Autenticación:** fuera del desarrollo (TP3): el autor se toma de un usuario identificado fijo (`investigadora.demo`).
 
 ---
@@ -760,13 +764,14 @@ Pruebas unitarias con pytest sobre el dominio y la capa de servicios, **sin pasa
 | CP-23 | Caja negra | Persistencia (puerto `RepositorioExperimentos`) | Las mismas situaciones que `CP-20` sobre la base SQLite, más: ida y vuelta de todos los campos, orden de los parámetros, ids desde el 101, borrado en cascada y datos que sobreviven a cerrar y abrir la base | Mismo contrato que el repositorio en memoria | `test_repositorio_sqlite.py` (16) |
 | CP-25 | Caja negra | Réplicas en las coincidencias (`RF-03`) | Original más réplica: se informa solo el original; réplica de réplica; declarar el original cubre a sus réplicas; original inválido: la réplica válida sí se informa | El usuario ve una sola coincidencia por familia de réplicas | `test_detector_de_duplicados.py` (4), `test_entidades.py` (1) |
 | CP-26 | Caja negra y blanca | Parámetros opcionales del docking | Centro y tamaño de la caja ("x, y, z"), exhaustividad, número de poses y mejor afinidad: bien formados, vacíos (no se guardan) y mal formados (casilla incompleta, texto, cero, negativo); se guardan como un parámetro nombre-valor-unidad y no entran en la clave de coincidencia | Valores válidos se aceptan; inválidos dan un mensaje por campo y no guardan | `test_tecnicas.py` (10), `test_carga_experimentos.py` (3) |
+| CP-27 | Caja negra | Google Docs real (con un servicio de Drive falso) | Crea el documento dentro de la carpeta y devuelve el enlace; sin carpeta no envía `parents`; sin `webViewLink` arma el enlace con el id; `arranque` elige el simulado sin variable de entorno y el real con ella | No se conecta a Google; la autorización con OAuth (`desde_credenciales`) se prueba a mano | `test_google_docs_real.py` (5) |
 | CP-24 | Caja negra | Cambio de repositorio | El núcleo real registra, detecta una coincidencia y continúa pese a ella, y respeta "Similar a", sobre SQLite | Sin modificar ninguna otra clase | `test_repositorio_sqlite.py` (2) |
 
-En total hay **136 pruebas** (también hay seis casos de `ServicioConsulta` y las de las pantallas, de apoyo). La numeración salta de `CP-18` a `CP-20` porque `CP-19` se retiró al unir casos; `CP-22` se agregó con la tabla de complejidad y `CP-23` y `CP-24`, con el repositorio SQLite. La prueba de calidad de `EC-07` es `CP-11`; la del criterio de A1 es `CP-05` junto con `CP-05b`, `CP-06` y `CP-06c`.
+En total hay **141 pruebas** (también hay seis casos de `ServicioConsulta` y las de las pantallas, de apoyo). La numeración salta de `CP-18` a `CP-20` porque `CP-19` se retiró al unir casos; `CP-22` se agregó con la tabla de complejidad y `CP-23` y `CP-24`, con el repositorio SQLite. La prueba de calidad de `EC-07` es `CP-11`; la del criterio de A1 es `CP-05` junto con `CP-05b`, `CP-06` y `CP-06c`.
 
 ### 7.3 Resultados y cobertura
 
-136 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **501 sentencias, 0 sin cubrir; 78 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
+141 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **516 sentencias, 0 sin cubrir; 80 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
 
 ### 7.4 Complejidad ciclomática y caminos independientes
 
@@ -792,6 +797,7 @@ Complejidad = decisiones + 1, medida con `radon cc src -s` (cuenta cada `if`, `f
 | `RegistroDeTecnicas.tecnica` | 2 | `if` tipo no registrado | (1) registrado; (2) desconocido → `CP-17`, `CP-09` |
 | `respuesta_para` (excepciones) | 4 | tres tipos de error previsto | un camino por tipo y el genérico → `CP-18` |
 | `AlmacenamientoArchivosEnMemoria.eliminar_archivos` | 4 | `for`; `if` | con archivos → `CP-15`; sin archivos → `CP-22` |
+| `ClienteGoogleDocsReal.crear_documento` | 3 | `if` carpeta; `or` del enlace | (1) con carpeta → `CP-27`; (2) sin carpeta → `CP-27`; (3) sin `webViewLink` → `CP-27` |
 
 `_errores_de` es el punto de mayor complejidad (14, nivel "C" de radon): concentra todas las validaciones de la solicitud. Se aceptó porque cada regla es una condición simple e independiente y está cubierta una por una; si se agregan más reglas conviene partirla en una función por grupo. `construir_nucleo` (CC 4) está en `arranque.py`, que se excluye de la medición.
 
