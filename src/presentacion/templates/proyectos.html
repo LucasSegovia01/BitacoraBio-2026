@@ -1,0 +1,71 @@
+{% import "_macros.html" as m %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Mis proyectos</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="/registro">Inicio</a>
+      <a href="/proyectos" class="active">Mis proyectos</a>
+      <a href="/experimentos">Experimentos</a>
+      <a href="/buscar">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><span>Mis proyectos</span></div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/ayuda" class="btn btn-secondary btn-sm">Ayuda</a>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">{{ usuario[:2]|upper }}</span>
+            <span class="user-info"><div class="name">{{ usuario }}</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a><a href="#">Preferencias</a><hr><button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <h1>Mis proyectos</h1>
+          <p>Proyectos en los que participás, propios y de tus compañeros de grupo.</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="card-header"><h2>Proyectos del catálogo</h2></div>
+        <table>
+          <thead>
+            <tr><th>Nombre</th><th>Experimentos</th><th>Última actividad</th></tr>
+          </thead>
+          <tbody>
+            {% for pr in proyectos %}
+            <tr class="row-link" onclick="location.href='/proyectos/{{ pr.id }}'">
+              <td><a class="id-link" href="/proyectos/{{ pr.id }}">{{ pr.nombre }}</a></td>
+              <td>{{ pr.cantidad }}</td>
+              <td class="muted">{{ m.fecha(pr.ultima) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

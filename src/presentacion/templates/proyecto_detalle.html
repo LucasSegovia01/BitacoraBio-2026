@@ -1,0 +1,98 @@
+{% import "_macros.html" as m %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · {{ proyecto.nombre }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="/registro">Inicio</a>
+      <a href="/proyectos" class="active">Mis proyectos</a>
+      <a href="/experimentos">Experimentos</a>
+      <a href="/buscar">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <a href="/proyectos">Mis proyectos</a> <span>›</span> <span>{{ proyecto.nombre }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/ayuda" class="btn btn-secondary btn-sm">Ayuda</a>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">{{ usuario[:2]|upper }}</span>
+            <span class="user-info"><div class="name">{{ usuario }}</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a><a href="#">Preferencias</a><hr><button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <a href="/proyectos" class="muted" style="display:inline-block; margin-bottom:12px; font-size:13.5px;">← Volver a Mis proyectos</a>
+
+      <div class="content-header">
+        <div>
+          <h1>{{ proyecto.nombre }}</h1>
+          <p>{{ proyecto.cantidad }} experimento(s) registrados.</p>
+        </div>
+        <div class="header-actions" style="align-items:center;">
+          <a href="/registro" class="btn btn-primary">+ Cargar experimento</a>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:18px;">
+        <section class="card">
+          <div class="card-header"><h2>Información del proyecto</h2></div>
+          <div class="card-body">
+            <table class="kv">
+              <tr><td>Cantidad de experimentos</td><td>{{ proyecto.cantidad }}</td></tr>
+              <tr><td>Última actividad</td><td>{{ m.fecha(proyecto.ultima) }}</td></tr>
+            </table>
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-header"><h2>Resumen de estados</h2></div>
+          <div class="card-body" style="display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="badge badge-success">{{ conteos.finalizado }} Finalizado</span>
+            <span class="badge badge-warning">{{ conteos.en_curso }} En curso</span>
+            <span class="badge badge-neutral">{{ conteos.invalido }} Inválido</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="card-header"><h2>Experimentos del proyecto</h2></div>
+        {% if experimentos %}
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Fecha</th><th>Molécula / Proteína</th><th>Ligando</th><th>Autor</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            {% for e in experimentos %}
+            <tr class="row-link" onclick="location.href='/experimentos/{{ e.id }}'">
+              <td><a class="id-link" href="/experimentos/{{ e.id }}">{{ m.codigo(e) }}</a></td><td class="muted">{{ m.fecha(e.fecha_realizacion) }}</td><td>{{ e.valor_de('proteina') or '—' }}</td><td>{{ e.valor_de('ligando') or '—' }}</td><td class="muted">{{ e.autor }}</td><td>{{ m.validez(e) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<div class="empty"><strong>Este proyecto todavía no tiene experimentos.</strong></div>{% endif %}
+      </section>
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

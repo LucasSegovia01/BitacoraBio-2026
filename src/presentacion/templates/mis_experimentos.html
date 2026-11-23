@@ -1,0 +1,81 @@
+{% import "_macros.html" as m %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · Mis experimentos</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="/registro">Inicio</a>
+      <a href="/proyectos">Mis proyectos</a>
+      <a href="/experimentos" class="active">Experimentos</a>
+      <a href="/buscar">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><span>Experimentos</span></div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/ayuda" class="btn btn-secondary btn-sm">Ayuda</a>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">{{ usuario[:2]|upper }}</span>
+            <span class="user-info"><div class="name">{{ usuario }}</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a><a href="#">Preferencias</a><hr><button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-header">
+        <div>
+          <h1>Mis experimentos</h1>
+          <p>Los experimentos que registraste vos, en todos tus proyectos.</p>
+        </div>
+        <div class="header-actions">
+          <a href="/buscar" class="btn btn-secondary">Filtros avanzados</a>
+          <a href="/registro" class="btn btn-primary">+ Agregar ensayo</a>
+        </div>
+      </div>
+
+      <div class="tabs" style="margin-bottom:16px;">
+        <a class="tab {{ 'active' if not estado }}" href="/experimentos">Todos ({{ conteos.total }})</a>
+        <a class="tab {{ 'active' if estado == 'finalizado' }}" href="/experimentos?estado=finalizado">Finalizado ({{ conteos.finalizado }})</a>
+        <a class="tab {{ 'active' if estado == 'en_curso' }}" href="/experimentos?estado=en_curso">En curso ({{ conteos.en_curso }})</a>
+        <a class="tab {{ 'active' if estado == 'invalido' }}" href="/experimentos?estado=invalido">Inválido ({{ conteos.invalido }})</a>
+      </div>
+
+      <section class="card">
+        {% if experimentos %}
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Fecha</th><th>Proyecto</th><th>Molécula / Proteína</th><th>Ligando</th><th>Estado de validez</th><th>Estado de análisis</th></tr>
+          </thead>
+          <tbody>
+            {% for e in experimentos %}
+            <tr class="row-link" onclick="location.href='/experimentos/{{ e.id }}'">
+              <td><a class="id-link" href="/experimentos/{{ e.id }}">{{ m.codigo(e) }}</a></td><td class="muted">{{ m.fecha(e.fecha_realizacion) }}</td><td>{{ nombres[e.proyecto_id] }}</td><td>{{ e.valor_de('proteina') or '—' }}</td><td>{{ e.valor_de('ligando') or '—' }}</td><td>{{ m.validez(e) }}</td><td>{{ m.analisis(e) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<div class="empty"><strong>Todavía no registraste experimentos.</strong><p style="margin:6px 0 0;">Cargá el primero desde "Agregar ensayo".</p></div>{% endif %}
+      </section>
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

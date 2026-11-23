@@ -1,0 +1,230 @@
+{% import "_macros.html" as m %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BitacoraBio 2026 · {{ m.codigo(e) }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">BitacoraBio 2026</div>
+    <nav class="nav">
+      <a href="/registro">Inicio</a>
+      <a href="/proyectos">Mis proyectos</a>
+      <a href="/experimentos" class="active">Experimentos</a>
+      <a href="/buscar">Buscar</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <a href="/experimentos">Experimentos</a> <span>›</span> <span>{{ m.codigo(e) }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/ayuda" class="btn btn-secondary btn-sm">Ayuda</a>
+        <div class="user-menu">
+          <button class="user-btn">
+            <span class="avatar">{{ usuario[:2]|upper }}</span>
+            <span class="user-info"><div class="name">{{ usuario }}</div><div class="role">Investigadora/a</div></span>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="#">Mi perfil</a>
+            <a href="#">Preferencias</a>
+            <hr>
+            <button type="button">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <a href="/experimentos" class="muted" style="display:inline-block; margin-bottom:12px; font-size:13.5px;">← Volver</a>
+
+      <div class="content-header">
+        <div>
+          <h1>{{ m.codigo(e) }}</h1>
+          <p>{{ e.tipo|capitalize }} · {{ e.valor_de('proteina') or '—' }} + {{ e.valor_de('ligando') or '—' }}</p>
+        </div>
+        <div class="header-actions" style="align-items:center;">
+          {{ m.validez(e) }}
+          {{ m.analisis(e) }}
+          {% if e.documento_notas %}<a class="btn btn-secondary" href="{{ e.documento_notas }}" target="_blank" rel="noopener">Ver en Google Docs</a>
+          {% else %}<span class="badge badge-warning">Bitácora no vinculada</span>{% endif %}
+        </div>
+      </div>
+
+      
+        <div class="tabs">
+          <button class="tab active" data-tab="tab-resumen">Resumen</button>
+          <button class="tab" data-tab="tab-parametros">Parámetros</button>
+          <button class="tab" data-tab="tab-resultados">Resultados</button>
+          <button class="tab" data-tab="tab-notas">Notas</button>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="tab-panel active" id="tab-resumen">
+          <div class="grid-2">
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><h2>Información general</h2></div>
+                <div class="card-body">
+                  <table class="kv">
+                    <tr><td>Tipo de experimento</td><td>{{ e.tipo|capitalize }}</td></tr>
+                    <tr><td>Molécula / Proteína</td><td>{{ e.valor_de('proteina') or '—' }}</td></tr>
+                    <tr><td>Ligando</td><td>{{ e.valor_de('ligando') or '—' }}</td></tr>
+                    <tr><td>Software utilizado</td><td>{{ e.valor_de('software') or '—' }}</td></tr>
+                    <tr><td>Hardware utilizado</td><td>{{ e.hardware or '—' }}</td></tr>
+                    <tr><td>Tiempo de procesamiento</td><td>{{ e.tiempo_procesamiento or '—' }}</td></tr>
+                    <tr><td>Autor</td><td>{{ e.autor }}</td></tr>
+                    <tr><td>Fecha de realización</td><td>{{ m.fecha(e.fecha_realizacion) }}</td></tr>
+                    <tr><td>Fecha de carga</td><td>{{ e.fecha_de_carga.strftime('%d/%m/%Y %H:%M') }}</td></tr>
+                  </table>
+                  <div class="field" style="margin-top:16px; margin-bottom:0;">
+                    <label>Objetivo</label>
+                    <p style="margin:0; color:var(--text-secondary);">{{ e.objetivo or '—' }}</p>
+                  </div>
+                  <div class="field" style="margin-top:16px; margin-bottom:0;">
+                    <label>Hipótesis</label>
+                    <p style="margin:0; color:var(--text-secondary);">{{ e.hipotesis or '—' }}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Archivos</h2></div>
+                <div class="card-body">
+                  {% if e.ruta_pdb %}<div style="font-weight:600;">{{ e.ruta_pdb.split('/')[-1] }}</div><div class="muted" style="font-size:12px;">{{ e.ruta_pdb }}</div>
+                  {% else %}<p class="hint" style="margin:0;">Sin archivo PDB.</p>{% endif %}
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Capturas que respaldan el resultado</h2></div>
+                <div class="card-body">
+                  {% if e.rutas_capturas %}<div class="capturas-grid">{% for c in e.rutas_capturas %}<div class="captura-thumb" title="{{ c }}">🖼️</div>{% endfor %}</div>
+                  {% else %}<p class="hint" style="margin:0;">Sin capturas.</p>{% endif %}
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><h2>Visor 3D de la pose</h2></div>
+                <div class="card-body" style="padding-top:0;">
+                  <div class="viewer" id="visor-pdb"><span class="viewer-lib-tag">3Dmol.js</span></div>
+                  <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="vista-cintas">Cintas</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="vista-varillas">Varillas</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="vista-esferas">Esferas</button>
+                  </div>
+                  <p id="estado-visor" class="hint" style="margin-top:8px;">Cargando estructura...</p>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Replicación</h2></div>
+                <div class="card-body">
+                  {% if e.similar_a %}<p style="margin:0;">Similar a: {% for s in e.similar_a %}<a class="id-link" href="/experimentos/{{ s }}">EXP-{{ '%04d'|format(s|int) }}</a>{{ ', ' if not loop.last }}{% endfor %}</p>
+                  {% else %}<p class="hint" style="margin:0;">No declara similitud con otros experimentos.</p>{% endif %}
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Información del proyecto</h2></div>
+                <div class="card-body">
+                  <table class="kv">
+                    <tr><td>Nombre del proyecto</td><td><a href="/proyectos/{{ e.proyecto_id }}" class="id-link">{{ nombre_proyecto }}</a></td></tr>
+                  </table>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><h2>Notas</h2></div>
+                <div class="card-body">
+                  <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:4px;">{{ e.autor }} · {{ m.fecha(e.fecha_realizacion) }}</div>
+                  <p style="margin:0;">{{ e.notas or 'Sin notas.' }}</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="tab-panel" id="tab-parametros">
+          <section class="card">
+            <div class="card-header"><h2>Todos los parámetros del ensayo</h2></div>
+            <div class="card-body">
+              <table class="kv">
+                {% for p in e.parametros %}<tr><td>{{ etiquetas.get(p.nombre, p.nombre) }}</td><td>{{ p.valor }}{% if p.unidad %} <span class="unit">{{ p.unidad }}</span>{% endif %}</td></tr>
+                {% else %}<tr><td colspan="2">Sin parámetros.</td></tr>{% endfor %}
+              </table>
+              <p class="hint" style="margin-top:14px;">Los parámetros se guardan como pares nombre-valor-unidad: la lista varía según el tipo de ensayo.</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div class="tab-panel" id="tab-resultados">
+          <section class="card">
+            <div class="card-header"><h2>Estado</h2></div>
+            <div class="card-body">
+              <table class="kv">
+                <tr><td>Estado de validez</td><td>{{ m.validez(e) }}</td></tr>
+                <tr><td>Estado de análisis</td><td>{{ m.analisis(e) }}</td></tr>
+                <tr><td>Archivo de pose</td><td>{{ e.ruta_pdb.split('/')[-1] if e.ruta_pdb else '—' }}</td></tr>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- NOTAS -->
+        <div class="tab-panel" id="tab-notas">
+          <section class="card">
+            <div class="card-header"><h2>Notas del experimento</h2></div>
+            <div class="card-body">
+              <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:4px;">{{ e.autor }} · {{ m.fecha(e.fecha_realizacion) }}</div>
+              <p style="margin:0 0 16px;">{{ e.notas or 'Sin notas.' }}</p>
+              {% if e.documento_notas %}<a class="btn btn-secondary btn-sm" href="{{ e.documento_notas }}" target="_blank" rel="noopener">Abrir bitácora en Google Docs</a>
+              {% else %}<p class="hint" style="margin:0;">La bitácora de este experimento todavía no está vinculada.</p>{% endif %}
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const contenedor = document.getElementById("visor-pdb");
+  const estado = document.getElementById("estado-visor");
+  if (!contenedor) return;
+  if (typeof $3Dmol === "undefined") { estado.textContent = "No se pudo cargar el visor (sin conexión)."; return; }
+  const visor = $3Dmol.createViewer(contenedor, { backgroundColor: "#0E1A2B" });
+  let cargado = false;
+  function vista(estilo) { if (!cargado) return; visor.setStyle({}, estilo); visor.render(); }
+  document.getElementById("vista-cintas").addEventListener("click", () => vista({ cartoon: { color: "spectrum" } }));
+  document.getElementById("vista-varillas").addEventListener("click", () => vista({ stick: { colorscheme: "Jmol" } }));
+  document.getElementById("vista-esferas").addEventListener("click", () => vista({ sphere: { colorscheme: "Jmol" } }));
+  fetch("/experimentos/{{ e.id }}/pdb")
+    .then(r => { if (!r.ok) throw new Error("sin archivo"); return r.text(); })
+    .then(txt => {
+      visor.addModel(txt, "pdb");
+      visor.setStyle({}, { cartoon: { color: "spectrum" } });
+      visor.zoomTo(); visor.render();
+      cargado = true;
+      estado.textContent = "Estructura cargada correctamente.";
+    })
+    .catch(() => { estado.textContent = "Este experimento no tiene un PDB disponible para mostrar."; });
+  window.addEventListener("resize", () => visor.resize());
+});
+</script>
+</body>
+</html>
