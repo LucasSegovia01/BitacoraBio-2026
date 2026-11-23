@@ -145,6 +145,8 @@ classDiagram
         objetivo: texto
         hardware_usado: texto  
         tiempo_procesamiento: texto 
+        tipo: texto — técnica del ensayo, por ahora docking
+        fecha_de_carga: fecha y hora — la asigna el sistema al registrar
     }
     class ParametroExperimento {
         clave: texto
@@ -162,6 +164,7 @@ classDiagram
     Experimento "1" --> "0..1" ArchivoResultado : produce
     Experimento "1" --> "*" CapturaResultado : respalda con
     Experimento "1" --> "0..1" DocumentoNotas : enlaza
+    Experimento "*" --> "*" Experimento : similar a (lo declara el usuario)
 ```
 
 # **Selección de proceso(s) a desarrollar en profundidad**
@@ -178,11 +181,11 @@ Se elige **Proceso 1 · Registrar Experimento** (incluyendo su interacción con 
 
 # **Requerimientos funcionales**
 ```
-RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, objetivo, notas (vacías por defecto), hardware usado, tiempo de procesamiento y estado.
+RF-01: El sistema debe permitir a un usuario con rol Investigador/a registrar un experimento de docking dentro de un proyecto existente, con los campos: molécula/proteína, ligando, software usado, parámetros clave, sitio activo, hipótesis, objetivo, notas (vacías por defecto), hardware usado, tiempo de procesamiento y estado, y, de forma opcional, el campo "Similar a" (uno o más experimentos existentes que el investigador/a declara como antecedente de una repetición intencional).
 
 RF-02: El sistema debe registrar automáticamente el autor, la fecha y la hora del experimento al momento de la carga, sin intervención manual del usuario.
 
-RF-03: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido".
+RF-03: El sistema debe verificar, antes de confirmar el registro, si existe un experimento previo con el mismo tipo y la misma combinación molécula/ligando, excluyendo de esta verificación los experimentos marcados con estado de validez "inválido" los que el usuario haya indicado en el campo "Similar a" del nuevo experimento y las réplicas (experimentos que declararon "Similar a" otro experimento que también coincide), de modo que se informe solo el original y no cada réplica.
 
 RF-04: El sistema debe alertar al usuario si detecta una posible coincidencia, mostrando el experimento existente, y permitirle decidir si continúa o cancela el registro.
 
@@ -221,7 +224,7 @@ Precondición: se recibió el tipo de experimento y la combinación molécula/li
 
 Flujo:
   1. El sistema busca en el catálogo (D1) experimentos del mismo tipo y la misma combinación molécula/ligando.
-  2. El sistema excluye de la búsqueda los experimentos con estado_validez = "inválido".
+  2. El sistema excluye de la búsqueda los experimentos con estado_validez = "inválido", los declarados en "Similar a" por el usuario y las réplicas de otro experimento que también coincide (se informa solo el original).
   3. El sistema retorna el resultado al llamador: "sin coincidencias" o "coincidencia encontrada" junto con el/los experimento(s) hallado(s).
 
 Postcondición: el llamador (CU-01) recibe el resultado de la verificación;
@@ -248,7 +251,7 @@ Garantía mínima: el sistema nunca confirma un registro sin haber completado la
 Flujo principal:
   1. El/la investigador/a selecciona el proyecto existente y completa los campos del experimento: molécula/proteína, ligando, software usado, parámetros clave (incluido el sitio activo, con su unidad cuando corresponda), y opcionalmente hardware usado, tiempo de procesamiento, objetivo, hipótesis y capturas de resultado (las notas quedan vacías por defecto; define el estado inicial).
   2. El sistema valida que los campos obligatorios estén completos y que su formato sea válido (RF-08).
-  3. El sistema verifica si existe un experimento previo del mismo tipo con la misma combinación molécula/ligando, excluyendo los marcados como inválidos <<include>> CU-00 · Detectar Duplicado.
+  3. El sistema verifica si existe un experimento previo del mismo tipo con la misma combinación molécula/ligando, excluyendo los marcados como inválidos y los declarados en "Similar a" <<include>> CU-00 · Detectar Duplicado.
   4. El sistema no encuentra coincidencias y continúa el registro.
   5. El sistema registra automáticamente el autor y la fecha/hora de carga.
   6. El sistema guarda el experimento en el catálogo.
@@ -294,6 +297,9 @@ Then el sistema registra automáticamente el autor y la fecha/hora de carga, y g
 - Given un experimento previo con la misma molécula/ligando pero marcado como estado_validez "inválido",
 When el investigador/a confirma el registro,
 Then el sistema NO lo reporta como coincidencia y guarda el experimento como en el camino normal.
+- Given un experimento previo con la misma molécula/ligando que el investigador/a indicó en el campo "Similar a",
+When el investigador/a confirma el registro,
+Then el sistema NO lo reporta como coincidencia y guarda el experimento como en el camino normal (la relación "Similar a" queda registrada).
 - Given un proyecto existente y todos los campos obligatorios completos, con los campos opcionales (hardware, tiempo de procesamiento, objetivo, hipótesis, notas y capturas) vacíos,
 When el investigador/a confirma el registro,
 Then el sistema guarda el experimento sin exigir esos campos.
