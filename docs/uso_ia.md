@@ -452,6 +452,42 @@ Qué se pidió, qué generó la IA y qué decidió el grupo. Si algo de lo escri
    **Qué pasó:** la IA trabajó con una copia desactualizada: había clonado solo la rama `main` y no vio la rama `tp4-hu-01-a1`, que tenía el código, las pruebas y los documentos más recientes. El grupo se lo avisó. Después de avisarle, el grupo resolvió la diferencia por su cuenta y siguió con la versión de la rama.
    **Resultado:** error de la IA, no del grupo, detectado y corregido por el grupo. Por eso los documentos que se generaron antes de ese aviso (discurso, presentación y número de pruebas) conviene contrastarlos con el repositorio.
 
+11. **Consulta:** se pasó el texto de la sección 3.5 que reescribió Juliana y se preguntó si lo que planteaba tenía sentido.
+    **Generó:** confirmó que había una contradicción entre 3.4 y 3.5 sobre cuándo se crea el documento de Google Docs, y corrigió las secciones 3.4 y 3.5 y el tamaño de la secuencia 2.
+    **Resultado:** se aceptó la corrección y el documento quedó coherente.
+
+12. **Consulta:** se adjuntó `formulario.html`, la plantilla hecha por el grupo, y se pidió conectar con lógica las demás plantillas.
+    **Generó:** conectó las otras plantillas al servicio de consulta y propuso ajustes al formulario.
+    **Resultado:** el grupo pidió dejar el formulario como estaba ("dejalo así") y se conservó su diseño. Solo se agregó el visor 3Dmol del archivo PDB.
+
+13. **Consulta:** se pidió que las páginas leyeran la base de datos para mostrar los experimentos cargados y el registro.
+    **Generó:** `ServicioConsulta`, un repositorio SQLite (opción `--db`), las rutas de consulta y las plantillas con datos reales.
+    **Resultado:** se aceptó. Un script de edición falló a medias y dejó datos de maqueta (EXP-0043, "Sitio activo") en la pestaña de parámetros del detalle; la IA lo encontró buscando en el código y lo corrigió.
+
+14. **Consulta:** se pidió un visor del PDB en el detalle del experimento y una pantalla de aviso cuando se registra con "Similar a".
+    **Generó:** el visor 3D y el aviso de réplica, con sus pruebas.
+    **Resultado:** se aceptó.
+
+15. **Consulta:** se pidieron parámetros opcionales del docking. Lucas aportó el texto con cinco parámetros de AutoDock Vina y pidió que las comas y los espacios vinieran predefinidos.
+    **Generó:** ocho definiciones en `TecnicaDocking` (tres obligatorias, cinco opcionales en un bloque plegado), con validación de formato y casillas con las comas ya puestas.
+    **Resultado:** se aceptó. Los opcionales no entran en la clave de coincidencia.
+
+16. **Consulta:** al probar el sistema, Lucas notó que con un experimento original, una réplica marcada como "Similar a" y una tercera carga sin marcar, aparecían las dos como coincidencias.
+    **Generó:** la regla "una réplica no se informa si ya se informa su original", con cambios en RF-03 del SRS, el diseño y las pruebas (CP-25).
+    **Resultado:** se aceptó. El problema lo encontró el grupo al usar la aplicación; la IA no lo había previsto.
+
+17. **Consulta:** se dio feedback sobre la interfaz generada ("se ve mal, no tiene el formato definido previamente").
+    **Generó:** un rediseño visual de la aplicación.
+    **Resultado:** se rechazó la primera versión visual y se rehízo. Es otro caso real de salida de la IA descartada.
+
+18. **Consulta:** se pidió integrar la conexión real a Google Docs que hizo Juliana (su `tp4.zip`) a la rama actualizada, indicando la carpeta de credenciales.
+    **Generó:** `ClienteGoogleDocsReal` desde el código de Juliana, la elección por variables de entorno en `arranque.py`, pruebas con un Drive falso y la guía de instalación. Se indicó que no leyera la carpeta de credenciales y que `credentials.json` y `token.json` no se suben al repositorio.
+    **Resultado:** se aceptó.
+
+19. **Consulta:** Lucas solicitó que los documentos tengan un formato predefinido, con apartados como título, fecha e hipótesis.
+    **Generó:** opciones y recomendó la primera: subir el contenido como HTML y que Drive lo convierta en Google Doc, sin habilitar otra API. Implementó `Experimento.apartados_de_notas`, el cambio del puerto `ClienteGoogleDocs` y las pruebas (145 en total).
+    **Resultado:** se aceptó la opción recomendada. Se probó con un Drive falso; la conexión real se probó a mano.
+
 
 ## Qué se descartó o se corrigió (y por qué)
 
@@ -463,3 +499,7 @@ Qué se pidió, qué generó la IA y qué decidió el grupo. Si algo de lo escri
 - Atributos del SRS perdidos en un diagrama reducido: se restauraron.
 - Cuenta de servicio para Google Docs (primera recomendación de la IA): se cambió a OAuth de escritorio por el problema de espacio en Drive con cuentas comunes.
 - Trabajo sobre una copia desactualizada del repositorio (solo `main`): lo detectó el grupo y lo resolvió usando la rama `tp4-hu-01-a1`.
+- Primera versión visual de la interfaz: se rechazó ("se ve mal, no tiene el formato definido previamente") y se rehízo.
+- Cambios de la IA al formulario: se descartaron; se conservó la plantilla del grupo.
+- Coincidencias de réplicas: la regla nació de una prueba manual del grupo, no de la IA.
+- Datos de maqueta que quedaron en el detalle del experimento por un script fallido: se detectaron y se corrigieron.
