@@ -403,3 +403,63 @@ alcance y consistencia interna del propio documento en evolución.
 - ChatGPT insistió en propuestas que no respetaban las restricciones de diseño indicadas por la usuaria. En más de una ocasión fue necesario reiterar que no debía crearse un controlador por cada operación, que la arquitectura debía simplificarse y que no se quería volver a una estructura con una cantidad excesiva de controladores.
 - ChatGPT volvió a plantear supuestos sobre responsabilidades y componentes que la usuaria ya había aclarado o rechazado. La usuaria tuvo que corregir esas interpretaciones y señalar que debían tomarse en cuenta las decisiones establecidas en intercambios anteriores, en lugar de volver a proponer soluciones incompatibles con ellas.
 - ChatGPT no siempre distinguió entre decisiones de diseño, funcionalidades proyectadas e implementación comprobada. Fue necesario insistir en que no se afirmara que algo estaba implementado sin haber revisado el código correspondiente.
+
+# Uso de IA — TP4 (diseño detallado, implementación y pruebas de HU-01.A1)
+
+**Herramienta:** Claude (Anthropic), en sesiones de chat y de código.
+
+Qué se pidió, qué generó la IA y qué decidió el grupo. Si algo de lo escrito en "Resultado" no coincide con lo que recuerdan, corríjanlo: la consigna pide que refleje lo que realmente pasó.
+
+## Registro de intercambios
+
+1. **Consulta:** se pidieron opciones de estructura en capas para corregir el TP3.
+   **Generó:** tres opciones (5 capas, 4 capas, aplicación-dominio-infraestructura) y recomendó 5 capas.
+   **Resultado:** se descartó la recomendación. El profesor había indicado 4 capas (presentación, servicios, dominio, acceso a datos y servicios externos) y se aplicó eso.
+
+2. **Consulta:** se pidió recomendar una HU para el TP4.
+   **Generó:** recomendó HU-01.A1 con B1.1 como base, y HU-01.E1 como alternativa.
+   **Resultado:** se eligió A1 y se dejó la conexión real con Google Docs fuera de alcance.
+
+3. **Consulta:** se pidió aplicar el cambio de capas a `arquitectura.md`.
+   **Generó:** redacción de los cambios en las secciones 5.2.2, 5.3, 5.5, 7 y DA-01.
+   **Resultado:** se leyó y reviso el texto generado, se confirmo que el mismo no presentaba contradicciones y que representaba efectivamente lo pedido por el grupo.
+
+4. **Consulta:** se pidió un primer diseño detallado de A1 (robustez, secuencias, clases).
+   **Generó:** un `EjecutorRegistro` sin lógica, reglas de coincidencia dentro de `Experimento` y la clave de coincidencia en el plug-in.
+   **Resultado:** se conservó la clave de coincidencia en la técnica. Se descartó delegar el filtrado en `Experimento` y se dejó en el detector, porque el repositorio no decide reglas (TP3, Tabla 6).
+
+5. **Consulta:** se pidió unificar el diseño con la versión de Lucas y las revisiones del grupo, comprobadas por otra herramienta de IA.
+   **Generó:** una versión con `PasoDeRegistro` (cuatro pasos), `Resultado`, `CoincidenciasSinConfirmar`, Google Docs simulado y una robustez con un controller por paso.
+   **Resultado:** el grupo rechazó el diseño por ilegible: un controller por paso producía controllers obesos y secuencias largas. Se redujo a cinco controllers y se pidió rehacer las secuencias más cortas. Es un caso real de sugerencia de la IA descartada.
+
+6. **Consulta:** se pidió implementar y probar.
+   **Generó:** el código Flask, 66 pruebas (luego 75) y una revisión por mutación manual.
+   **Resultado:** se comprobó la funcionalidad del código, buscando los casos de error, recorriendo los distintos caminos posibles. Se hallaron problemas en la resolución de distintos problemas, así como también con distintos pasos de la implementación, que no seguían lo específicado anteriormento por el grupo.
+
+7. **Consulta:** se pidió un nuevo diagrama de clases y, luego, ajustar el flujo (solicitud pendiente, estados de preparación).
+   **Generó:** `GestorDeRegistro` y `DetectorDeDuplicados` en lugar de los cuatro pasos, la solicitud pendiente en el ejecutor, `ResultadoPreparacion` en lugar de `CoincidenciasSinConfirmar`, `AlmacenamientoArchivos` y tres secuencias cortas. Adaptó código, pruebas y documento.
+   **Resultado:** se aceptó el diseño. Se pidió mantener los cinco controllers y que el actor solo toque fronteras. Un diagrama de clases reducido que generó la IA había perdido atributos del SRS de `Experimento` (estado de análisis, objetivo, hardware, tiempo de procesamiento, hipótesis, notas) y la relación `CargaDeExperimentos → RegistroDeTecnicas`: se detectó en la revisión y se restauraron.
+
+8. **Consulta:** se pidió una revisión integral del diseño (contradicciones, trazabilidad, revisión de pruebas), con la restricción de no modificar código ni pruebas.
+   **Generó:** correcciones al documento y una lista de pendientes. Verificó el comportamiento real antes de documentarlo: reportó que la falla de Google Docs hoy produce un error 500 y no lo especificado (E1), y que una afirmación del pedido sobre archivos de prueba duplicados no era cierta.
+   **Resultado:** el documento de diseño quedó como versión final salvo errores de consistencia. Los pendientes (E1, ramas, complejidad ciclomática, actualizar SRS y TP3) quedaron registrados y no se tapan.
+
+9. **Consulta:** se pidió conectar Google Docs de verdad y qué hacía falta.
+   **Generó:** una explicación de los pasos (proyecto de Google Cloud, APIs, credenciales), una guía detallada para configurarlo y la clase `ClienteGoogleDocsReal` (crea un documento vacío en una carpeta de Drive), activable con variables de entorno; por defecto sigue el cliente simulado. Primero recomendó una cuenta de servicio y, al revisar, se corrigió a sí misma: con una cuenta de Gmail común los archivos de una cuenta de servicio no tienen espacio propio en Drive, y propuso OAuth de aplicación de escritorio. Escribió pruebas con un Drive falso.
+   **Resultado:** el grupo creó el proyecto y las credenciales, y lo probó a mano en su máquina, porque la IA no pudo probar la conexión contra Google. Se mantuvo como opcional; el manejo de la falla de Google Docs (E1) sigue sin implementar.
+
+10. **Consulta:** se pidió trabajar sobre una rama alternativa.
+   **Qué pasó:** la IA trabajó con una copia desactualizada: había clonado solo la rama `main` y no vio la rama `tp4-hu-01-a1`, que tenía el código, las pruebas y los documentos más recientes. El grupo se lo avisó. Después de avisarle, el grupo resolvió la diferencia por su cuenta y siguió con la versión de la rama.
+   **Resultado:** error de la IA, no del grupo, detectado y corregido por el grupo. Por eso los documentos que se generaron antes de ese aviso (discurso, presentación y número de pruebas) conviene contrastarlos con el repositorio.
+
+
+## Qué se descartó o se corrigió (y por qué)
+
+- Cinco capas (propuesta de la IA): se descartó por indicación del profesor.
+- Un controller de robustez por paso y `PasoDeRegistro`: se descartó por obeso e ilegible; quedaron cinco controllers.
+- Coincidencias como excepción (`CoincidenciasSinConfirmar`): se reemplazó por un resultado de preparación, porque es un camino normal del negocio.
+- Repetir el registro con una marca de confirmada (idea del TP3): se reemplazó por una solicitud pendiente en el ejecutor.
+- Filtrado dentro de `Experimento`: se dejó en el detector.
+- Atributos del SRS perdidos en un diagrama reducido: se restauraron.
+- Cuenta de servicio para Google Docs (primera recomendación de la IA): se cambió a OAuth de escritorio por el problema de espacio en Drive con cuentas comunes.
+- Trabajo sobre una copia desactualizada del repositorio (solo `main`): lo detectó el grupo y lo resolvió usando la rama `tp4-hu-01-a1`.
