@@ -5,9 +5,11 @@ lo que responde (aviso de registro, coincidencias o errores traducidos por Gesti
 """
 from __future__ import annotations
 
+import mimetypes
 from datetime import date
 
 from flask import Flask, Response, abort, render_template, request
+from werkzeug.utils import secure_filename
 
 from ..dominio.registro_tecnicas import RegistroDeTecnicas
 from ..dominio.solicitud import DatosRegistro
@@ -44,6 +46,10 @@ def _leer_datos(form, archivos) -> DatosRegistro:
     pdb = None
     if archivos.get("pdb") and archivos["pdb"].filename:
         pdb = archivos["pdb"].read()
+    capturas = []
+    for i, archivo in enumerate(archivos.getlist("capturas"), start=1):
+        if archivo and archivo.filename:  # el índice evita que dos capturas con el mismo nombre se pisen
+            capturas.append((f"{i}-{secure_filename(archivo.filename) or 'captura'}", archivo.read()))
     return DatosRegistro(
         proyecto_id=form.get("proyecto_id", ""),
         tipo=tipo,
@@ -57,6 +63,7 @@ def _leer_datos(form, archivos) -> DatosRegistro:
         notas=form.get("notas", ""),
         similar_a=form.getlist("similar_a"),
         pdb=pdb,
+        capturas=capturas,
     )
 
 
@@ -156,6 +163,16 @@ def crear_app(
         if contenido is None:
             abort(404)
         return Response(contenido, mimetype="text/plain")
+
+    @app.get("/experimentos/<experimento_id>/capturas/<int:indice>")
+    def captura_del_experimento(experimento_id, indice):
+        e = consulta.experimento(experimento_id)
+        contenido = consulta.contenido_captura(e, indice) if e else None
+        if contenido is None:
+            abort(404)
+        tipo = mimetypes.guess_type(e.rutas_capturas[indice])[0] or ""
+        return Response(contenido, mimetype=tipo if tipo.startswith("image/") else "application/octet-stream",
+                        headers={"X-Content-Type-Options": "nosniff"})
 
     @app.get("/proyectos")
     def listado_de_proyectos():

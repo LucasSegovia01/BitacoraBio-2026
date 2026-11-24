@@ -68,3 +68,14 @@ def experimento_existente_con_ruta(ruta):
     e = experimento_existente()
     e.ruta_pdb = ruta
     return e
+
+
+def test_entrega_los_bytes_de_una_captura_o_nada(repo, archivos):
+    e = experimento_existente()
+    e.rutas_capturas = [archivos.guardar("101", "1-pose.png", b"PNG1"), "101/borrada.png"]
+    repo.guardar(e)
+    consulta = ServicioConsulta(repo, archivos)
+    assert consulta.contenido_captura(e, 0) == b"PNG1"
+    assert consulta.contenido_captura(e, 1) is None  # la ruta existe pero el archivo ya no está
+    assert consulta.contenido_captura(e, 2) is None and consulta.contenido_captura(e, -1) is None  # índice fuera de rango
+    assert ServicioConsulta(repo).contenido_captura(e, 0) is None  # sin almacenamiento

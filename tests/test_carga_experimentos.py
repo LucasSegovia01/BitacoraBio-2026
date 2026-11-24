@@ -113,3 +113,44 @@ def test_casillas_incompletas_o_invalidas_muestran_el_error_y_dejan_el_bloque_ab
     assert r.status_code == 400 and "Centro de la caja debe ser" in html and "Exhaustividad debe ser un entero positivo" in html
     assert '<details class="grupo-opcional" open' in html and 'value="12.5"' in html
     assert repo.todos() == []
+
+
+def test_las_capturas_del_formulario_se_guardan_y_se_ven_en_el_detalle(cliente, repo, archivos):
+    enviar(cliente, capturas=[(io.BytesIO(b"PNG1"), "pose.png"), (io.BytesIO(b"JPG2"), "pose.png")])
+    e = repo.todos()[0]
+    assert len(e.rutas_capturas) == 2 and e.rutas_capturas[0] != e.rutas_capturas[1]  # mismo nombre: no se pisan
+    assert [archivos.leer(r) for r in e.rutas_capturas] == [b"PNG1", b"JPG2"]
+    detalle = cliente.get(f"/experimentos/{e.id}").get_data(as_text=True)
+    assert f"/experimentos/{e.id}/capturas/0" in detalle and f"/experimentos/{e.id}/capturas/1" in detalle
+    r = cliente.get(f"/experimentos/{e.id}/capturas/0")
+    assert r.status_code == 200 and r.data == b"PNG1" and r.mimetype == "image/png"
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_sin_capturas_el_detalle_lo_dice_y_la_ruta_responde_404(cliente, repo):
+    enviar(cliente)
+    e = repo.todos()[0]
+    assert e.rutas_capturas == []
+    assert "Sin capturas" in cliente.get(f"/experimentos/{e.id}").get_data(as_text=True)
+    assert cliente.get(f"/experimentos/{e.id}/capturas/0").status_code == 404
+    assert cliente.get("/experimentos/999/capturas/0").status_code == 404
+
+
+def test_un_archivo_que_no_es_imagen_se_sirve_como_descarga_y_no_como_pagina(cliente, repo, archivos):
+    enviar(cliente, capturas=[(io.BytesIO(b"<script>alert(1)</script>"), "x.html")])
+    e = repo.todos()[0]
+    r = cliente.get(f"/experimentos/{e.id}/capturas/0")
+    assert r.mimetype == "application/octet-stream"
+
+
+def test_el_formulario_ofrece_el_campo_de_capturas(cliente):
+    html = cliente.get("/registro").get_data(as_text=True)
+    assert 'name="capturas"' in html and "multiple" in html
+
+
+def test_las_capturas_sobreviven_al_camino_de_continuar_pese_a_la_coincidencia(cliente, repo, archivos):
+    repo.guardar(experimento_existente())
+    html = enviar(cliente, capturas=[(io.BytesIO(b"PNG1"), "pose.png")]).get_data(as_text=True)
+    cliente.post("/registro/confirmar", data={"pendiente_id": _pendiente_id(html)})
+    nuevo = repo.todos()[-1]
+    assert nuevo.id != "101" and [archivos.leer(r) for r in nuevo.rutas_capturas] == [b"PNG1"]

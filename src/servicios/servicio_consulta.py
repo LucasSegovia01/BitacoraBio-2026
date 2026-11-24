@@ -46,6 +46,12 @@ class ServicioConsulta:
     def experimento(self, experimento_id: str) -> Optional[Experimento]:
         return next((e for e in self._repo.todos() if e.id == experimento_id), None)
 
+    def contenido_captura(self, experimento: Experimento, indice: int) -> Optional[bytes]:
+        """Bytes de la captura número ``indice`` del experimento, o None si no existe o ya no está guardada."""
+        if self._archivos is None or not 0 <= indice < len(experimento.rutas_capturas):
+            return None
+        return self._archivos.leer(experimento.rutas_capturas[indice])
+
     def contenido_pdb(self, experimento: Experimento) -> Optional[str]:
         """Texto del PDB del experimento para el visor, o None si no tiene o ya no está guardado."""
         if not experimento.ruta_pdb or self._archivos is None:
