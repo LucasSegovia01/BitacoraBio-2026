@@ -772,7 +772,7 @@ En total hay **145 pruebas** (también hay seis casos de `ServicioConsulta` y la
 
 ### 7.3 Resultados y cobertura
 
-145 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **532 sentencias, 0 sin cubrir; 82 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
+145 pruebas, todas pasan. Con `pytest --cov=src --cov-branch`: **535 sentencias, 0 sin cubrir; 82 ramas, 0 parciales; 100 %**. El análisis (qué mide y qué no) está en `docs/design/cobertura.md`.
 
 ### 7.4 Complejidad ciclomática y caminos independientes
 

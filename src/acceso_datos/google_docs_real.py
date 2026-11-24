@@ -16,13 +16,21 @@ ALCANCES = ["https://www.googleapis.com/auth/drive"]
 TIPO_DOCUMENTO = "application/vnd.google-apps.document"
 
 
+ESTILO_TITULO = "font-size:20pt;font-weight:bold;color:#1f3a5f;margin:0 0 6pt 0"
+ESTILO_APARTADO = (
+    "font-size:12pt;font-weight:bold;color:#2b6a8f;margin:14pt 0 2pt 0;"
+    "border-bottom:1px solid #c9d6df;padding-bottom:2pt"
+)
+ESTILO_TEXTO = "font-size:11pt;font-weight:normal;color:#222222;margin:3pt 0 0 0;line-height:1.35"
+
+
 def armar_html(titulo: str, apartados: list[tuple[str, str]]) -> str:
     """HTML del documento: un título y, por cada apartado, un subtítulo y su texto (los saltos de línea se conservan).
-    Drive lo convierte en un Google Doc con esos estilos."""
-    partes = [f"<h1>{escape(titulo)}</h1>"]
+    Los estilos van en línea, que es lo que Drive respeta al convertirlo en un Google Doc."""
+    partes = [f'<h1 style="{ESTILO_TITULO}">{escape(titulo)}</h1>']
     for nombre, texto in apartados:
         cuerpo = escape(texto).replace("\n", "<br>") or "&nbsp;"
-        partes.append(f"<h2>{escape(nombre)}</h2><p>{cuerpo}</p>")
+        partes.append(f'<h2 style="{ESTILO_APARTADO}">{escape(nombre)}</h2><p style="{ESTILO_TEXTO}">{cuerpo}</p>')
     return f'<html><head><meta charset="utf-8"></head><body>{"".join(partes)}</body></html>'
 
 

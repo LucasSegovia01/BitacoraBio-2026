@@ -12,7 +12,7 @@
 | Archivo | Sentencias | Ramas | Cobertura |
 |---|---|---|---|
 | `acceso_datos/almacenamiento_archivos_en_memoria.py` | 15 | 2 | 100 % |
-| `acceso_datos/google_docs_real.py` | 24 | 4 | 100 % |
+| `acceso_datos/google_docs_real.py` | 27 | 4 | 100 % |
 | `acceso_datos/google_docs_simulado.py` | 11 | 0 | 100 % |
 | `acceso_datos/repositorio_en_memoria.py` | 32 | 0 | 100 % |
 | `acceso_datos/repositorio_sqlite.py` | 63 | 2 | 100 % |
@@ -27,7 +27,7 @@
 | `servicios/ejecutor_registro.py` | 40 | 4 | 100 % |
 | `servicios/servicio_consulta.py` | 53 | 14 | 100 % |
 | `transversal/gestion_excepciones.py` | 21 | 6 | 100 % |
-| **Total** | **532** | **82** | **100 %** |
+| **Total** | **535** | **82** | **100 %** |
 
 ## Análisis
 

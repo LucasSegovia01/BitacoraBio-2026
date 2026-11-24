@@ -1,5 +1,7 @@
 """ClienteGoogleDocsReal con un servicio de Drive falso (no se conecta a Google)."""
-from src.acceso_datos.google_docs_real import ClienteGoogleDocsReal, TIPO_DOCUMENTO, armar_html
+from src.acceso_datos.google_docs_real import (
+    ESTILO_APARTADO, ESTILO_TEXTO, ESTILO_TITULO, ClienteGoogleDocsReal, TIPO_DOCUMENTO, armar_html,
+)
 
 APARTADOS = [("Autor", "ana"), ("Notas", "")]
 
@@ -35,7 +37,7 @@ def test_crea_el_documento_dentro_de_la_carpeta_y_devuelve_el_enlace():
     assert enlace == "https://docs.google.com/document/d/abc/edit"
     cuerpo, media, _ = drive.llamadas[0]
     assert cuerpo == {"name": "Notas del experimento 7", "mimeType": TIPO_DOCUMENTO, "parents": ["CARPETA1"]}
-    assert media[0] == "media" and b"<h1>Notas del experimento 7</h1>" in media[1]
+    assert media[0] == "media" and b"Notas del experimento 7</h1>" in media[1]
 
 
 def test_sin_carpeta_no_envia_parents():
@@ -51,9 +53,9 @@ def test_arma_el_enlace_si_la_respuesta_no_trae_webviewlink():
 
 def test_el_html_tiene_titulo_apartados_escapados_y_saltos_de_linea():
     html = armar_html("A <b>", [("Hipótesis", "x < y\nz"), ("Notas", "")])
-    assert "<h1>A &lt;b&gt;</h1>" in html
-    assert "<h2>Hipótesis</h2><p>x &lt; y<br>z</p>" in html
-    assert "<h2>Notas</h2><p>&nbsp;</p>" in html
+    assert f'<h1 style="{ESTILO_TITULO}">A &lt;b&gt;</h1>' in html
+    assert f'<h2 style="{ESTILO_APARTADO}">Hipótesis</h2><p style="{ESTILO_TEXTO}">x &lt; y<br>z</p>' in html
+    assert f'<h2 style="{ESTILO_APARTADO}">Notas</h2><p style="{ESTILO_TEXTO}">&nbsp;</p>' in html
 
 
 def test_sin_variable_de_entorno_se_usa_el_cliente_simulado(monkeypatch):
@@ -81,4 +83,4 @@ def test_con_variable_de_entorno_se_arma_el_cliente_real_con_su_carpeta_y_token(
 
 
 def test_un_documento_sin_apartados_tiene_solo_el_titulo():
-    assert "<h1>T</h1></body>" in armar_html("T", [])
+    assert f'<h1 style="{ESTILO_TITULO}">T</h1></body>' in armar_html("T", [])
